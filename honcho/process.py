@@ -5,83 +5,113 @@ import select
 import shlex
 import subprocess
 import sys
-from multiprocessing import Lock
+from threading import Thread
+
+try:
+    from Queue import Queue, Empty
+except ImportError:
+    from queue import Queue, Empty # 3.x
 
 from .colour import get_colours
 from .printer import Printer
 
+ON_POSIX = 'posix' in sys.builtin_module_names
+
 class Process(subprocess.Popen):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, cmd, name=None, *args, **kwargs):
+        self.name = name
+        self.reader = None
+        self.printer = None
+
         defaults = {
             'stdout': subprocess.PIPE,
-            'stderr': subprocess.PIPE,
-            'shell': True
+            'stderr': subprocess.STDOUT,
+            'shell': True,
+            'bufsize': 1,
+            'close_fds': ON_POSIX
         }
         defaults.update(kwargs)
-        super(Process, self).__init__(*args, **defaults)
+
+        super(Process, self).__init__(cmd, *args, **defaults)
 
 class ProcessManager(object):
     def __init__(self):
-        self.lock = Lock()
         self.processes = []
-        self.printers = []
         self.colours = get_colours()
 
-        self.system_printer = Printer(sys.stderr, name='system')
+        self._terminating = False
 
-    def add_process(self, name, proc, numprocs=1):
-        for i in xrange(1, numprocs+1):
-            self.processes.append(('{name}.{i}'.format(**vars()), proc))
+        self.system_printer = Printer(sys.stdout, name='system')
+
+    def add_process(self, name, cmd, concurrency=1):
+        for i in xrange(1, concurrency + 1):
+            n = '{name}.{i}'.format(**vars())
+            self.processes.append(Process(cmd, name=n))
 
     def loop(self):
+        self._init_readers()
         self._init_printers()
 
-        for i, proc_tuple in enumerate(self.processes):
-            name, proc = proc_tuple
-            print("started with pid {}".format(proc.pid), file=self.printers[i][1])
+        for proc in self.processes:
+            print("started with pid {}".format(proc.pid), file=proc.printer)
 
-        while [p.poll() for n, p in self.processes].count(None) > 0:
+        while self._process_count() > 0:
             try:
-                try_rlist = [x for n, p in self.processes for x in (p.stdout, p.stderr)]
+                for proc in self.processes:
 
-                try:
-                    rlist, _, _ = select.select(try_rlist, [], [])
-                except select.error as e:
-                    if e.args[0] == errno.EINTR:
-                        continue
-                    raise
+                    try:
+                        line = proc.reader.get_nowait()
+                    except Empty:
+                        pass
+                    else:
+                        print(line, end='', file=proc.printer)
 
-                for i, proc_tuple in enumerate(self.processes):
-                    name, proc = proc_tuple
-                    if proc.stdout in rlist:
-                        self._print_with_lock(proc.stdout, self.printers[i][0])
-                    if proc.stderr in rlist:
-                        self._print_with_lock(proc.stderr, self.printers[i][1])
+                    if proc.poll() is not None:
+                        print('process terminated', file=proc.printer)
+                        self.processes.remove(proc)
+                        self.terminate()
 
             except KeyboardInterrupt:
                 print("SIGINT received", file=sys.stderr)
-                print("sending SIGTERM to all processes", file=self.system_printer)
+                self.terminate()
 
-                for n, p in self.processes:
-                    if p.poll() is None:
-                        print("sending SIGTERM to pid {0:d}".format(p.pid), file=self.system_printer)
-                        p.terminate()
+
+    def terminate(self):
+        if self._terminating:
+            return False
+
+        self._terminating = True
+
+        print("sending SIGTERM to all processes", file=self.system_printer)
+        for proc in self.processes:
+            if proc.poll() is None:
+                print("sending SIGTERM to pid {0:d}".format(proc.pid), file=self.system_printer)
+                proc.terminate()
+
+    def _process_count(self):
+        return [p.poll() for p in self.processes].count(None)
+
+    def _init_readers(self):
+        for proc in self.processes:
+            q = Queue()
+            t = Thread(target=enqueue_output, args=(proc.stdout, q))
+            t.daemon = True # thread dies with the program
+            t.start()
+            proc.reader = q
 
     def _init_printers(self):
-        width = max(len(name) for name, _ in self.processes)
-        width = max(width, 6) # 'system'
+        width = max(len(p.name) for p in self.processes)
+        width = max(width, len(self.system_printer.name))
 
         self.system_printer.width = width
 
-        for name, proc in self.processes:
-            colour = self.colours.next()
-            kwargs = dict(name=name, colour=colour, width=width)
-            stdout = Printer(sys.stdout, **kwargs)
-            stderr = Printer(sys.stderr, **kwargs)
-            self.printers.append((stdout, stderr))
+        for proc in self.processes:
+            proc.printer = Printer(sys.stdout,
+                                   name=proc.name,
+                                   colour=self.colours.next(),
+                                   width=width)
 
-    def _print_with_lock(self, fp_in, fp_out):
-        l = fp_in.readline()
-        if l:
-            with self.lock:
-                print(l, end='', file=fp_out)
+def enqueue_output(out, queue):
+    for line in iter(out.readline, b''):
+        queue.put(line)
+    out.close()

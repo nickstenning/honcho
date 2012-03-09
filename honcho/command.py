@@ -70,7 +70,7 @@ def run(args):
     read_env(args)
 
     cmd = ' '.join(args.command)
-    p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    p = Process(cmd, stdout=sys.stdout)
     p.wait()
 
 def start(args):
@@ -81,7 +81,7 @@ def start(args):
         sys.exit(1)
 
     for name, cmd in procfile.commands.iteritems():
-        process_manager.add_process(name, Process(cmd))
+        process_manager.add_process(name, cmd)
 
     process_manager.loop()
 
