@@ -8,7 +8,9 @@ setup(
     install_requires = [],
 
     # metadata for upload to PyPI
-    author = 'Nick Stenning (Open Knowledge Foundation)',
+    author = 'Nick Stenning',
+    author_email = 'nick@whiteink.com',
+    url = 'https://github.com/nickstenning/honcho',
     description = 'Honcho - manage Procfile-based applications',
     license = 'MIT',
     keywords = 'sysadmin process procfile',
