@@ -1,18 +1,11 @@
-#!/usr/bin/env python
-
 from __future__ import print_function
 
 import argparse
-from cStringIO import StringIO
 import logging
-from multiprocessing import Lock
 import os
-import random
 import re
-import signal
 import sys
 
-from honcho.printer import Printer
 from honcho.procfile import Procfile
 from honcho.process import Process, ProcessManager
 

@@ -1,8 +1,6 @@
 from datetime import datetime
 import sys
 
-import honcho.colour
-
 class Printer(object):
     def __init__(self, output=sys.stdout, name='unknown', colour=None, width=0):
         self.output = output
@@ -25,7 +23,7 @@ class Printer(object):
     def _prefix(self):
         time = datetime.now().strftime('%H:%M:%S')
         name = self.name.ljust(self.width)
-        prefix = '{time} {name} | '.format(**vars())
+        prefix = '{time} {name} | '.format(time=time, name=name)
         if self.colour:
             return _colour_string(self.colour, prefix)
         else:

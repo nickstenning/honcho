@@ -1,8 +1,5 @@
 from __future__ import print_function
 
-import errno
-import select
-import shlex
 import subprocess
 import sys
 from threading import Thread
@@ -10,7 +7,7 @@ from threading import Thread
 try:
     from Queue import Queue, Empty
 except ImportError:
-    from queue import Queue, Empty # 3.x
+    from queue import Queue, Empty # Python 3.x
 
 from .colour import get_colours
 from .printer import Printer
