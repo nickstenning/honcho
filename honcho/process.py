@@ -35,10 +35,10 @@ class ProcessManager(object):
     def __init__(self):
         self.processes = []
         self.colours = get_colours()
+        self.queue = Queue()
+        self.system_printer = Printer(sys.stdout, name='system')
 
         self._terminating = False
-
-        self.system_printer = Printer(sys.stdout, name='system')
 
     def add_process(self, name, cmd, concurrency=1):
         for i in xrange(1, concurrency + 1):
@@ -54,23 +54,18 @@ class ProcessManager(object):
 
         while self._process_count() > 0:
             try:
-                for proc in self.processes:
-
-                    try:
-                        line = proc.reader.get_nowait()
-                    except Empty:
-                        pass
-                    else:
-                        print(line, end='', file=proc.printer)
-
-                    if proc.poll() is not None:
-                        print('process terminated', file=proc.printer)
-                        self.processes.remove(proc)
-                        self.terminate()
-
+                proc, line = self.queue.get(timeout=0.1)
+            except Empty:
+                pass
             except KeyboardInterrupt:
                 print("SIGINT received", file=sys.stderr)
                 self.terminate()
+            else:
+                print(line, end='', file=proc.printer)
+
+                if proc.poll() is not None:
+                    print('process terminated', file=proc.printer)
+                    self.terminate()
 
 
     def terminate(self):
@@ -90,11 +85,9 @@ class ProcessManager(object):
 
     def _init_readers(self):
         for proc in self.processes:
-            q = Queue()
-            t = Thread(target=enqueue_output, args=(proc.stdout, q))
+            t = Thread(target=enqueue_output, args=(proc, self.queue))
             t.daemon = True # thread dies with the program
             t.start()
-            proc.reader = q
 
     def _init_printers(self):
         width = max(len(p.name) for p in self.processes)
@@ -108,7 +101,9 @@ class ProcessManager(object):
                                    colour=self.colours.next(),
                                    width=width)
 
-def enqueue_output(out, queue):
-    for line in iter(out.readline, b''):
-        queue.put(line)
-    out.close()
+def enqueue_output(proc, queue):
+    for line in iter(proc.stdout.readline, b''):
+        if not line.endswith('\n'):
+            line += '\n'
+        queue.put((proc, line))
+    proc.stdout.close()
