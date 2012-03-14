@@ -15,6 +15,12 @@ from .printer import Printer
 ON_POSIX = 'posix' in sys.builtin_module_names
 
 class Process(subprocess.Popen):
+    """
+
+    A simple utility wrapper around subprocess.Popen that stores
+    a number of attributes needed by Honcho.
+
+    """
     def __init__(self, cmd, name=None, *args, **kwargs):
         self.name = name
         self.reader = None
@@ -32,6 +38,21 @@ class Process(subprocess.Popen):
         super(Process, self).__init__(cmd, *args, **defaults)
 
 class ProcessManager(object):
+    """
+
+    Here's where the business happens. The ProcessManager multiplexes and
+    pretty-prints the output from a number of Process objects, typically added
+    using the add_process() method.
+
+    Example:
+
+        pm = ProcessManager()
+        pm.add_process('name', 'ruby server.rb')
+        pm.add_process('name', 'python worker.py', concurrency=4)
+
+        pm.loop()
+
+    """
     def __init__(self):
         self.processes = []
         self.colours = get_colours()
@@ -41,11 +62,35 @@ class ProcessManager(object):
         self._terminating = False
 
     def add_process(self, name, cmd, concurrency=1):
+        """
+
+        Add a process to this manager instance:
+
+        Arguments:
+
+        name        - a human-readable identifier for the process
+                      (e.g. 'worker'/'server')
+        cmd         - the command-line used to run the process
+                      (e.g. 'python run.py')
+        concurrency - the number of identical commands to start
+
+        """
         for i in xrange(1, concurrency + 1):
             n = '{name}.{i}'.format(**vars())
             self.processes.append(Process(cmd, name=n))
 
     def loop(self):
+        """
+
+        Enter the main loop of the program. This will print the multiplexed
+        output of all the processes in this ProcessManager to sys.stdout, and
+        will block until all the processes have completed.
+
+        If one process terminates, all the others will be terminated by
+        Honcho, and loop() will return.
+
+        """
+
         self._init_readers()
         self._init_printers()
 
@@ -69,6 +114,12 @@ class ProcessManager(object):
 
 
     def terminate(self):
+        """
+
+        Terminate all the child processes of this ProcessManager, bringing the
+        loop() to an end.
+
+        """
         if self._terminating:
             return False
 
@@ -85,7 +136,7 @@ class ProcessManager(object):
 
     def _init_readers(self):
         for proc in self.processes:
-            t = Thread(target=enqueue_output, args=(proc, self.queue))
+            t = Thread(target=_enqueue_output, args=(proc, self.queue))
             t.daemon = True # thread dies with the program
             t.start()
 
@@ -101,7 +152,7 @@ class ProcessManager(object):
                                    colour=self.colours.next(),
                                    width=width)
 
-def enqueue_output(proc, queue):
+def _enqueue_output(proc, queue):
     for line in iter(proc.stdout.readline, b''):
         if not line.endswith('\n'):
             line += '\n'
