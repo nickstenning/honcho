@@ -130,6 +130,11 @@ class ProcessManager(object):
             if proc.poll() is None:
                 print("sending SIGTERM to pid {0:d}".format(proc.pid), file=self.system_printer)
                 proc.terminate()
+        for proc in self.processes:
+            if proc.poll() is None:
+                print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
+                proc.kill()
+
 
     def _process_count(self):
         return [p.poll() for p in self.processes].count(None)
