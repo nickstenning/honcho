@@ -1,0 +1,3 @@
+foo: python test_program.py
+bar: python test_program.py
+baz: python test_program.py
