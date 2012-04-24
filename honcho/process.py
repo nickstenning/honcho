@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import signal
 import subprocess
 import sys
 from threading import Thread
@@ -130,6 +131,16 @@ class ProcessManager(object):
             if proc.poll() is None:
                 print("sending SIGTERM to pid {0:d}".format(proc.pid), file=self.system_printer)
                 proc.terminate()
+
+        def kill(signum, frame):
+            # If anything is still alive, SIGKILL it
+            for proc in self.processes:
+                if proc.poll() is None:
+                    print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
+                    proc.kill()
+
+        signal.signal(signal.SIGALRM, kill)
+        signal.alarm(5)
 
     def _process_count(self):
         return [p.poll() for p in self.processes].count(None)
