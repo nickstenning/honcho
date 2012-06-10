@@ -6,6 +6,7 @@ import os
 import re
 import sys
 
+from honcho import __version__
 from honcho.procfile import Procfile
 from honcho.process import Process, ProcessManager
 

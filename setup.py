@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
+from honcho import __version__
+
 setup(
     name = 'honcho',
-    version = '0.0.3',
+    version = __version__,
     packages = find_packages(),
-
-    install_requires = [],
 
     # metadata for upload to PyPI
     author = 'Nick Stenning',
