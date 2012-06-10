@@ -17,7 +17,8 @@ process_manager = ProcessManager()
 
 def make_procfile(filename):
     try:
-        content = open(filename).read()
+        with open(filename) as f:
+            content = f.read()
     except IOError:
         log.error('Procfile does not exist or is not a file')
         return False
@@ -33,7 +34,8 @@ def make_procfile(filename):
 def read_env(args):
     app_root = args.app_root or os.path.dirname(args.procfile)
     try:
-        content = open(os.path.join(app_root, '.env')).read()
+        with open(os.path.join(app_root, '.env')) as f:
+            content = f.read()
     except IOError:
         content = ''
 
