@@ -15,6 +15,7 @@ log = logging.getLogger('honcho')
 
 process_manager = ProcessManager()
 
+
 def make_procfile(filename):
     try:
         with open(filename) as f:
@@ -31,14 +32,20 @@ def make_procfile(filename):
 
     return procfile
 
-def read_env(args):
-    app_root = args.app_root or os.path.dirname(args.procfile)
-    try:
-        with open(os.path.join(app_root, '.env')) as f:
-            content = f.read()
-    except IOError:
-        content = ''
 
+def read_env(args):
+    directory = args.directory or os.path.dirname(args.procfile)
+    files = [env.strip() for env in args.env.split(',')]
+    for envfile in files:
+        try:
+            with open(os.path.join(directory, args.env)) as f:
+                content = f.read()
+            set_env(content)
+        except IOError:
+            pass
+
+
+def set_env(content):
     for line in content.splitlines():
         m1 = re.match(r'\A([A-Za-z_0-9]+)=(.*)\Z', line)
         if m1:
@@ -81,18 +88,86 @@ def start(args):
 
     process_manager.loop()
 
+
 def main():
     args = parser.parse_args()
     args.func(args)
 
-parser = argparse.ArgumentParser(description='Manage Procfile-based applications')
-parser.add_argument('-f', '--procfile', help='Default: Procfile', default='Procfile')
-parser.add_argument('-d', '--app-root', help='Default: Procfile directory')
 
-subparsers = parser.add_subparsers(help='Commands')
-parser_check = subparsers.add_parser('check', help="Validate your application's Procfile")
-parser_run = subparsers.add_parser('run', help="Run a command using your application's environment")
-parser_start = subparsers.add_parser('start', help="Start the application (or a specific PROCESS)")
+class MetaVarHidingHelpFormatter(argparse.HelpFormatter):
+    def _format_action_invocation(self, action):
+        if not action.option_strings:
+            metavar, = self._metavar_formatter(action, action.dest)(1)
+            return metavar
+
+        else:
+            parts = []
+
+            # if the Optional doesn't take a value, format is:
+            #    -s, --long
+            if action.nargs == 0:
+                parts.extend(action.option_strings)
+
+            # if the Optional takes a value, format is:
+            #    -s ARGS, --long ARGS
+            else:
+                for option_string in action.option_strings:
+                    parts.append(option_string)
+
+            return ', '.join(parts)
+
+
+class MainparserHelpFormatter(argparse.ArgumentDefaultsHelpFormatter, MetaVarHidingHelpFormatter):
+    pass
+
+
+class SubparserHelpFormatter(argparse.ArgumentDefaultsHelpFormatter, MetaVarHidingHelpFormatter):
+    def is_subparsers_action(self, action):
+        return isinstance(action, argparse._SubParsersAction)
+
+    def _add_item(self, func, args):
+        if (func == self._format_action and
+                args and self.is_subparsers_action(args[0])):
+            return
+        self._current_section.items.append((func, args))
+
+    def _metavar_formatter(self, action, default_metavar):
+        if action.metavar is not None:
+            result = action.metavar
+        elif action.choices is not None:
+            if self.is_subparsers_action(action):
+                result = ""
+            else:
+                choice_strs = [str(choice) for choice in action.choices]
+                result = '{%s}' % ','.join(choice_strs)
+        else:
+            result = default_metavar
+
+        def format(tuple_size):
+            if isinstance(result, tuple):
+                return result
+            else:
+                return (result, ) * tuple_size
+        return format
+
+parser = argparse.ArgumentParser(version=__version__,
+    description='Manage Procfile-based applications',
+    formatter_class=MainparserHelpFormatter)
+
+group = parser.add_argument_group('common arguments')
+group.add_argument('-f', '--procfile', help='Procfile path', default='Procfile')
+group.add_argument('-d', '--directory', help='Procfile directory', default='.')
+group.add_argument('-e', '--env', help='Environment file[,file]', default='.env')
+
+subparsers = parser.add_subparsers(title='tasks')
+subparams = {
+    'parents': [parser],
+    'add_help': False,
+    'formatter_class': SubparserHelpFormatter,
+}
+parser_check = subparsers.add_parser('check', help="Validate your application's Procfile", **subparams)
+parser_run = subparsers.add_parser('run', help="Run command using your environment", **subparams)
+parser_start = subparsers.add_parser('start', help="Start the application (or PROCESS)", **subparams)
 
 parser_check.set_defaults(func=check)
 
