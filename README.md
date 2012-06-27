@@ -18,7 +18,7 @@ Seriously? honcho is a Python port of Foreman.
 
 Why a port? Well, only two good reasons, and only one of which you're going to be interested in:
 
-1. I work in Python-only development environments, where installing Ruby just so I can run Procfile apps seemed a bit crazy. Python, on the other hand, is part of the [LSB](http://en.wikipedia.org/wiki/Linux_Standard_Base), and so even in "Ruby-only" environments, Python will still be around.
+1. I work in Python-only development environments, where installing Ruby just so I can run Procfile apps seems a bit crazy. Python, on the other hand, is part of the [LSB](http://en.wikipedia.org/wiki/Linux_Standard_Base), and so even in "Ruby-only" environments, Python will still be around.
 
 2. I wanted to learn about [asynchronous I/O](http://docs.python.org/library/select.html) [in Python](http://docs.python.org/library/queue.html).
 
