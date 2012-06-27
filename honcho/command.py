@@ -108,8 +108,6 @@ parser = argparse.ArgumentParser(description='Manage Procfile-based applications
 
 parser.add_argument('-f', '--procfile', help='Default: Procfile', default='Procfile')
 parser.add_argument('-d', '--app-root', help='Default: Procfile directory')
-parser.add_argument('-p', '--port', help='Default: 5000', type=int, default=5000)
-parser.add_argument('-c', '--concurrency', help='The number of each process type to run. The value passed in should be in the format "process=num,process=num"')
 
 subparsers = parser.add_subparsers(help='Commands')
 parser_check = subparsers.add_parser('check', help="Validate your application's Procfile")
@@ -121,6 +119,8 @@ parser_check.set_defaults(func=check)
 parser_run.add_argument('command', nargs='+', help='Command to run')
 parser_run.set_defaults(func=run)
 
+parser_start.add_argument('-p', '--port', help='Default: 5000', type=int, default=5000)
+parser_start.add_argument('-c', '--concurrency', help='The number of each process type to run. The value passed in should be in the format "process=num,process=num"')
 parser_start.add_argument('process', nargs='?', help='Name of process to start. All processes will be run if omitted.')
 parser_start.set_defaults(func=start)
 
