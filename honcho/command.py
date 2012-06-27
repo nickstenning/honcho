@@ -103,7 +103,9 @@ def main():
     args = parser.parse_args()
     args.func(args)
 
-parser = argparse.ArgumentParser(description='Manage Procfile-based applications')
+parser = argparse.ArgumentParser(description='Manage Procfile-based applications',
+                                 version=__version__)
+
 parser.add_argument('-f', '--procfile', help='Default: Procfile', default='Procfile')
 parser.add_argument('-d', '--app-root', help='Default: Procfile directory')
 parser.add_argument('-p', '--port', help='Default: 5000', type=int, default=5000)
