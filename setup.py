@@ -15,6 +15,8 @@ setup(
     license = 'MIT',
     keywords = 'sysadmin process procfile',
 
+    test_suite='test.test_simple',
+
     entry_points = {
         'console_scripts': [
             'honcho = honcho.command:main'
