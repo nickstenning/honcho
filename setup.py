@@ -11,7 +11,7 @@ setup(
     author = 'Nick Stenning',
     author_email = 'nick@whiteink.com',
     url = 'https://github.com/nickstenning/honcho',
-    description = 'Honcho - manage Procfile-based applications',
+    description = 'Honcho: a python clone of Foreman. For managing Procfile-based applications.',
     license = 'MIT',
     keywords = 'sysadmin process procfile',
 
