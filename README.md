@@ -12,6 +12,8 @@
     
 ---------------------------------------------------------------------------------------------
 
+[![Build Status](https://secure.travis-ci.org/nickstenning/honcho.png?branch=master)](http://travis-ci.org/nickstenning/honcho)
+
 So, uh, honcho is basically [Foreman](http://ddollar.github.com/foreman), but uh, honcho instead.
 
 Seriously? honcho is a Python port of Foreman.
