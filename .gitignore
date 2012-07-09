@@ -3,3 +3,4 @@
 /.env
 /dist
 .tox
+/*.sublime-*
