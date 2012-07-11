@@ -8,12 +8,13 @@ from threading import Thread
 try:
     from Queue import Queue, Empty
 except ImportError:
-    from queue import Queue, Empty # Python 3.x
+    from queue import Queue, Empty  # Python 3.x
 
 from .colour import get_colours
 from .printer import Printer
 
 ON_POSIX = 'posix' in sys.builtin_module_names
+
 
 class Process(subprocess.Popen):
     """
@@ -37,6 +38,7 @@ class Process(subprocess.Popen):
         defaults.update(kwargs)
 
         super(Process, self).__init__(cmd, *args, **defaults)
+
 
 class ProcessManager(object):
     """
@@ -110,7 +112,6 @@ class ProcessManager(object):
                     print('process terminated', file=proc.printer)
                     self.terminate()
 
-
     def terminate(self):
         """
 
@@ -145,7 +146,7 @@ class ProcessManager(object):
     def _init_readers(self):
         for proc in self.processes:
             t = Thread(target=_enqueue_output, args=(proc, self.queue))
-            t.daemon = True # thread dies with the program
+            t.daemon = True  # thread dies with the program
             t.start()
 
     def _init_printers(self):
@@ -159,6 +160,7 @@ class ProcessManager(object):
                                    name=proc.name,
                                    colour=self.colours.next(),
                                    width=width)
+
 
 def _enqueue_output(proc, queue):
     for line in iter(proc.stdout.readline, b''):

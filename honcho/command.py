@@ -16,6 +16,7 @@ log = logging.getLogger('honcho')
 
 process_manager = ProcessManager()
 
+
 def make_procfile(filename):
     try:
         with open(filename) as f:
@@ -31,6 +32,7 @@ def make_procfile(filename):
         return False
 
     return procfile
+
 
 def read_env(args):
     app_root = args.app_root or os.path.dirname(args.procfile)
@@ -55,6 +57,7 @@ def read_env(args):
 
             os.environ[key] = val
 
+
 def parse_concurrency(desc):
     result = defaultdict(lambda: 1)
     if desc is None:
@@ -64,6 +67,7 @@ def parse_concurrency(desc):
         result[key] = int(concurrency)
     return result
 
+
 def check(args):
     procfile = make_procfile(args.procfile)
 
@@ -72,12 +76,14 @@ def check(args):
 
     print('Valid procfile detected ({})'.format(', '.join(procfile.commands.keys())))
 
+
 def run(args):
     read_env(args)
 
     cmd = ' '.join(args.command)
     p = Process(cmd, stdout=sys.stdout)
     p.wait()
+
 
 def start(args):
     read_env(args)
@@ -98,6 +104,7 @@ def start(args):
         port += 1000
 
     process_manager.loop()
+
 
 def main():
     args = parser.parse_args()

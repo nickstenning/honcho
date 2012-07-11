@@ -13,6 +13,7 @@ for i, name in enumerate(ANSI_COLOURS):
     globals()[name] = str(30 + i)
     globals()['intense_' + name] = str(30 + i) + ';1'
 
+
 def get_colours():
     cs = ['cyan', 'yellow', 'green', 'magenta', 'red', 'blue',
           'intense_cyan', 'intense_yellow', 'intense_green',
