@@ -49,7 +49,7 @@ class ProcessManager(object):
 
         pm = ProcessManager()
         pm.add_process('name', 'ruby server.rb')
-        pm.add_process('name', 'python worker.py', concurrency=4)
+        pm.add_process('name', 'python worker.py')
 
         pm.loop()
 
@@ -62,7 +62,7 @@ class ProcessManager(object):
 
         self._terminating = False
 
-    def add_process(self, name, cmd, concurrency=1):
+    def add_process(self, name, cmd):
         """
 
         Add a process to this manager instance:
@@ -73,12 +73,9 @@ class ProcessManager(object):
                       (e.g. 'worker'/'server')
         cmd         - the command-line used to run the process
                       (e.g. 'python run.py')
-        concurrency - the number of identical commands to start
 
         """
-        for i in xrange(1, concurrency + 1):
-            n = '{name}.{i}'.format(**vars())
-            self.processes.append(Process(cmd, name=n))
+        self.processes.append(Process(cmd, name))
 
     def loop(self):
         """

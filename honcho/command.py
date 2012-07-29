@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import argparse
+from collections import defaultdict
 import logging
 import os
 import re
@@ -34,11 +35,11 @@ def make_procfile(filename):
 
 
 def read_env(args):
-    directory = args.directory or os.path.dirname(args.procfile)
+    app_root = args.app_root or os.path.dirname(args.procfile)
     files = [env.strip() for env in args.env.split(',')]
     for envfile in files:
         try:
-            with open(os.path.join(directory, args.env)) as f:
+            with open(os.path.join(app_root, envfile)) as f:
                 content = f.read()
             set_env(content)
         except IOError:
@@ -60,6 +61,15 @@ def set_env(content):
                 val = re.sub(r'\\(.)', r'\1', m3.group(1))
 
             os.environ[key] = val
+
+def parse_concurrency(desc):
+    result = defaultdict(lambda: 1)
+    if desc is None:
+        return result
+    for item in desc.split(','):
+        key, concurrency = item.split('=', 1)
+        result[key] = int(concurrency)
+    return result
 
 def check(args):
     procfile = make_procfile(args.procfile)
@@ -83,8 +93,16 @@ def start(args):
     if not procfile:
         sys.exit(1)
 
+    port = args.port
+    concurrency = parse_concurrency(args.concurrency)
+
     for name, cmd in procfile.commands.iteritems():
-        process_manager.add_process(name, cmd)
+        for i in xrange(1, concurrency[name] + 1):
+            n = '{name}.{i}'.format(**vars())
+            os.environ['PORT'] = str(port)
+            process_manager.add_process(n, cmd)
+            port += 1
+        port += 1000
 
     process_manager.loop()
 
@@ -156,7 +174,7 @@ parser = argparse.ArgumentParser(version=__version__,
 
 group = parser.add_argument_group('common arguments')
 group.add_argument('-f', '--procfile', help='Procfile path', default='Procfile')
-group.add_argument('-d', '--directory', help='Procfile directory', default='.')
+group.add_argument('-d', '--app-root', help='Procfile directory', default='.')
 group.add_argument('-e', '--env', help='Environment file[,file]', default='.env')
 
 subparsers = parser.add_subparsers(title='tasks')
@@ -174,6 +192,8 @@ parser_check.set_defaults(func=check)
 parser_run.add_argument('command', nargs='+', help='Command to run')
 parser_run.set_defaults(func=run)
 
+parser_start.add_argument('-p', '--port', help='Default: 5000', type=int, default=5000)
+parser_start.add_argument('-c', '--concurrency', help='The number of each process type to run. The value passed in should be in the format "process=num,process=num"')
 parser_start.add_argument('process', nargs='?', help='Name of process to start. All processes will be run if omitted.')
 parser_start.set_defaults(func=start)
 
