@@ -1,135 +1,232 @@
-from __future__ import print_function
-
 import argparse
-from collections import defaultdict
 import logging
 import os
 import re
 import sys
+from collections import defaultdict
 
 from honcho import __version__
 from honcho.procfile import Procfile
 from honcho.process import Process, ProcessManager
 
-logging.basicConfig(format='%(levelname)s: %(message)s')
-log = logging.getLogger('honcho')
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+log = logging.getLogger(__name__)
 
 process_manager = ProcessManager()
 
 
-def make_procfile(filename):
-    try:
-        with open(filename) as f:
-            content = f.read()
-    except IOError:
-        log.error('Procfile does not exist or is not a file')
-        return False
+# option decorator
+def option(*args, **kwargs):
+    def _decorator(func):
+        _option = (args, kwargs)
+        if hasattr(func, 'options'):
+            func.options.append(_option)
+        else:
+            func.options = [_option]
+        return func
+    return _decorator
 
-    procfile = Procfile(content)
-
-    if not procfile.commands:
-        log.error('No processes defined in Procfile')
-        return False
-
-    return procfile
+# arg decorator
+arg = option
 
 
-def read_env(args):
-    app_root = args.app_root or os.path.dirname(args.procfile)
-    try:
-        with open(os.path.join(app_root, '.env')) as f:
-            content = f.read()
-    except IOError:
-        content = ''
-
-    for line in content.splitlines():
-        m1 = re.match(r'\A([A-Za-z_0-9]+)=(.*)\Z', line)
-        if m1:
-            key, val = m1.group(1), m1.group(2)
-
-            m2 = re.match(r"\A'(.*)'\Z", val)
-            if m2:
-                val = m2.group(1)
-
-            m3 = re.match(r'\A"(.*)"\Z', val)
-            if m3:
-                val = re.sub(r'\\(.)', r'\1', m3.group(1))
-
-            os.environ[key] = val
+class Commander(type):
+    def __new__(cls, name, bases, attrs):
+        subcommands = {}
+        commands = attrs.get('commands', [])
+        for command in commands:
+            func = attrs.get(command, None)
+            if func is not None:
+                subcommand = {
+                    'name': command,
+                    'func': func,
+                    'options': []
+                }
+                if hasattr(func, 'options'):
+                    subcommand['options'] = func.options
+                subcommands[command] = subcommand
+        attrs['_subcommands'] = subcommands
+        return type.__new__(cls, name, bases, attrs)
 
 
-def parse_concurrency(desc):
-    result = defaultdict(lambda: 1)
-    if desc is None:
+class CommandError(Exception):
+    pass
+
+
+class Honcho(object):
+    "Manage Procfile-based applications"
+    __metaclass__ = Commander
+
+    name = 'honcho'
+    version = __version__
+    epilog = ''
+    formatter_class = argparse.ArgumentDefaultsHelpFormatter
+
+    subparser_title = 'tasks'
+    subparser_help = ''
+    subparser_formatter_class = formatter_class
+
+    default = ['--help']
+    commands = ['start', 'check', 'help', 'run']
+    common = [
+        option('-e', '--env', help='Environment file[,file]', default='.env'),
+        option('-d', '--app-root', help='Procfile directory', default='.'),
+        option('-f', '--procfile', help='Procfile path', default='Procfile'),
+    ]
+
+    def add_common(self, parser):
+        "add all common options and arguments to the main parser"
+        common_group = parser.add_argument_group('common arguments')
+        for option in self.common:
+            options = option(lambda: None).options
+            if options:
+                args, kwargs = options[0]
+                common_group.add_argument(*args, **kwargs)
+
+    def parse(self, argv=None):
+        # the main parser
+        parser = argparse.ArgumentParser(
+            prog=self.name,
+            formatter_class=self.formatter_class,
+            description=self.__doc__,
+            epilog=self.epilog,
+        )
+        parser.add_argument('-v', '--version', action='version',
+                            version='%(prog)s ' + self.version)
+        self.add_common(parser)
+
+        # then add the subparsers
+        subparsers = parser.add_subparsers(
+            title=self.subparser_title,
+            help=self.subparser_help)
+
+        for name, subcommand in sorted(self._subcommands.items()):
+            subparser = subparsers.add_parser(subcommand['name'],
+                help=subcommand['func'].__doc__,
+                formatter_class=self.subparser_formatter_class)
+            self.add_common(subparser)
+            for args, kwargs in subcommand['options']:
+                subparser.add_argument(*args, **kwargs)
+            subparser.set_defaults(func=subcommand['func'])
+
+        if not argv:
+            argv = sys.argv[1:]
+        if not argv:
+            argv = self.default
+
+        options = parser.parse_args(argv)
+
+        try:
+            options.func(self, options)
+        except CommandError as e:
+            if e.message:
+                log.error(e.message)
+            sys.exit(1)
+
+    @arg('task', help='Task to show help for', nargs='?')
+    def help(self, options):
+        "Describe available tasks or one specific task"
+        argv = ['--help']
+        if options.task:
+            argv.append(options.task)
+        return self.parse(argv[::-1])
+
+    def check(self, options):
+        "Validate your application's Procfile"
+        procfile = self.make_procfile(options.procfile)
+
+        if not procfile:
+            raise CommandError
+
+        log.info('Valid procfile detected ({})'.format(', '.join(procfile.commands)))
+
+    @arg('command', nargs='+', help='Command to run')
+    def run(self, options):
+        "Run a command using your application's environment"
+        self.read_env(options)
+
+        cmd = ' '.join(options.command)
+        p = Process(cmd, stdout=sys.stdout)
+        p.wait()
+
+    @option('-p', '--port', type=int, default=5000, metavar='N')
+    @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
+    @arg('process', nargs='?', help='Name of process to start. All processes will be run if omitted.')
+    def start(self, options):
+        "Start the application (or a specific PROCESS)"
+        self.read_env(options)
+        procfile = self.make_procfile(options.procfile)
+
+        if not procfile:
+            raise CommandError
+
+        port = options.port
+        concurrency = self.parse_concurrency(options.concurrency)
+
+        for name, cmd in procfile.commands.iteritems():
+            for i in xrange(1, concurrency[name] + 1):
+                n = '{name}.{i}'.format(**vars())
+                os.environ['PORT'] = str(port)
+                process_manager.add_process(n, cmd)
+                port += 1
+            port += 1000
+
+        process_manager.loop()
+
+    def make_procfile(self, filename):
+        try:
+            with open(filename) as f:
+                content = f.read()
+        except IOError:
+            raise CommandError('Procfile does not exist or is not a file')
+
+        procfile = Procfile(content)
+
+        if not procfile.commands:
+            raise CommandError('No processes defined in Procfile')
+
+        return procfile
+
+    def read_env(self, args):
+        app_root = args.app_root or os.path.dirname(args.procfile)
+        files = [env.strip() for env in args.env.split(',')]
+        for envfile in files:
+            try:
+                with open(os.path.join(app_root, envfile)) as f:
+                    content = f.read()
+                self.set_env(content)
+            except IOError:
+                pass
+
+    def set_env(self, content):
+        for line in content.splitlines():
+            m1 = re.match(r'\A([A-Za-z_0-9]+)=(.*)\Z', line)
+            if m1:
+                key, val = m1.group(1), m1.group(2)
+
+                m2 = re.match(r"\A'(.*)'\Z", val)
+                if m2:
+                    val = m2.group(1)
+
+                m3 = re.match(r'\A"(.*)"\Z', val)
+                if m3:
+                    val = re.sub(r'\\(.)', r'\1', m3.group(1))
+
+                os.environ[key] = val
+
+    def parse_concurrency(self, desc):
+        result = defaultdict(lambda: 1)
+        if desc is None:
+            return result
+        for item in desc.split(','):
+            key, concurrency = item.split('=', 1)
+            result[key] = int(concurrency)
         return result
-    for item in desc.split(','):
-        key, concurrency = item.split('=', 1)
-        result[key] = int(concurrency)
-    return result
-
-
-def check(args):
-    procfile = make_procfile(args.procfile)
-
-    if not procfile:
-        sys.exit(1)
-
-    print('Valid procfile detected ({})'.format(', '.join(procfile.commands.keys())))
-
-
-def run(args):
-    read_env(args)
-
-    cmd = ' '.join(args.command)
-    p = Process(cmd, stdout=sys.stdout)
-    p.wait()
-
-
-def start(args):
-    read_env(args)
-    procfile = make_procfile(args.procfile)
-
-    if not procfile:
-        sys.exit(1)
-
-    port = args.port
-    concurrency = parse_concurrency(args.concurrency)
-
-    for name, cmd in procfile.commands.iteritems():
-        for i in xrange(1, concurrency[name] + 1):
-            n = '{name}.{i}'.format(**vars())
-            os.environ['PORT'] = str(port)
-            process_manager.add_process(n, cmd)
-            port += 1
-        port += 1000
-
-    process_manager.loop()
 
 
 def main():
-    args = parser.parse_args()
-    args.func(args)
-
-parser = argparse.ArgumentParser(description='Manage Procfile-based applications',
-                                 version=__version__)
-
-parser.add_argument('-f', '--procfile', help='Default: Procfile', default='Procfile')
-parser.add_argument('-d', '--app-root', help='Default: Procfile directory')
-
-subparsers = parser.add_subparsers(help='Commands')
-parser_check = subparsers.add_parser('check', help="Validate your application's Procfile")
-parser_run = subparsers.add_parser('run', help="Run a command using your application's environment")
-parser_start = subparsers.add_parser('start', help="Start the application (or a specific PROCESS)")
-
-parser_check.set_defaults(func=check)
-
-parser_run.add_argument('command', nargs='+', help='Command to run')
-parser_run.set_defaults(func=run)
-
-parser_start.add_argument('-p', '--port', help='Default: 5000', type=int, default=5000)
-parser_start.add_argument('-c', '--concurrency', help='The number of each process type to run. The value passed in should be in the format "process=num,process=num"')
-parser_start.add_argument('process', nargs='?', help='Name of process to start. All processes will be run if omitted.')
-parser_start.set_defaults(func=start)
+    app = Honcho()
+    app.parse()
 
 if __name__ == '__main__':
     main()
