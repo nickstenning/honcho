@@ -157,7 +157,15 @@ class Honcho(object):
         port = options.port
         concurrency = self.parse_concurrency(options.concurrency)
 
-        for name, cmd in procfile.commands.iteritems():
+        if options.process is not None:
+            try:
+                commands = {options.process: procfile.commands[options.process]}
+            except KeyError:
+                raise CommandError("Process type '{0}' does not exist in Procfile".format(options.process))
+        else:
+            commands = procfile.commands
+
+        for name, cmd in commands.iteritems():
             for i in xrange(1, concurrency[name] + 1):
                 n = '{name}.{i}'.format(**vars())
                 os.environ['PORT'] = str(port)
