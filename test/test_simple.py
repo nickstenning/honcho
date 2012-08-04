@@ -22,7 +22,7 @@ class SimpleTest(unittest.TestCase):
         with open('Procfile', 'w') as procfile:
             procfile.write("count_1_upto_4: python count_1_upto_4.py")
             procfile.close()
-            output = subprocess.check_output('honcho check', shell=True)
+            output = subprocess.check_output('honcho check', stderr=subprocess.STDOUT, shell=True)
             self.assertIn('Valid procfile detected', output)
 
     def test_check_empty(self):
