@@ -135,10 +135,7 @@ class Honcho(object):
         "Validate your application's Procfile"
         procfile = self.make_procfile(options.procfile)
 
-        if not procfile:
-            raise CommandError
-
-        log.info('Valid procfile detected ({})'.format(', '.join(procfile.commands)))
+        log.info('Valid procfile detected ({0})'.format(', '.join(procfile.commands)))
 
     @arg('command', nargs='+', help='Command to run')
     def run(self, options):
@@ -156,9 +153,6 @@ class Honcho(object):
         "Start the application (or a specific PROCESS)"
         self.read_env(options)
         procfile = self.make_procfile(options.procfile)
-
-        if not procfile:
-            raise CommandError
 
         port = options.port
         concurrency = self.parse_concurrency(options.concurrency)
