@@ -12,6 +12,14 @@ from honcho.process import Process, ProcessManager
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
 
+# Optionally make use of colorama to transparantly convert
+# ANSI color code's for use on Windows
+try:
+    import colorama
+    colorama.init(autoreset=True)
+except ImportError:
+    pass
+
 process_manager = ProcessManager()
 
 

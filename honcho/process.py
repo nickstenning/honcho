@@ -3,7 +3,7 @@ from __future__ import print_function
 import signal
 import subprocess
 import sys
-from threading import Thread
+from threading import Thread, Timer
 
 try:
     from Queue import Queue, Empty
@@ -12,6 +12,7 @@ except ImportError:
 
 from .colour import get_colours
 from .printer import Printer
+from .repeattimer import RepeatTimer
 
 ON_POSIX = 'posix' in sys.builtin_module_names
 
@@ -130,15 +131,25 @@ class ProcessManager(object):
                 print("sending SIGTERM to pid {0:d}".format(proc.pid), file=self.system_printer)
                 proc.terminate()
 
-        def kill(signum, frame):
+        def kill():
+            cancel_kill_timer.cancel()
+
             # If anything is still alive, SIGKILL it
             for proc in self.processes:
                 if proc.poll() is None:
                     print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
                     proc.kill()
 
-        signal.signal(signal.SIGALRM, kill)
-        signal.alarm(5)
+        kill_timer = Timer(5.0, kill)
+        kill_timer.start()
+
+        def cancel_kill_check():
+            if self._process_count() == 0:
+                kill_timer.cancel()
+                cancel_kill_timer.cancel()
+
+        cancel_kill_timer = RepeatTimer(0.1, cancel_kill_check)
+        cancel_kill_timer.start()
 
     def _process_count(self):
         return [p.poll() for p in self.processes].count(None)
