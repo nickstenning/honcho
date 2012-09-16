@@ -1,0 +1,10 @@
+one_one:   python test_fast.py
+one_two:   python test_fast.py
+one_three: python test_fast.py
+one_four:  python test_fast.py
+one_five:  python test_fast.py
+one_six:   python test_fast.py
+one_seven: python test_fast.py
+one_eight: python test_fast.py
+one_nine:  python test_fast.py
+one_ten:   python test_fast.py

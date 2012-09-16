@@ -3,9 +3,11 @@ import sys
 import time
 
 def handler(signum, frame):
-    print "Received SIGTERM"
+    print "Ignoring you"
     sys.stdout.flush()
 
+signal.signal(signal.SIGQUIT, handler)
+signal.signal(signal.SIGINT, handler)
 signal.signal(signal.SIGTERM, handler)
 
 if __name__ == '__main__':

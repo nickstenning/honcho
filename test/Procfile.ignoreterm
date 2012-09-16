@@ -1,3 +1,0 @@
-foo: python test_program.py
-bar: python test_program.py
-ignoreterm: ./ignoreterm

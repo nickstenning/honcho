@@ -8,4 +8,4 @@ if __name__ == '__main__':
     while True:
         print ' '.join(random.choice(words) for _ in xrange(3))
         sys.stdout.flush()
-        time.sleep(random.uniform(1, 5))
+        # time.sleep(0.1)
