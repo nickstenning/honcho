@@ -27,6 +27,7 @@ class Process(subprocess.Popen):
         self.name = name
         self.reader = None
         self.printer = None
+        self.dead = False
 
         defaults = {
             'stdout': subprocess.PIPE,
@@ -95,9 +96,9 @@ class ProcessManager(object):
         self._init_printers()
 
         for proc in self.processes:
-            print("started with pid {}".format(proc.pid), file=proc.printer)
+            print("started with pid {0}".format(proc.pid), file=proc.printer)
 
-        while self._process_count() > 0:
+        while True:
             try:
                 proc, line = self.queue.get(timeout=0.1)
             except Empty:
@@ -108,9 +109,23 @@ class ProcessManager(object):
             else:
                 print(line, end='', file=proc.printer)
 
-                if proc.poll() is not None:
+            for proc in self.processes:
+                if not proc.dead and proc.poll() is not None:
                     print('process terminated', file=proc.printer)
+                    proc.dead = True
                     self.terminate()
+
+            if not self._process_count() > 0:
+                break
+
+        while True:
+            try:
+                proc, line = self.queue.get(timeout=0.1)
+            except Empty:
+                break
+            else:
+                print(line, end='', file=proc.printer)
+
 
     def terminate(self):
         """
