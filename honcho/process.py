@@ -78,7 +78,7 @@ class ProcessManager(object):
                       (e.g. 'python run.py')
 
         """
-        self.processes.append(Process(cmd, name))
+        self.processes.append(Process(cmd, name=name))
 
     def loop(self):
         """
