@@ -10,7 +10,7 @@ if sys.version_info[:2] < (2, 7):
 setup(
     name='honcho',
     version=__version__,
-    packages=find_packages(),
+    packages=find_packages(exclude=['test*']),
 
     # metadata for upload to PyPI
     author='Nick Stenning',
@@ -20,7 +20,6 @@ setup(
     license='MIT',
     keywords='sysadmin process procfile',
 
-    test_suite='test.test_simple',
     install_requires=requirements,
     entry_points={
         'console_scripts': [
