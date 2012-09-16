@@ -3,10 +3,6 @@ import re
 LINE = re.compile(r'^([A-Za-z0-9_]+):\s*(.+)$')
 
 
-class InvalidProcfileError(Exception):
-    pass
-
-
 class Procfile(object):
     def __init__(self, contents):
         self.commands = {}
