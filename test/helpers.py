@@ -1,6 +1,6 @@
 import os
 import re
-from subprocess import Popen, PIPE, CalledProcessError
+from subprocess import Popen, PIPE
 from nose.tools import *
 from mock import *
 
@@ -18,6 +18,7 @@ if not 'assert_regexp_matches' in globals():
             msg = '%s: %r not found in %r' % (msg, expected_regexp.pattern, text)
             raise AssertionError(msg)
 
+
 def get_honcho_output(args):
     os.chdir(FIXTURE_ROOT)
     cmd = ['honcho']
@@ -26,11 +27,8 @@ def get_honcho_output(args):
     # The below is mostly copy-pasted from subprocess.py's check_output (to
     # support python 2.6)
 
-    process = Popen(cmd, stdout=PIPE)
-    output, _ = process.communicate()
+    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    output, error = process.communicate()
     retcode = process.poll()
 
-    if retcode:
-        raise CalledProcessError(retcode, cmd, output=output)
-
-    return output
+    return retcode, output, error
