@@ -1,0 +1,2 @@
+foo: while : ; do echo foo; sleep 1; done
+bar: echo bar
