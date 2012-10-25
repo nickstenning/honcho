@@ -12,6 +12,11 @@ from honcho.process import Process, ProcessManager
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
 
+PATH = os.path.dirname(__file__)
+BASENAME = os.path.basename(os.getcwd())
+
+EXPORT_CHOICES = ['upstart']
+
 process_manager = ProcessManager()
 
 
@@ -67,7 +72,7 @@ class Honcho(object):
     subparser_formatter_class = formatter_class
 
     default = ['--help']
-    commands = ['start', 'check', 'help', 'run']
+    commands = ['start', 'check', 'help', 'run', 'export']
     common = [
         option('-e', '--env', help='Environment file[,file]', default='.env'),
         option('-d', '--app-root', help='Procfile directory', default='.'),
@@ -140,7 +145,8 @@ class Honcho(object):
     @arg('command', nargs='+', help='Command to run')
     def run(self, options):
         "Run a command using your application's environment"
-        self.read_env(options)
+        self.set_env(self.read_env(options))
+
 
         cmd = ' '.join(options.command)
         p = Process(cmd, stdout=sys.stdout)
@@ -151,7 +157,7 @@ class Honcho(object):
     @arg('process', nargs='?', help='Name of process to start. All processes will be run if omitted.')
     def start(self, options):
         "Start the application (or a specific PROCESS)"
-        self.read_env(options)
+        self.set_env(self.read_env(options))
         procfile = self.make_procfile(options.procfile)
 
         port = options.port
@@ -175,6 +181,31 @@ class Honcho(object):
 
         process_manager.loop()
 
+    @option('-a', '--app', help = "Alternative app name", default = BASENAME, type=str, metavar ='APP')
+    @option('-l', '--log', help = "Specify the directory to place process logs in", default = "/var/log/APP", type=str, metavar='DIR')
+    @option('-p', '--port', default=5000, type=int, metavar = 'N')
+    @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
+    @option('-u', '--user', help = "Specify the user the application should run as", default = os.environ['USER'], type=str)
+    @arg('location', help="Folder to export to", default = EXPORT_CHOICES[0], type=str, metavar = "LOCATION")
+    @arg('format', help = "What format to export to", default = EXPORT_CHOICES[0], choices = EXPORT_CHOICES, type=str, metavar="FORMAT")
+    def export(self, options):
+        "Export the application to another process management format"
+        if options.log == "/var/log/APP":
+            options.log = options.log.replace('APP', options.app)
+
+        options.app_root = os.path.abspath(options.app_root)
+
+        procfile = self.make_procfile(options.procfile)
+        env = self.read_env(options)
+        concurrency = self.parse_concurrency(options.concurrency)
+
+        mod = __import__('.'.join(['honcho', 'export', options.format]),
+                         fromlist = ['Export'])
+
+        export = mod.Export(procfile, options, env, concurrency)
+        export.export()
+        
+
     def make_procfile(self, filename):
         try:
             with open(filename) as f:
@@ -192,15 +223,18 @@ class Honcho(object):
     def read_env(self, args):
         app_root = args.app_root or os.path.dirname(args.procfile)
         files = [env.strip() for env in args.env.split(',')]
+        content = []
         for envfile in files:
             try:
                 with open(os.path.join(app_root, envfile)) as f:
-                    content = f.read()
-                self.set_env(content)
+                    content.append(f.read())
             except IOError:
                 pass
 
-    def set_env(self, content):
+        return self.parse_env('\n'.join(content))
+
+    def parse_env(self, content):
+        values = {}
         for line in content.splitlines():
             m1 = re.match(r'\A([A-Za-z_0-9]+)=(.*)\Z', line)
             if m1:
@@ -214,7 +248,11 @@ class Honcho(object):
                 if m3:
                     val = re.sub(r'\\(.)', r'\1', m3.group(1))
 
-                os.environ[key] = val
+                values[key] = val
+        return values
+
+    def set_env(self, values):
+        os.environ.update(values)
 
     def parse_concurrency(self, desc):
         result = defaultdict(lambda: 1)
