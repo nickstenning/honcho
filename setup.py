@@ -12,6 +12,7 @@ setup(
     name='honcho',
     version=__version__,
     packages=find_packages(exclude=['test*']),
+    include_package_data=True,
 
     # metadata for upload to PyPI
     author='Nick Stenning',
