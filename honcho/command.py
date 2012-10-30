@@ -166,12 +166,11 @@ class Honcho(object):
             commands = procfile.commands
 
         for name, cmd in commands.iteritems():
-            for i in xrange(1, concurrency[name] + 1):
-                n = '{name}.{i}'.format(**vars())
-                os.environ['PORT'] = str(port)
+            for i in xrange(concurrency[name]):
+                n = '{name}.{num}'.format(name=name, num=i+1)
+                os.environ['PORT'] = str(port + i)
                 process_manager.add_process(n, cmd)
-                port += 1
-            port += 1000
+            port += 100
 
         process_manager.loop()
 
