@@ -54,3 +54,17 @@ def test_procfiles():
         content = textwrap.dedent(content)
         procfile = Procfile(content)
         assert_equal(procfile.commands, commands)
+
+
+def test_procfile_ordered():
+    content = textwrap.dedent("""
+    one: onecommand
+    two: twocommand
+    three: twocommand
+    four: fourcommand
+    """)
+
+    procfile = Procfile(content)
+
+    order = [k for k in procfile.commands]
+    assert_equal(['one', 'two', 'three', 'four'], order)
