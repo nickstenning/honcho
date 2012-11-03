@@ -102,8 +102,8 @@ class Honcho(object):
 
         for name, subcommand in sorted(self._subcommands.items()):
             subparser = subparsers.add_parser(subcommand['name'],
-                help=subcommand['func'].__doc__,
-                formatter_class=self.subparser_formatter_class)
+                                              help=subcommand['func'].__doc__,
+                                              formatter_class=self.subparser_formatter_class)
             self.add_common(subparser)
             for args, kwargs in subcommand['options']:
                 subparser.add_argument(*args, **kwargs)
@@ -167,7 +167,7 @@ class Honcho(object):
 
         for name, cmd in commands.iteritems():
             for i in xrange(concurrency[name]):
-                n = '{name}.{num}'.format(name=name, num=i+1)
+                n = '{name}.{num}'.format(name=name, num=i + 1)
                 os.environ['PORT'] = str(port + i)
                 process_manager.add_process(n, cmd)
             port += 100
