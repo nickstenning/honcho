@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import sys
+import pipes
 from collections import defaultdict
 
 from honcho import __version__
@@ -141,10 +142,17 @@ class Honcho(object):
     def run(self, options):
         "Run a command using your application's environment"
         self.read_env(options)
+        procfile = self.make_procfile(options.procfile)
 
-        cmd = ' '.join(options.command)
+        try:
+            cmd = procfile.commands[options.command[0]]
+            if options.command[1:]:
+                cmd += ' ' + ' '.join(pipes.quote(arg) for arg in options.command[1:])
+        except KeyError:
+            cmd = ' '.join(pipes.quote(arg) for arg in options.command)
+
         p = Process(cmd, stdout=sys.stdout)
-        p.wait()
+        sys.exit(p.wait())
 
     @option('-p', '--port', type=int, default=5000, metavar='N')
     @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
