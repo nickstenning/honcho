@@ -142,14 +142,23 @@ class Honcho(object):
     def run(self, options):
         "Run a command using your application's environment"
         self.read_env(options)
-        procfile = self.make_procfile(options.procfile)
-
         try:
-            cmd = procfile.commands[options.command[0]]
-            if options.command[1:]:
-                cmd += ' ' + ' '.join(pipes.quote(arg) for arg in options.command[1:])
-        except KeyError:
-            cmd = ' '.join(pipes.quote(arg) for arg in options.command)
+            procfile = self.make_procfile(options.procfile)
+        except:
+            procfile = None
+
+        cmd = None
+
+        if procfile:
+            try:
+                cmd = procfile.commands[options.command[0]]
+                if options.command[1:]:
+                    cmd += ' ' + ' '.join(options.command[1:])
+            except KeyError:
+                pass
+
+        if cmd is None:
+            cmd = ' '.join(options.command)
 
         p = Process(cmd, stdout=sys.stdout)
         sys.exit(p.wait())
