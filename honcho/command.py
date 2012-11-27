@@ -141,10 +141,26 @@ class Honcho(object):
     def run(self, options):
         "Run a command using your application's environment"
         self.read_env(options)
+        try:
+            procfile = self.make_procfile(options.procfile)
+        except:
+            procfile = None
 
-        cmd = ' '.join(options.command)
+        cmd = None
+
+        if procfile:
+            try:
+                cmd = procfile.commands[options.command[0]]
+                if options.command[1:]:
+                    cmd += ' ' + ' '.join(options.command[1:])
+            except KeyError:
+                pass
+
+        if cmd is None:
+            cmd = ' '.join(options.command)
+
         p = Process(cmd, stdout=sys.stdout)
-        p.wait()
+        sys.exit(p.wait())
 
     @option('-p', '--port', type=int, default=5000, metavar='N')
     @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
