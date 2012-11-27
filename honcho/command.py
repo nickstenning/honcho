@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import sys
-import pipes
 from collections import defaultdict
 
 from honcho import __version__
