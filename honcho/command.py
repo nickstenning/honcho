@@ -154,7 +154,7 @@ class Honcho(object):
         self.read_env(options)
         procfile = self.make_procfile(options.procfile)
 
-        port = options.port
+        port = int(os.environ.get('PORT', options.port))
         concurrency = self.parse_concurrency(options.concurrency)
 
         if options.process is not None:
