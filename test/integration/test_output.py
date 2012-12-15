@@ -11,9 +11,9 @@ def test_honcho_start_joins_stderr_into_stdout():
     assert_equal(err, '')
 
 
-def test_honcho_run_joins_stderr_into_stdout():
+def test_honcho_run_keeps_stderr_and_stdout_separate():
     ret, out, err = get_honcho_output(['run', 'python', 'output.py'])
 
     assert_equal(ret, 0)
-    assert_equal(out, 'some normal output\nand then write to stderr\n')
-    assert_equal(err, '')
+    assert_equal(out, 'some normal output\n')
+    assert_equal(err, 'and then write to stderr\n')
