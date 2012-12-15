@@ -137,7 +137,7 @@ class Honcho(object):
 
         log.info('Valid procfile detected ({0})'.format(', '.join(procfile.commands)))
 
-    @arg('command', nargs='+', help='Command to run')
+    @arg('command', nargs=argparse.REMAINDER, help='Command to run')
     def run(self, options):
         "Run a command using your application's environment"
         self.read_env(options)
