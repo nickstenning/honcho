@@ -6,8 +6,8 @@ def test_honcho_start_joins_stderr_into_stdout():
 
     assert_equal(ret, 0)
 
-    assert_in('some normal output', out)
-    assert_in('and then write to stderr', out)
+    assert_regexp_matches(out, r'some normal output')
+    assert_regexp_matches(out, r'and then write to stderr')
     assert_equal(err, '')
 
 
