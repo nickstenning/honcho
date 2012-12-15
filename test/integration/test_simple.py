@@ -13,3 +13,9 @@ def test_simple():
 
     count = len(re.findall(r'foo\.1  \| (....)?one two three\n', out))
     assert_equal(count, 3)
+
+
+def test_run_captures_all_arguments():
+    ret, out, err = get_honcho_output(['run', 'env', '-i', 'A=B'])
+    assert_equal(ret, 0)
+    assert_equal(out.strip(), "A=B")
