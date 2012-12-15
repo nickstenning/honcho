@@ -9,6 +9,11 @@ from honcho import __version__
 from honcho.procfile import Procfile
 from honcho.process import Process, ProcessManager
 
+try:
+    from collections import OrderedDict
+except ImportError:
+    from ordereddict import OrderedDict
+
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -148,20 +153,24 @@ class Honcho(object):
 
     @option('-p', '--port', type=int, default=5000, metavar='N')
     @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
-    @arg('process', nargs='?', help='Name of process to start. All processes will be run if omitted.')
+    @arg('process', nargs='?', help='Name of processes to start (seprated by comma if many). All processes will be run if omitted.')
     def start(self, options):
-        "Start the application (or a specific PROCESS)"
+        "Start the application (or a specific PROCESSES)"
         self.read_env(options)
         procfile = self.make_procfile(options.procfile)
 
         port = int(os.environ.get('PORT', options.port))
         concurrency = self.parse_concurrency(options.concurrency)
-
+        
         if options.process is not None:
+            commands = OrderedDict()
+            # Check if the process contains many process names.
+            processes = options.process.split(',') if ',' in options.process else [options.process]
             try:
-                commands = {options.process: procfile.commands[options.process]}
+                for process in processes:
+                    commands[process] = procfile.commands[process]            
             except KeyError:
-                raise CommandError("Process type '{0}' does not exist in Procfile".format(options.process))
+                raise CommandError("Process type '{0}' does not exist in Procfile".format(process))
         else:
             commands = procfile.commands
 
