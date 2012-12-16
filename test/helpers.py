@@ -18,6 +18,17 @@ if not 'assert_regexp_matches' in globals():
             msg = '%s: %r not found in %r' % (msg, expected_regexp.pattern, text)
             raise AssertionError(msg)
 
+if not 'assert_regexp_notmatches' in globals():
+
+    def assert_regexp_notmatches(text, expected_regexp, msg=None):
+        """Fail the test unless the text matches the regular expression."""
+        if isinstance(expected_regexp, basestring):
+            expected_regexp = re.compile(expected_regexp)
+        if expected_regexp.search(text):
+            msg = msg or "Regexp did match"
+            msg = '%s: %r found in %r' % (msg, expected_regexp.pattern, text)
+            raise AssertionError(msg)
+
 
 def get_honcho_output(args):
     os.chdir(FIXTURE_ROOT)
