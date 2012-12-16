@@ -126,6 +126,7 @@ class ProcessManager(object):
             else:
                 print(line, end='', file=proc.printer)
 
+        self._exit_with_code()
 
     def terminate(self):
         """
@@ -138,7 +139,6 @@ class ProcessManager(object):
             return False
 
         self._terminating = True
-
         print("sending SIGTERM to all processes", file=self.system_printer)
         for proc in self.processes:
             if proc.poll() is None:
@@ -154,6 +154,10 @@ class ProcessManager(object):
 
         signal.signal(signal.SIGALRM, kill)
         signal.alarm(5)
+
+    def _exit_with_code(self):
+        if len(self.processes) == 1 and self.processes[0].returncode is not None:
+            sys.exit(self.processes[0].returncode)
 
     def _process_count(self):
         return [p.poll() for p in self.processes].count(None)
