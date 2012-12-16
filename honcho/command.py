@@ -172,7 +172,7 @@ class Honcho(object):
                 process_manager.add_process(n, cmd)
             port += 100
 
-        process_manager.loop()
+        sys.exit(process_manager.loop())
 
     def make_procfile(self, filename):
         try:

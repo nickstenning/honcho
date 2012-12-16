@@ -62,6 +62,7 @@ class ProcessManager(object):
         self.colours = get_colours()
         self.queue = Queue()
         self.system_printer = Printer(sys.stdout, name='system')
+        self.returncode = None
 
         self._terminating = False
 
@@ -90,6 +91,9 @@ class ProcessManager(object):
         If one process terminates, all the others will be terminated by
         Honcho, and loop() will return.
 
+        Returns: the returncode of the first process to exit, or 130 if
+        interrupted with Ctrl-C (SIGINT)
+
         """
 
         self._init_readers()
@@ -105,6 +109,7 @@ class ProcessManager(object):
                 pass
             except KeyboardInterrupt:
                 print("SIGINT received", file=sys.stderr)
+                self.returncode = 130
                 self.terminate()
             else:
                 print(line, end='', file=proc.printer)
@@ -113,6 +118,12 @@ class ProcessManager(object):
                 if not proc.dead and proc.poll() is not None:
                     print('process terminated', file=proc.printer)
                     proc.dead = True
+
+                    # Set the returncode of the ProcessManager instance if not
+                    # already set.
+                    if self.returncode is None:
+                        self.returncode = proc.returncode
+
                     self.terminate()
 
             if not self._process_count() > 0:
@@ -126,6 +137,7 @@ class ProcessManager(object):
             else:
                 print(line, end='', file=proc.printer)
 
+        return self.returncode
 
     def terminate(self):
         """
