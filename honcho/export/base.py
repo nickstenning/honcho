@@ -19,7 +19,7 @@ class BaseExport(object):
 
     def _mkdir(self, directory):
         if os.path.exists(directory):
-            return 
+            return
         try:
             os.makedirs(directory)
         except OSError, e:
@@ -39,7 +39,7 @@ class BaseExport(object):
 
     def _write(self, filename, content):
         path = os.path.join(self.options.location, filename)
-        
+
         try:
             open(path, 'w').write(content)
         except IOError:
@@ -58,7 +58,7 @@ class BaseExport(object):
         except IOError:
             raise CommandError("Can not find template with name {}".format(
                     name))
-                     
+
 
     def export(self):
         self._mkdir(self.options.location)
@@ -66,7 +66,7 @@ class BaseExport(object):
         self._chown(self.options.log)
 
         files = self.render(self.procfile, self.options, self.environment, self.concurrency)
-        
+
         for name, content in files:
             self._write(name, content)
 
@@ -74,6 +74,6 @@ class BaseExport(object):
 
     def render(self, procfile, options, environment, concurrency):
         raise NotImplementedError("You must write a render method.")
-            
-            
-            
+
+
+
