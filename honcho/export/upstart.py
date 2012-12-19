@@ -11,14 +11,15 @@ class Export(BaseExport):
             'environment' : environment,
             'log'         : options.log,
             'port'        : options.port,
-            'user'        : options.user,}
+            'user'        : options.user,
+            'shell'        : options.shell}
 
         for name, cmd in procfile.commands.iteritems():
             ctx = context.copy()
             ctx.update({
                     'command' : cmd,
                     'name'    : name,})
-                    
+
             master  = "{}-{}.conf".format(options.app, name)
             files.append((master,  self.get_template("process_master.conf").render(ctx)))
 
