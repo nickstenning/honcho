@@ -29,6 +29,6 @@ def get_honcho_output(args):
 
     process = Popen(cmd, stdout=PIPE, stderr=PIPE)
     output, error = process.communicate()
-    retcode = process.poll()
+    retcode = process.returncode
 
     return retcode, output, error

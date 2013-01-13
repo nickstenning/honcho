@@ -1,4 +1,5 @@
 from ..helpers import *
+import os
 
 
 def test_proctype_increment():
@@ -24,3 +25,22 @@ def test_concurrency_increment():
     assert_regexp_matches(out, r'worker\.3 \| (....)?PORT=5102')
     assert_regexp_matches(out, r'redis\.1  \| (....)?PORT=5200')
     assert_regexp_matches(out, r'es\.1     \| (....)?PORT=5300')
+
+
+def test_get_port_from_dot_env():
+
+    ret, out, err = get_honcho_output(['-f', 'Procfile.ports', '-e', '.env_port', 'start'])
+
+    assert_equal(ret, 0)
+
+    assert_regexp_matches(out, r'web\.1    \| (....)?PORT=8000')
+
+
+def test_get_port_from_env():
+    os.environ['PORT'] = '3000'
+
+    ret, out, err = get_honcho_output(['-f', 'Procfile.ports', 'start'])
+
+    assert_equal(ret, 0)
+
+    assert_regexp_matches(out, r'web\.1    \| (....)?PORT=3000')

@@ -102,8 +102,8 @@ class Honcho(object):
 
         for name, subcommand in sorted(self._subcommands.items()):
             subparser = subparsers.add_parser(subcommand['name'],
-                help=subcommand['func'].__doc__,
-                formatter_class=self.subparser_formatter_class)
+                                              help=subcommand['func'].__doc__,
+                                              formatter_class=self.subparser_formatter_class)
             self.add_common(subparser)
             for args, kwargs in subcommand['options']:
                 subparser.add_argument(*args, **kwargs)
@@ -137,13 +137,13 @@ class Honcho(object):
 
         log.info('Valid procfile detected ({0})'.format(', '.join(procfile.commands)))
 
-    @arg('command', nargs='+', help='Command to run')
+    @arg('command', nargs=argparse.REMAINDER, help='Command to run')
     def run(self, options):
         "Run a command using your application's environment"
         self.read_env(options)
 
         cmd = ' '.join(options.command)
-        p = Process(cmd, stdout=sys.stdout)
+        p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
         p.wait()
 
     @option('-p', '--port', type=int, default=5000, metavar='N')
@@ -154,7 +154,7 @@ class Honcho(object):
         self.read_env(options)
         procfile = self.make_procfile(options.procfile)
 
-        port = options.port
+        port = int(os.environ.get('PORT', options.port))
         concurrency = self.parse_concurrency(options.concurrency)
 
         if options.process is not None:
@@ -167,12 +167,12 @@ class Honcho(object):
 
         for name, cmd in commands.iteritems():
             for i in xrange(concurrency[name]):
-                n = '{name}.{num}'.format(name=name, num=i+1)
+                n = '{name}.{num}'.format(name=name, num=i + 1)
                 os.environ['PORT'] = str(port + i)
                 process_manager.add_process(n, cmd)
             port += 100
 
-        process_manager.loop()
+        sys.exit(process_manager.loop())
 
     def make_procfile(self, filename):
         try:
