@@ -186,6 +186,7 @@ class Honcho(object):
     @option('-p', '--port', default=5000, type=int, metavar = 'N')
     @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
     @option('-u', '--user', help = "Specify the user the application should run as", default = os.environ['USER'], type=str)
+    @option('-s', '--shell', help = "Specify the shell that should run the application", default='/bin/sh', type=str)
     @arg('location', help="Folder to export to", default = EXPORT_CHOICES[0], type=str, metavar = "LOCATION")
     @arg('format', help = "What format to export to", default = EXPORT_CHOICES[0], choices = EXPORT_CHOICES, type=str, metavar="FORMAT")
     def export(self, options):
@@ -204,7 +205,7 @@ class Honcho(object):
 
         export = mod.Export(procfile, options, env, concurrency)
         export.export()
-        
+
 
     def make_procfile(self, filename):
         try:
