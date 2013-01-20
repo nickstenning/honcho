@@ -147,7 +147,6 @@ class Honcho(object):
         "Run a command using your application's environment"
         self.set_env(self.read_env(options))
 
-
         cmd = ' '.join(options.command)
         p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
         p.wait()
@@ -180,14 +179,27 @@ class Honcho(object):
 
         sys.exit(process_manager.loop())
 
-    @option('-a', '--app', help = "Alternative app name", default = BASENAME, type=str, metavar ='APP')
-    @option('-l', '--log', help = "Specify the directory to place process logs in", default = "/var/log/APP", type=str, metavar='DIR')
-    @option('-p', '--port', default=5000, type=int, metavar = 'N')
-    @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
-    @option('-u', '--user', help = "Specify the user the application should run as", default = os.environ['USER'], type=str)
-    @option('-s', '--shell', help = "Specify the shell that should run the application", default='/bin/sh', type=str)
-    @arg('location', help="Folder to export to", default = EXPORT_CHOICES[0], type=str, metavar = "LOCATION")
-    @arg('format', help = "What format to export to", default = EXPORT_CHOICES[0], choices = EXPORT_CHOICES, type=str, metavar="FORMAT")
+    @option('-a', '--app',
+            help="Alternative app name", default=BASENAME, type=str, metavar='APP')
+    @option('-l', '--log',
+            help="Specify the directory to place process logs in",
+            default="/var/log/APP", type=str, metavar='DIR')
+    @option('-p', '--port', default=5000, type=int, metavar='N')
+    @option('-c', '--concurrency',
+            help='The number of each process type to run.',
+            type=str, metavar='process=num,process=num')
+    @option('-u', '--user',
+            help="Specify the user the application should run as",
+            default=os.environ['USER'], type=str)
+    @option('-s', '--shell',
+            help="Specify the shell that should run the application",
+            default='/bin/sh', type=str)
+    @arg('location',
+         help="Folder to export to",
+         default=EXPORT_CHOICES[0], type=str, metavar="LOCATION")
+    @arg('format',
+         help="What format to export to",
+         default=EXPORT_CHOICES[0], choices=EXPORT_CHOICES, type=str, metavar="FORMAT")
     def export(self, options):
         "Export the application to another process management format"
         if options.log == "/var/log/APP":
@@ -200,11 +212,10 @@ class Honcho(object):
         concurrency = self.parse_concurrency(options.concurrency)
 
         mod = __import__('.'.join(['honcho', 'export', options.format]),
-                         fromlist = ['Export'])
+                         fromlist=['Export'])
 
         export = mod.Export(procfile, options, env, concurrency)
         export.export()
-
 
     def make_procfile(self, filename):
         try:
