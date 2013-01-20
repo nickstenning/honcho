@@ -12,10 +12,13 @@ class BaseExport(object):
         self.concurrency = concurrency
 
         try:
-            self.uid = pwd.getpwnam(options.user).pw_uid
+            user_entry = pwd.getpwnam(options.user)
         except KeyError:
             raise CommandError("No such user available: {}"
                                .format(options.user))
+
+        self.uid = user_entry.pw_uid
+        self.gid = user_entry.pw_gid
 
     def _mkdir(self, directory):
         if os.path.exists(directory):
@@ -29,7 +32,7 @@ class BaseExport(object):
 
     def _chown(self, filename):
         try:
-            os.chown(filename, self.uid, self.uid)
+            os.chown(filename, self.uid, self.gid)
         except OSError:
             raise CommandError("Can not chown {} to {}"
                                .format(self.options.log,
