@@ -158,7 +158,7 @@ class Honcho(object):
         "Run a command using your application's environment"
         self.set_env(self.read_env(options))
 
-        cmd = ' '.join(options.command)
+        cmd = ' '.join(shellquote(arg) for arg in options.command)
         p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
         p.wait()
 
