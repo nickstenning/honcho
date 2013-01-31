@@ -35,6 +35,17 @@ def option(*args, **kwargs):
 arg = option
 
 
+def shellquote(arg):
+    # Inspired by Ruby's `Shellwords::shellescape`
+
+    if not arg:
+        return "''"
+
+    arg = re.sub(r'([^A-Za-z0-9_\-.,:\/@\n])', r'\\\1', arg)
+    arg = re.sub(r'\n', r'\\n', arg)
+    return arg
+
+
 class Commander(type):
     def __new__(cls, name, bases, attrs):
         subcommands = {}
