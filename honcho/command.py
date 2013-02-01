@@ -35,15 +35,10 @@ def option(*args, **kwargs):
 arg = option
 
 
-def shellquote(arg):
-    # Inspired by Ruby's `Shellwords::shellescape`
-
-    if not arg:
-        return "''"
-
-    arg = re.sub(r'([^A-Za-z0-9_\-.,:\/@\n])', r'\\\1', arg)
-    arg = re.sub(r'\n', r'\\n', arg)
-    return arg
+try:
+    from shlex import quote as shellquote
+except ImportError:
+    from pipes import quote as shellquote
 
 
 class Commander(type):
