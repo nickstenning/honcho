@@ -35,6 +35,12 @@ def option(*args, **kwargs):
 arg = option
 
 
+try:
+    from shlex import quote as shellquote
+except ImportError:
+    from pipes import quote as shellquote
+
+
 class Commander(type):
     def __new__(cls, name, bases, attrs):
         subcommands = {}
@@ -147,7 +153,7 @@ class Honcho(object):
         "Run a command using your application's environment"
         self.set_env(self.read_env(options))
 
-        cmd = ' '.join(options.command)
+        cmd = ' '.join(shellquote(arg) for arg in options.command)
         p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
         p.wait()
 
