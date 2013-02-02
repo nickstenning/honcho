@@ -32,11 +32,13 @@ class Process(subprocess.Popen):
         defaults = {
             'stdout': subprocess.PIPE,
             'stderr': subprocess.STDOUT,
-            'shell': True,
             'bufsize': 1,
             'close_fds': ON_POSIX
         }
         defaults.update(kwargs)
+
+        if isinstance(cmd, basestring):
+            defaults.update(shell=True)
 
         super(Process, self).__init__(cmd, *args, **defaults)
 
