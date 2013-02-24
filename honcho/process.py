@@ -166,15 +166,12 @@ class ProcessManager(object):
                     print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
                     proc.kill()
 
-        if ON_WINDOWS:
-            # SIGALRM is not supported on Windows: use a timer instead
-            import threading
-            timer = threading.Timer(5.0, kill, args=[None, None])
-            timer.start()
-        else:
-            # we assume posix semantics and signaling is available otehrwise
+        if ON_POSIX:
             signal.signal(signal.SIGALRM, kill)
             signal.alarm(5)
+        else:
+            # SIGALRM is not supported on Windows: just kill instead
+            kill(None, None)
 
     def _process_count(self):
         return [p.poll() for p in self.processes].count(None)
