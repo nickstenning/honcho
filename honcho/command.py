@@ -4,6 +4,10 @@ import os
 import re
 import sys
 from collections import defaultdict
+try:
+    from shlex import quote as shellquote # Python 3
+except ImportError:
+    from pipes import quote as shellquote
 
 from honcho import __version__
 from honcho.procfile import Procfile
@@ -147,7 +151,7 @@ class Honcho(object):
         "Run a command using your application's environment"
         self.set_env(self.read_env(options))
 
-        cmd = ' '.join(options.command)
+        cmd = ' '.join(shellquote(arg) for arg in options.command)
         p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
         p.wait()
 

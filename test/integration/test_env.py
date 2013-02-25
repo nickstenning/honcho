@@ -12,8 +12,8 @@ def test_env_start():
 
 
 def test_env_run():
-    var = '$TEST_ANIMAL' if ON_POSIX else '%TEST_ANIMAL%'
-    ret, out, err = get_honcho_output(['run', 'echo', var])
+    command  = ['run', 'sh', '-c', 'echo $TEST_ANIMAL'] if ON_POSIX else ['run', 'echo', '%TEST_ANIMAL%']
+    ret, out, err = get_honcho_output(command)
 
     assert_equal(ret, 0)
     assert_equal(out.strip(), 'giraffe')
