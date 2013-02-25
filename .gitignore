@@ -4,3 +4,12 @@
 /.tox
 /build
 /dist
+/Include
+/Lib
+/man
+/Scripts
+/.project
+/.pydevproject
+/bin
+/lib
+*.egg
