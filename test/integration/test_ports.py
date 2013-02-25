@@ -1,9 +1,11 @@
 from ..helpers import *
 import os
+from honcho.process import ON_POSIX
 
 
 def test_proctype_increment():
-    ret, out, err = get_honcho_output(['-f', 'Procfile.ports', 'start'])
+    procfile = 'Procfile.ports' if ON_POSIX else 'Procfile.portswin'
+    ret, out, err = get_honcho_output(['-f', procfile, 'start'])
 
     assert_equal(ret, 0)
 
