@@ -41,17 +41,21 @@ def test_start_with_arg_returncode():
     assert_equal(ret, 42)
 
 
-def test_run_captures_all_arguments_posix():
-    if not honcho.ON_POSIX: return
+def test_run_captures_all_arguments():
+    if not honcho.ON_POSIX:
+        return
     command = ['run', 'env', '-i', 'A=B']
     ret, out, err = get_honcho_output(command)
 
     assert_equal(ret, 0)
-    assert_true("A=B" in out.strip())
+    assert_equal(out.strip(), "A=B")
 
 
 def test_run_captures_all_arguments_windows():
-    if not honcho.ON_WINDOWS: return
+    # note: this is not the same exact test as on Posix 
+    # but this captures the gist of the intention
+    if not honcho.ON_WINDOWS:
+        return
     command = ['run', 'cmd', '/a', '/e:on', '/c', 'cd', '&', 'set']
     ret, out, err = get_honcho_output(command)
 

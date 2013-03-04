@@ -153,7 +153,8 @@ class Honcho(object):
         self.set_env(self.read_env(options))
 
         if honcho.ON_WINDOWS:
-            # do not quote on Windows, subprocess with handle it
+            # do not quote on Windows, subprocess will handle it for us
+            # using the MSFT quoting rules
             cmd = options.command
         else:
             cmd = ' '.join(shellquote(arg) for arg in options.command)
@@ -189,9 +190,6 @@ class Honcho(object):
 
         sys.exit(process_manager.loop())
 
-    # USER is not defined on Windows
-    user_env_var = 'USERNAME' if honcho.ON_WINDOWS else 'USER'
-
     @option('-a', '--app',
             help="Alternative app name", default=BASENAME, type=str, metavar='APP')
     @option('-l', '--log',
@@ -203,7 +201,9 @@ class Honcho(object):
             type=str, metavar='process=num,process=num')
     @option('-u', '--user',
             help="Specify the user the application should run as",
-            default=os.environ[user_env_var], type=str)
+            # USER is not defined on Windows
+            default=os.environ['USERNAME' if honcho.ON_WINDOWS else 'USER'], 
+            type=str)
     @option('-s', '--shell',
             help="Specify the shell that should run the application",
             default='/bin/sh', type=str)
