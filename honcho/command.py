@@ -9,6 +9,7 @@ try:
 except ImportError:
     from pipes import quote as shellquote
 
+import honcho
 from honcho import __version__
 from honcho.procfile import Procfile
 from honcho.process import Process, ProcessManager
@@ -151,7 +152,12 @@ class Honcho(object):
         "Run a command using your application's environment"
         self.set_env(self.read_env(options))
 
-        cmd = ' '.join(shellquote(arg) for arg in options.command)
+        if honcho.ON_WINDOWS:
+            # do not quote on Windows, subprocess with handle it
+            cmd = options.command
+        else:
+            cmd = ' '.join(shellquote(arg) for arg in options.command)
+
         p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
         p.wait()
 
@@ -183,6 +189,9 @@ class Honcho(object):
 
         sys.exit(process_manager.loop())
 
+    # USER is not defined on Windows
+    user_env_var = 'USERNAME' if honcho.ON_WINDOWS else 'USER'
+
     @option('-a', '--app',
             help="Alternative app name", default=BASENAME, type=str, metavar='APP')
     @option('-l', '--log',
@@ -194,7 +203,7 @@ class Honcho(object):
             type=str, metavar='process=num,process=num')
     @option('-u', '--user',
             help="Specify the user the application should run as",
-            default=os.environ['USER'], type=str)
+            default=os.environ[user_env_var], type=str)
     @option('-s', '--shell',
             help="Specify the shell that should run the application",
             default='/bin/sh', type=str)

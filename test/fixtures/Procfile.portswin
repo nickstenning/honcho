@@ -1,4 +1,7 @@
-web: echo PORT=%PORT% & timeout /T 1 /NOBREAK >nul
-worker: echo PORT=%PORT% & timeout /T 1 /NOBREAK >nul
-redis: echo PORT=%PORT% & timeout /T 1 /NOBREAK >nul
+# using ping on windows is a crude hack to emulate sleep
+# http://stackoverflow.com/questions/1672338/how-to-sleep-for-5-seconds-in-windowss-command-prompt-or-dos
+
+web: echo PORT=%PORT% & python -c "import time;time.sleep(2)"
+worker: echo PORT=%PORT%  & python -c "import time;time.sleep(2)"
+redis: echo PORT=%PORT%  & python -c "import time;time.sleep(2)"
 es: echo PORT=%PORT%

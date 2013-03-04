@@ -10,12 +10,10 @@ try:
 except ImportError:
     from queue import Queue, Empty  # Python 3.x
 
+import honcho
+
 from .colour import get_colours
 from .printer import Printer
-
-ON_POSIX = 'posix' in sys.builtin_module_names
-# this works for both 32 and 64 bits Windows
-ON_WINDOWS = 'win32' in str(sys.platform).lower()
 
 
 class Process(subprocess.Popen):
@@ -36,7 +34,7 @@ class Process(subprocess.Popen):
             'stderr': subprocess.STDOUT,
             'shell': True,
             'bufsize': 1,
-            'close_fds': ON_POSIX
+            'close_fds': honcho.ON_POSIX
         }
         defaults.update(kwargs)
 
@@ -166,10 +164,10 @@ class ProcessManager(object):
                     print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
                     proc.kill()
 
-        if ON_POSIX:
-            signal.signal(signal.SIGALRM, kill)
-            signal.alarm(5)
-        else:
+        if honcho.ON_POSIX:
+            signal.signal(signal.SIGALRM, kill) # @UndefinedVariable
+            signal.alarm(5) # @UndefinedVariable
+        else: #if honcho.ON_WINDOWS:
             # SIGALRM is not supported on Windows: just kill instead
             kill(None, None)
 

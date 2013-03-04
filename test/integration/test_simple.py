@@ -1,7 +1,7 @@
 import re
 from ..helpers import *
 
-from honcho.process import ON_POSIX
+import honcho
 
 def test_simple():
     ret, out, err = get_honcho_output(['-f', 'Procfile.simple', 'start'])
@@ -41,12 +41,20 @@ def test_start_with_arg_returncode():
     assert_equal(ret, 42)
 
 
-def test_run_captures_all_arguments():
-    if ON_POSIX:
-        command = ['run', 'env', '-i', 'A=B']
-    else:
-        command = ['run', 'set', 'A=B', '&', 'set', 'A']
+def test_run_captures_all_arguments_posix():
+    if not honcho.ON_POSIX: return
+    command = ['run', 'env', '-i', 'A=B']
     ret, out, err = get_honcho_output(command)
 
     assert_equal(ret, 0)
     assert_true("A=B" in out.strip())
+
+
+def test_run_captures_all_arguments_windows():
+    if not honcho.ON_WINDOWS: return
+    command = ['run', 'cmd', '/a', '/e:on', '/c', 'cd', '&', 'set']
+    ret, out, err = get_honcho_output(command)
+
+    assert_equal(ret, 0)
+    assert_true("honcho" in out)
+    assert_true("HOMEDRIVE" in out)
