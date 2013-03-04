@@ -13,3 +13,4 @@
 /bin
 /lib
 *.egg
+/include
