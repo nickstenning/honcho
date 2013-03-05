@@ -27,7 +27,7 @@ def get_honcho_output(args):
     # The below is mostly copy-pasted from subprocess.py's check_output (to
     # support python 2.6)
 
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE)
+    process = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
     output, error = process.communicate()
     retcode = process.returncode
 

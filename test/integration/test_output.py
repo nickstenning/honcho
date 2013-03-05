@@ -15,5 +15,5 @@ def test_honcho_run_keeps_stderr_and_stdout_separate():
     ret, out, err = get_honcho_output(['run', 'python', 'output.py'])
 
     assert_equal(ret, 0)
-    assert_equal(out.strip(), 'some normal output')
-    assert_equal(err.strip(), 'and then write to stderr')
+    assert_equal(out, 'some normal output\n')
+    assert_equal(err, 'and then write to stderr\n')

@@ -19,4 +19,4 @@ def test_env_run():
     ret, out, err = get_honcho_output(command)
 
     assert_equal(ret, 0)
-    assert_equal(out.strip(), 'giraffe')
+    assert_equal(out, 'giraffe\n')

@@ -10,4 +10,4 @@ def test_run_quoting():
                                        'print "hello world"' ])
 
     assert_equal(ret, 0)
-    assert_equal(out.strip(), 'hello world')
+    assert_equal(out, 'hello world\n')
