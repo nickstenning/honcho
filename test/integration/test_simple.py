@@ -31,13 +31,15 @@ def test_start_with_arg():
 
 
 def test_start_returncode():
-    ret, out, err = get_honcho_output(['-f', 'Procfile.returncode', 'start'])
+    procfile = 'Procfile.returncodewin' if compat.ON_WINDOWS else 'Procfile.returncode'
+    ret, out, err = get_honcho_output(['-f', procfile, 'start'])
 
     assert_true(ret in [123, 42])
 
 
 def test_start_with_arg_returncode():
-    ret, out, err = get_honcho_output(['-f', 'Procfile.returncode', 'start', 'bar'])
+    procfile = 'Procfile.returncodewin' if compat.ON_WINDOWS else 'Procfile.returncode'
+    ret, out, err = get_honcho_output(['-f', procfile, 'start', 'bar'])
 
     assert_equal(ret, 42)
 
