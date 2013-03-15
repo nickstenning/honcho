@@ -16,7 +16,7 @@ def test_proctype_increment():
 
 
 def test_concurrency_increment():
-    procfile = 'Procfile.portswin' if compat.ON_WINDOWS else 'procfile.ports'
+    procfile = 'Procfile.portswin' if compat.ON_WINDOWS else 'Procfile.ports'
     ret, out, err = get_honcho_output(['-f', procfile, 'start', '-c', 'web=2,worker=3'])
 
     assert_equal(ret, 0)
@@ -31,7 +31,7 @@ def test_concurrency_increment():
 
 
 def test_get_port_from_dot_env():
-    procfile = 'Procfile.portswin' if compat.ON_WINDOWS else 'procfile.ports'
+    procfile = 'Procfile.portswin' if compat.ON_WINDOWS else 'Procfile.ports'
     ret, out, err = get_honcho_output(['-f', procfile, '-e', '.env_port', 'start'])
 
     assert_equal(ret, 0)
@@ -41,7 +41,7 @@ def test_get_port_from_dot_env():
 
 def test_get_port_from_env():
     os.environ['PORT'] = '3000'
-    procfile = 'Procfile.portswin' if compat.ON_WINDOWS else 'procfile.ports'
+    procfile = 'Procfile.portswin' if compat.ON_WINDOWS else 'Procfile.ports'
     ret, out, err = get_honcho_output(['-f', procfile, 'start'])
 
     assert_equal(ret, 0)
