@@ -1,7 +1,8 @@
 import re
 from ..helpers import *
 
-import honcho
+from honcho import compat
+
 
 def test_simple():
     ret, out, err = get_honcho_output(['-f', 'Procfile.simple', 'start'])
@@ -42,7 +43,7 @@ def test_start_with_arg_returncode():
 
 
 def test_run_captures_all_arguments():
-    if not honcho.ON_POSIX:
+    if not compat.ON_POSIX:
         return
     command = ['run', 'env', '-i', 'A=B']
     ret, out, err = get_honcho_output(command)
@@ -53,7 +54,7 @@ def test_run_captures_all_arguments():
 def test_run_captures_all_arguments_windows():
     # note: this is not the same exact test as on Posix 
     # but this captures the gist of the intention
-    if not honcho.ON_WINDOWS:
+    if not compat.ON_WINDOWS:
         return
     command = ['run', 'cmd', '/a', '/e:on', '/c', 'cd', '&', 'set']
     ret, out, err = get_honcho_output(command)

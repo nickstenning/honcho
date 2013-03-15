@@ -9,10 +9,10 @@ try:
 except ImportError:
     from pipes import quote as shellquote
 
-import honcho
 from honcho import __version__
 from honcho.procfile import Procfile
 from honcho.process import Process, ProcessManager
+from honcho import compat
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -152,7 +152,7 @@ class Honcho(object):
         "Run a command using your application's environment"
         self.set_env(self.read_env(options))
 
-        if honcho.ON_WINDOWS:
+        if compat.ON_WINDOWS:
             # do not quote on Windows, subprocess will handle it for us
             # using the MSFT quoting rules
             cmd = options.command
@@ -202,7 +202,7 @@ class Honcho(object):
     @option('-u', '--user',
             help="Specify the user the application should run as",
             # USER is not defined on Windows
-            default=os.environ['USERNAME' if honcho.ON_WINDOWS else 'USER'], 
+            default=os.environ['USERNAME' if compat.ON_WINDOWS else 'USER'], 
             type=str)
     @option('-s', '--shell',
             help="Specify the shell that should run the application",
