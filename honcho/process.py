@@ -13,7 +13,7 @@ except ImportError:
 
 from .colour import get_colours
 from .printer import Printer
-from .compat import ON_POSIX, ON_WINDOWS
+from .compat import ON_WINDOWS
 
 
 class Process(subprocess.Popen):
@@ -34,7 +34,7 @@ class Process(subprocess.Popen):
             'stderr': subprocess.STDOUT,
             'shell': True,
             'bufsize': 1,
-            'close_fds': ON_POSIX
+            'close_fds': not ON_WINDOWS
         }
         defaults.update(kwargs)
 

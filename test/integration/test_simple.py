@@ -45,7 +45,7 @@ def test_start_with_arg_returncode():
 
 
 def test_run_captures_all_arguments():
-    if not compat.ON_POSIX:
+    if compat.ON_WINDOWS:
         return
     command = ['run', 'env', '-i', 'A=B']
     ret, out, err = get_honcho_output(command)
