@@ -1,0 +1,5 @@
+# using Python time.sleep on windows is a crude hack to emulate sleep
+web: echo PORT=%PORT% & python -c "import time;time.sleep(2)"
+worker: echo PORT=%PORT%  & python -c "import time;time.sleep(2)"
+redis: echo PORT=%PORT%  & python -c "import time;time.sleep(2)"
+es: echo PORT=%PORT%

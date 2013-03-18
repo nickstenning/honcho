@@ -1,6 +1,8 @@
 import re
 from ..helpers import *
 
+from honcho import compat
+
 
 def test_simple():
     ret, out, err = get_honcho_output(['-f', 'Procfile.simple', 'start'])
@@ -29,18 +31,35 @@ def test_start_with_arg():
 
 
 def test_start_returncode():
-    ret, out, err = get_honcho_output(['-f', 'Procfile.returncode', 'start'])
+    procfile = 'Procfile.returncodewin' if compat.ON_WINDOWS else 'Procfile.returncode'
+    ret, out, err = get_honcho_output(['-f', procfile, 'start'])
 
     assert_true(ret in [123, 42])
 
 
 def test_start_with_arg_returncode():
-    ret, out, err = get_honcho_output(['-f', 'Procfile.returncode', 'start', 'bar'])
+    procfile = 'Procfile.returncodewin' if compat.ON_WINDOWS else 'Procfile.returncode'
+    ret, out, err = get_honcho_output(['-f', procfile, 'start', 'bar'])
 
     assert_equal(ret, 42)
 
 
 def test_run_captures_all_arguments():
-    ret, out, err = get_honcho_output(['run', 'env', '-i', 'A=B'])
+    if compat.ON_WINDOWS:
+        return
+    command = ['run', 'env', '-i', 'A=B']
+    ret, out, err = get_honcho_output(command)
     assert_equal(ret, 0)
     assert_equal(out.strip(), "A=B")
+
+
+def test_run_captures_all_arguments_windows():
+    # note: this is not the same exact test as on Posix 
+    # but this captures the gist of the intention
+    if not compat.ON_WINDOWS:
+        return
+    command = ['run', 'cmd', '/a', '/e:on', '/c', 'cd', '&', 'set']
+    ret, out, err = get_honcho_output(command)
+    assert_equal(ret, 0)
+    assert_true("honcho" in out)
+    assert_true("HOMEDRIVE" in out)
