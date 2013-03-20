@@ -12,8 +12,7 @@ except ImportError:
 
 from .colour import get_colours
 from .printer import Printer
-
-ON_POSIX = 'posix' in sys.builtin_module_names
+from .compat import ON_WINDOWS
 
 
 class Process(subprocess.Popen):
@@ -34,7 +33,7 @@ class Process(subprocess.Popen):
             'stderr': subprocess.STDOUT,
             'shell': True,
             'bufsize': 1,
-            'close_fds': ON_POSIX
+            'close_fds': not ON_WINDOWS
         }
         defaults.update(kwargs)
 
@@ -164,8 +163,13 @@ class ProcessManager(object):
                     print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
                     proc.kill()
 
-        signal.signal(signal.SIGALRM, kill)
-        signal.alarm(5)
+        if ON_WINDOWS:
+            # SIGALRM is not supported on Windows: just kill instead
+            kill(None, None)
+        else:
+            # the default is POSIX
+            signal.signal(signal.SIGALRM, kill) # @UndefinedVariable
+            signal.alarm(5) # @UndefinedVariable
 
     def _process_count(self):
         return [p.poll() for p in self.processes].count(None)

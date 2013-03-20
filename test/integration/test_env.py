@@ -1,8 +1,10 @@
 from ..helpers import *
+from honcho import compat
 
 
 def test_env_start():
-    ret, out, err = get_honcho_output(['-f', 'Procfile.env', 'start'])
+    procfile = 'Procfile.envwin' if compat.ON_WINDOWS else 'Procfile.env'
+    ret, out, err = get_honcho_output(['-f', procfile, 'start'])
 
     assert_equal(ret, 0)
 
@@ -10,7 +12,11 @@ def test_env_start():
 
 
 def test_env_run():
-    ret, out, err = get_honcho_output(['run', 'sh', '-c', 'echo $TEST_ANIMAL'])
+    if compat.ON_WINDOWS:
+        command = ['run', 'cmd', '/c', 'echo', '%TEST_ANIMAL%']
+    else:
+        command  = ['run', 'sh', '-c', 'echo $TEST_ANIMAL']
+    ret, out, err = get_honcho_output(command)
 
     assert_equal(ret, 0)
     assert_equal(out, 'giraffe\n')
