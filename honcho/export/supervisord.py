@@ -1,0 +1,33 @@
+import pipes
+from honcho.export.base import BaseExport
+
+
+class Export(BaseExport):
+    def render(self, procfile, options, environment, concurrency):
+        commands = []
+        port = options.port
+        for name, cmd in procfile.commands.items():
+            for num in xrange(1, concurrency[name]+1):
+                env = environment.copy()
+                env['PORT'] = str(port + num)
+                commands.append((
+                    name,
+                    cmd,
+                    num,
+                    [(key, pipes.quote(value)) for key,value in env.items()]
+                ))
+            port += 100
+
+        context = {
+            'app':         options.app,
+            'app_root':    options.app_root,
+            'log':         options.log,
+            'port':        options.port,
+            'user':        options.user,
+            'shell':       options.shell,
+            'commands':    commands,
+            'concurrency': concurrency
+        }
+        filename = "{0}.conf".format(options.app)
+        content = self.get_template("supervisord.conf").render(context)
+        return [(filename, content)]
