@@ -20,7 +20,7 @@ class Export(BaseExport):
                     cmd,
                     '-'.join(full_name_parts),
                     num,
-                    [(key, pipes.quote(value)) for key,value in env.items()] # quote env values
+                    [(key, '"%s"' % pipes.quote(value)) for key,value in env.items()] # quote env values
                 ))
             port += 100
 
