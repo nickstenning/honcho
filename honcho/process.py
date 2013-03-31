@@ -1,4 +1,5 @@
 from __future__ import print_function
+import os
 
 import signal
 import subprocess
@@ -64,6 +65,8 @@ class ProcessManager(object):
         self.returncode = None
 
         self._terminating = False
+
+        signal.signal(signal.SIGTERM, self.terminate)
 
     def add_process(self, name, cmd):
         """
@@ -138,7 +141,7 @@ class ProcessManager(object):
 
         return self.returncode
 
-    def terminate(self):
+    def terminate(self, *args, **kwargs):
         """
 
         Terminate all the child processes of this ProcessManager, bringing the
@@ -153,15 +156,15 @@ class ProcessManager(object):
         print("sending SIGTERM to all processes", file=self.system_printer)
         for proc in self.processes:
             if proc.poll() is None:
-                print("sending SIGTERM to pid {0:d}".format(proc.pid), file=self.system_printer)
-                proc.terminate()
+                print("sending SIGTERM to pg of pid {0:d}".format(proc.pid), file=self.system_printer)
+                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
 
         def kill(signum, frame):
             # If anything is still alive, SIGKILL it
             for proc in self.processes:
                 if proc.poll() is None:
-                    print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
-                    proc.kill()
+                    print("sending SIGKILL to pg of pid {0:d}".format(proc.pid), file=self.system_printer)
+                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
 
         if ON_WINDOWS:
             # SIGALRM is not supported on Windows: just kill instead
