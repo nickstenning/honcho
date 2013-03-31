@@ -40,6 +40,21 @@ class Process(subprocess.Popen):
 
         super(Process, self).__init__(cmd, *args, **defaults)
 
+    def term(self, sig):
+        """
+        Send signal to the process's process group, unless our process
+        is in the same group, then just send it to the process rather than
+        kill ourselves.
+        """
+        if self.poll() is None:
+            proc_pgid = os.getpgid(self.pid)
+            if os.getpgrp() == proc_pgid:
+                # Just kill the proc, don't kill ourselves too
+                os.kill(self.pid, sig)
+            else:
+                # Kill the whole process group
+                os.killpg(proc_pgid, sig)
+
 
 class ProcessManager(object):
     """
@@ -156,15 +171,15 @@ class ProcessManager(object):
         print("sending SIGTERM to all processes", file=self.system_printer)
         for proc in self.processes:
             if proc.poll() is None:
-                print("sending SIGTERM to pg of pid {0:d}".format(proc.pid), file=self.system_printer)
-                os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+                print("sending SIGTERM to pid {0:d}".format(proc.pid), file=self.system_printer)
+                proc.term(signal.SIGTERM)
 
         def kill(signum, frame):
             # If anything is still alive, SIGKILL it
             for proc in self.processes:
                 if proc.poll() is None:
-                    print("sending SIGKILL to pg of pid {0:d}".format(proc.pid), file=self.system_printer)
-                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                    print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
+                    proc.term(signal.SIGKILL)
 
         if ON_WINDOWS:
             # SIGALRM is not supported on Windows: just kill instead
