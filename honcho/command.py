@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 PATH = os.path.dirname(__file__)
 BASENAME = os.path.basename(os.getcwd())
 
-EXPORT_CHOICES = ['upstart']
+EXPORT_CHOICES = ['upstart', 'supervisord']
 
 process_manager = ProcessManager()
 
