@@ -1,42 +1,29 @@
 ::
 
-         ___           ___           ___           ___           ___           ___     
-        /\__\         /\  \         /\__\         /\  \         /\__\         /\  \    
-       /:/  /        /::\  \       /::|  |       /::\  \       /:/  /        /::\  \   
-      /:/__/        /:/\:\  \     /:|:|  |      /:/\:\  \     /:/__/        /:/\:\  \  
-     /::\  \ ___   /:/  \:\  \   /:/|:|  |__   /:/  \:\  \   /::\  \ ___   /:/  \:\  \ 
+         ___           ___           ___           ___           ___           ___
+        /\__\         /\  \         /\__\         /\  \         /\__\         /\  \
+       /:/  /        /::\  \       /::|  |       /::\  \       /:/  /        /::\  \
+      /:/__/        /:/\:\  \     /:|:|  |      /:/\:\  \     /:/__/        /:/\:\  \
+     /::\  \ ___   /:/  \:\  \   /:/|:|  |__   /:/  \:\  \   /::\  \ ___   /:/  \:\  \
     /:/\:\  /\__\ /:/__/ \:\__\ /:/ |:| /\__\ /:/__/ \:\__\ /:/\:\  /\__\ /:/__/ \:\__\
     \/__\:\/:/  / \:\  \ /:/  / \/__|:|/:/  / \:\  \  \/__/ \/__\:\/:/  / \:\  \ /:/  /
-         \::/  /   \:\  /:/  /      |:/:/  /   \:\  \            \::/  /   \:\  /:/  / 
-         /:/  /     \:\/:/  /       |::/  /     \:\  \           /:/  /     \:\/:/  /  
-        /:/  /       \::/  /        /:/  /       \:\__\         /:/  /       \::/  /   
-        \/__/         \/__/         \/__/         \/__/         \/__/         \/__/   
+         \::/  /   \:\  /:/  /      |:/:/  /   \:\  \            \::/  /   \:\  /:/  /
+         /:/  /     \:\/:/  /       |::/  /     \:\  \           /:/  /     \:\/:/  /
+        /:/  /       \::/  /        /:/  /       \:\__\         /:/  /       \::/  /
+        \/__/         \/__/         \/__/         \/__/         \/__/         \/__/
 
 |Build Status|
 
-So, uh, honcho is basically Foreman_, but uh, honcho instead.
+Honcho is a Python port of Foreman_, a tool for managing Procfile-based applications.
 
-Seriously? honcho is a Python port of Foreman.
-
-Why a port? Well, only two good reasons, and only one of which you're
-going to be interested in:
-
-1. I work in Python-only development environments, where installing Ruby
-   just so I can run Procfile apps seems a bit crazy. Python, on the
-   other hand, is part of the LSB_, and so even in "Ruby-only"
-   environments, Python will still be around.
-
-2. I wanted to learn about `asynchronous I/O`_ `in Python`_.
+`Why a port? <//honcho.readthedocs.org/en/latest/#why-did-you-port-foreman>`_
 
 .. _Foreman: http://ddollar.github.com/foreman
-.. _LSB: http://en.wikipedia.org/wiki/Linux_Standard_Base
-.. _asynchronous I/O: http://docs.python.org/library/select.html
-.. _in Python: http://docs.python.org/library/queue.html
 
 .. |Build Status| image:: https://secure.travis-ci.org/nickstenning/honcho.png?branch=master
    :target: http://travis-ci.org/nickstenning/honcho
 
-How to get honcho
+Installing Honcho
 -----------------
 
 ::
@@ -49,14 +36,10 @@ the program`_.
 
 .. _get with the program: http://www.pip-installer.org/en/latest/index.html
 
-How to use honcho
+How to use Honcho
 -----------------
 
-1. Read `the Foreman documentation`_
-2. Run ``honcho -h`` and see which bits of Foreman I've got round to
-   implementing
-
-Or, the 30-second version:
+The 30-second version:
 
 1. Write `a Procfile`_::
 
@@ -72,10 +55,20 @@ Or, the 30-second version:
     REDIS_URI=redis://localhost:6789/0
     EOM
 
-3. Run the app with honcho::
+3. Run the app with Honcho::
 
     $ honcho start
 
-.. _the Foreman documentation: http://ddollar.github.com/foreman/
 .. _a Procfile: https://devcenter.heroku.com/articles/procfile
 .. _to configure your app: http://www.12factor.net/config
+
+For more detail and an explanation of the circumstances in which Honcho might
+be useful, consult the `Honcho documentation`_.
+
+.. _Honcho documentation: //honcho.readthedocs.org/
+
+License
+-------
+
+Honcho is released under the terms of the MIT license, a copy of which can be
+found in ``LICENSE``.
