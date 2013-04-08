@@ -30,8 +30,7 @@ Installing Honcho
 
     pip install honcho
 
-If you're one of those sick people who's into this kind of thing, you
-can probably also ``easy_install honcho``. But please, don't: `get with
+You can probably also ``easy_install honcho``. But please, don't: `get with
 the program`_.
 
 .. _get with the program: http://www.pip-installer.org/en/latest/index.html
