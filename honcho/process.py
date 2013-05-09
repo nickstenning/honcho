@@ -12,7 +12,7 @@ except ImportError:
 
 from .colour import get_colours
 from .printer import Printer
-from .compat import ON_WINDOWS
+from .compat import ON_WINDOWS, graceful_kill_windows
 
 
 class Process(subprocess.Popen):
@@ -31,7 +31,7 @@ class Process(subprocess.Popen):
         defaults = {
             'stdout': subprocess.PIPE,
             'stderr': subprocess.STDOUT,
-            'shell': True,
+            'shell': not ON_WINDOWS,
             'bufsize': 1,
             'close_fds': not ON_WINDOWS
         }
@@ -150,11 +150,18 @@ class ProcessManager(object):
 
         self._terminating = True
 
-        print("sending SIGTERM to all processes", file=self.system_printer)
-        for proc in self.processes:
-            if proc.poll() is None:
-                print("sending SIGTERM to pid {0:d}".format(proc.pid), file=self.system_printer)
-                proc.terminate()
+        if ON_WINDOWS:
+            print("sending CTRL-C to all processes", file=self.system_printer)
+            for proc in self.processes:
+                if proc.poll() is None:
+                    print("sending CTRL-C to pid {0:d}".format(proc.pid), file=self.system_printer)
+                    graceful_kill_windows(proc)
+        else:
+            print("sending SIGTERM to all processes", file=self.system_printer)
+            for proc in self.processes:
+                if proc.poll() is None:
+                    print("sending SIGTERM to pid {0:d}".format(proc.pid), file=self.system_printer)
+                    proc.terminate()
 
         def kill(signum, frame):
             # If anything is still alive, SIGKILL it
