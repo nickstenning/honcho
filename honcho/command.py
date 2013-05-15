@@ -161,6 +161,7 @@ class Honcho(object):
 
         p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
         p.wait()
+        sys.exit(p.returncode)
 
     @option('-p', '--port', type=int, default=5000, metavar='N')
     @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
