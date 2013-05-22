@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 from honcho import __version__
 
-requirements = ['jinja2>=2.6']
+requirements = ['jinja2==2.7']
 
 if sys.version_info[:2] < (2, 7):
     requirements.append('argparse')
