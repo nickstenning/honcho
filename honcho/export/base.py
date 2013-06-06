@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import pwd
 from honcho.command import CommandError, PATH
@@ -25,8 +26,8 @@ class BaseExport(object):
             return
         try:
             os.makedirs(directory)
-        except OSError, e:
-            print e
+        except OSError as e:
+            print(e)
             raise CommandError("Can not create {0}"
                                .format(directory))
 

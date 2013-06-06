@@ -7,7 +7,7 @@ def test_run_quoting():
     # in particular on Windows, this is not the case
     python = sys.executable
     ret, out, err = get_honcho_output(['run', python, '-c',
-                                       'print "hello world"' ])
+                                       'print("hello world")' ])
 
     assert_equal(ret, 0)
     assert_equal(out, 'hello world\n')
