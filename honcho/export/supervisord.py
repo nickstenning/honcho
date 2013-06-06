@@ -1,4 +1,5 @@
 import pipes
+from honcho import compat
 from honcho.export.base import BaseExport
 
 
@@ -7,7 +8,7 @@ class Export(BaseExport):
         commands = []
         port = options.port
         for name, cmd in procfile.commands.items():
-            for num in xrange(1, concurrency[name]+1):
+            for num in compat.xrange(1, concurrency[name]+1):
                 full_name_parts = [options.app, name]
                 env = environment.copy()
                 if concurrency[name] > 1:

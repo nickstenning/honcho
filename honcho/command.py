@@ -63,7 +63,7 @@ class CommandError(Exception):
     pass
 
 
-class Honcho(object):
+class Honcho(compat.with_metaclass(Commander, object)):
     "Manage Procfile-based applications"
     __metaclass__ = Commander
 
@@ -182,8 +182,8 @@ class Honcho(object):
         else:
             commands = procfile.commands
 
-        for name, cmd in commands.iteritems():
-            for i in xrange(concurrency[name]):
+        for name, cmd in compat.iteritems(commands):
+            for i in compat.xrange(concurrency[name]):
                 n = '{name}.{num}'.format(name=name, num=i + 1)
                 os.environ['PORT'] = str(port + i)
                 process_manager.add_process(n, cmd)

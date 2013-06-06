@@ -189,12 +189,13 @@ class ProcessManager(object):
         for proc in self.processes:
             proc.printer = Printer(sys.stdout,
                                    name=proc.name,
-                                   colour=self.colours.next(),
+                                   colour=next(self.colours),
                                    width=width)
 
 
 def _enqueue_output(proc, queue):
     for line in iter(proc.stdout.readline, b''):
+        line = line.decode('utf-8')
         if not line.endswith('\n'):
             line += '\n'
         queue.put((proc, line))
