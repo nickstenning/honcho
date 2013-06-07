@@ -3,6 +3,6 @@ import sys
 
 
 if __name__ == '__main__':
-    for i in xrange(3):
+    for i in range(3):
         print('one two three')
         sys.stdout.flush()

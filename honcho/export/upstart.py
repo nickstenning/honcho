@@ -1,3 +1,4 @@
+from honcho import compat
 from honcho.export.base import BaseExport
 
 
@@ -24,7 +25,7 @@ class Export(BaseExport):
             master_content = self.get_template("process_master.conf").render(ctx)
             files.append((master, master_content))
 
-            for num in xrange(1, concurrency[name] + 1):
+            for num in compat.xrange(1, concurrency[name] + 1):
                 ctx.update({'num': num})
                 process = "{0}-{1}-{2}.conf".format(options.app, name, num)
                 process_content = self.get_template("process.conf").render(ctx)
