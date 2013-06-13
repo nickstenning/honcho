@@ -65,7 +65,6 @@ class CommandError(Exception):
 
 class Honcho(compat.with_metaclass(Commander, object)):
     "Manage Procfile-based applications"
-    __metaclass__ = Commander
 
     name = 'honcho'
     version = __version__
@@ -129,8 +128,9 @@ class Honcho(compat.with_metaclass(Commander, object)):
         try:
             options.func(self, options)
         except CommandError as e:
-            if e.message:
-                log.error(e.message)
+            message = str(e) if compat.IS_PY3 else e.message
+            if message:
+                log.error(message)
             sys.exit(1)
 
     @arg('task', help='Task to show help for', nargs='?')
