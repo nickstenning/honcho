@@ -129,8 +129,7 @@ class Honcho(compat.with_metaclass(Commander, object)):
         try:
             options.func(self, options)
         except CommandError as e:
-            if e.message:
-                log.error(e.message)
+            log.error(str(e))
             sys.exit(1)
 
     @arg('task', help='Task to show help for', nargs='?')
