@@ -7,17 +7,19 @@ import sys
 # This works for both 32 and 64 bit Windows
 ON_WINDOWS = 'win32' in str(sys.platform).lower()
 
-# Check Python version
-IS_PY3 = sys.version_info[0] == 3
-
 # Python 3 hasn't iteritems, we should use items instead
-iteritems = lambda data: data.items() if IS_PY3 else data.iteritems()
-
-# Python 3 hasn't next method, we should use builtin function instead
-next = lambda gen: next(gen) if IS_PY3 else gen.next()
+try:
+    {}.iteritems
+except AttributeError:
+    iteritems = lambda data: data.items()
+else:
+    iteritems = lambda data: data.iteritems()
 
 # Python 3 hasn't xrange, we should use range instead
-xrange = range if IS_PY3 else xrange
+try:
+    xrange = xrange
+except NameError:
+    xrange = range
 
 # Python 3 doesn't understand __metaclass__ magic
 def with_metaclass(meta, *bases):
