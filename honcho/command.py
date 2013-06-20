@@ -65,7 +65,6 @@ class CommandError(Exception):
 
 class Honcho(compat.with_metaclass(Commander, object)):
     "Manage Procfile-based applications"
-    __metaclass__ = Commander
 
     name = 'honcho'
     version = __version__
