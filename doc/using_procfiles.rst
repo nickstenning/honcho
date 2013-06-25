@@ -46,6 +46,11 @@ For more on why you might want to use environment variables to configure your
 application, see Heroku's article on `configuration variables`_ and The
 Twelve-Factor App's `guidance on configuration`_.
 
+.. note:: If you are using python (ex. django), and not all the output is \
+          printend add `PYTHONBUFFERED=true` to the ``.env`` file.
+
+
+
 .. _configuration variables: https://devcenter.heroku.com/articles/config-vars
 .. _guidance on configuration: http://12factor.net/config
 
