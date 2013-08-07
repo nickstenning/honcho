@@ -54,7 +54,7 @@ established that you need to run your application under a proper web server like
 
     web: gunicorn -b "0.0.0.0:$PORT" -w 4 myapp:app
     worker: python worker.py --priority high,med,low
-    worker_low: python worker.py --priority med,low 
+    worker_low: python worker.py --priority med,low
 
 Again, you can start all three processes with a single command::
 
@@ -81,6 +81,37 @@ Python-only development environments, where installing Ruby just so I can run
 Procfile applications seemed a bit crazy. Python, on the other hand, is part of
 the `Linux Standard Base`_, and so even in "Ruby-only" environments, Python will
 still be around.
+
+From a development point of view it is trivial when developing in a
+Python environment to start up services via python package. For
+example, adding honcho to a `dev_requirements.txt` means you can
+easily enforce how users start an array of services for an app. For
+example, using `paver`_ you can get a user up and running in a few simple steps: ::
+
+  # pavement.py
+  from paver.easy import task, sh, path
+
+  venv = path('.')
+
+  @task
+  def bootstrap():
+      pip = venv / 'pip'
+      sh('%s install -e .' % pip)  # install the pkg
+      sh('%s install dev_requirements.txt' % pip)  # pytest, honcho, mock
+
+  @task
+  def start_all():
+      honcho = venv / 'honcho'
+      sh('%s -f Procfile.dev start' % honcho)
+
+The instructions for gettings started are simple then: ::
+
+  $ paver bootstrap
+  $ paver start_all
+  # visit http://localhost:9000 in your browser
+
+You can provide new developers a clear, automated path from getting
+the code to running the app.
 
 (Oh, and I also I wanted to learn about `asynchronous I/O`_ `in Python`_.)
 
@@ -123,4 +154,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
