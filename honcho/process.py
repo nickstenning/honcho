@@ -22,11 +22,15 @@ class Process(subprocess.Popen):
     a number of attributes needed by Honcho.
 
     """
-    def __init__(self, cmd, name=None, *args, **kwargs):
+    def __init__(self, cmd, name=None, quiet=False, *args, **kwargs):
         self.name = name
+        self.quiet = quiet
         self.reader = None
         self.printer = None
         self.dead = False
+
+        if self.quiet:
+            self.name = "{0} (quiet)".format(self.name)
 
         defaults = {
             'stdout': subprocess.PIPE,
@@ -65,7 +69,7 @@ class ProcessManager(object):
 
         self._terminating = False
 
-    def add_process(self, name, cmd):
+    def add_process(self, name, cmd, quiet=False):
         """
 
         Add a process to this manager instance:
@@ -78,7 +82,7 @@ class ProcessManager(object):
                       (e.g. 'python run.py')
 
         """
-        self.processes.append(Process(cmd, name=name))
+        self.processes.append(Process(cmd, name=name, quiet=quiet))
 
     def loop(self):
         """
@@ -181,7 +185,7 @@ class ProcessManager(object):
             t.start()
 
     def _init_printers(self):
-        width = max(len(p.name) for p in self.processes)
+        width = max(len(p.name) for p in filter( lambda x: not x.quiet, self.processes))
         width = max(width, len(self.system_printer.name))
 
         self.system_printer.width = width
@@ -194,9 +198,10 @@ class ProcessManager(object):
 
 
 def _enqueue_output(proc, queue):
-    for line in iter(proc.stdout.readline, b''):
-        line = line.decode('utf-8')
-        if not line.endswith('\n'):
-            line += '\n'
-        queue.put((proc, line))
-    proc.stdout.close()
+    if not proc.quiet:
+        for line in iter(proc.stdout.readline, b''):
+            line = line.decode('utf-8')
+            if not line.endswith('\n'):
+                line += '\n'
+            queue.put((proc, line))
+        proc.stdout.close()
