@@ -164,7 +164,7 @@ class Honcho(compat.with_metaclass(Commander, object)):
     @option('-p', '--port', type=int, default=5000, metavar='N')
     @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
     @option('-q', '--quiet', help='Any processes that you want to quiet ouput of.', type=str, metavar='process1,process2,process3')
-    @arg('process', nargs='?', help='Name of process to start. All processes will be run if omitted.')
+    @arg('processes', nargs='*', help='Process(es) to start. All processes will be run if omitted.')
     def start(self, options):
         "Start the application (or a specific PROCESS)"
         self.set_env(self.read_env(options))
@@ -175,11 +175,15 @@ class Honcho(compat.with_metaclass(Commander, object)):
         quiet = self.parse_quiet(options.quiet)
 
 
-        if options.process is not None:
-            try:
-                commands = {options.process: procfile.commands[options.process]}
-            except KeyError:
-                raise CommandError("Process type '{0}' does not exist in Procfile".format(options.process))
+        processes = options.processes
+
+        if len(processes) > 0:
+            commands = {}
+            for process in processes:
+                try:
+                    commands[process] = procfile.commands[process]
+                except KeyError:
+                    raise CommandError("Process type '{0}' does not exist in Procfile".format(process))
         else:
             commands = procfile.commands
 
