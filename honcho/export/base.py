@@ -1,8 +1,20 @@
 from __future__ import print_function
 import os
 import pwd
+import sys
 from honcho.command import CommandError, PATH
-from jinja2 import Template
+
+try:
+    from jinja2 import Template
+except ImportError:
+    print("honcho's 'export' command requires the jinja2 package,\n"
+          "which you don't appear to have installed.\n"
+          "\n"
+          "To fix this, install honcho with the 'export' extra selected:\n"
+          "\n"
+          "    pip install honcho[export]\n",
+          file=sys.stderr)
+    sys.exit(1)
 
 
 class BaseExport(object):

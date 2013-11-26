@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 from honcho import __version__
 
-requirements = ['jinja2==2.7.1']
+requirements = []
 
 if sys.version_info[:2] < (2, 7):
     requirements.append('argparse')
@@ -32,6 +32,9 @@ setup(
     keywords='sysadmin process procfile',
 
     install_requires=requirements,
+    extras_require={
+        'export': ['jinja2>=2.7,<2.8'],
+    },
     entry_points={
         'console_scripts': [
             'honcho=honcho.command:main'
