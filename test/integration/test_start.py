@@ -30,6 +30,25 @@ def test_start_with_arg():
     assert_equal(count, 2)
 
 
+def test_start_with_multiple_args():
+    ret, out, err = get_honcho_output(['-f', 'Procfile.default', 'start', 'foo', 'bar'])
+
+    assert_equal(ret, 0)
+
+    assert_regexp_matches(out, r'foo\.1  \| (....)?started with pid \d+\n')
+    assert_regexp_matches(out, r'foo\.1  \| (....)?process terminated\n')
+    assert_regexp_matches(out, r'bar\.1  \| (....)?started with pid \d+\n')
+    assert_regexp_matches(out, r'foo\.1  \| (....)?process terminated\n')
+    assert_regexp_matches(out, r'system \| (....)?sending SIGTERM to all processes\n')
+
+    count = len(re.findall(r'foo\.1  \| (....)?(normal|error) output\n', out))
+    assert_equal(count, 2)
+    count = len(re.findall(r'bar\.1  \| (....)?(normal|error) output\n', out))
+    assert_equal(count, 2)
+    count = len(re.findall(r'baz\.1  \| (....)?(normal|error) output\n', out))
+    assert_equal(count, 0)
+
+
 def test_start_returncode():
     procfile = 'Procfile.returncodewin' if compat.ON_WINDOWS else 'Procfile.returncode'
     ret, out, err = get_honcho_output(['-f', procfile, 'start'])
