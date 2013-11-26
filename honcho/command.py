@@ -203,8 +203,6 @@ class Honcho(compat.with_metaclass(Commander, object)):
             type=str, metavar='process=num,process=num')
     @option('-u', '--user',
             help="Specify the user the application should run as",
-            # USER is not defined on Windows
-            default=os.environ['USERNAME' if compat.ON_WINDOWS else 'USER'],
             type=str)
     @option('-s', '--shell',
             help="Specify the shell that should run the application",
@@ -219,6 +217,16 @@ class Honcho(compat.with_metaclass(Commander, object)):
         "Export the application to another process management format"
         if options.log == "/var/log/APP":
             options.log = options.log.replace('APP', options.app)
+
+        if options.user is None:
+            if compat.ON_WINDOWS:
+                options.user = os.environ.get('USERNAME')
+            else:
+                options.user = os.environ.get('USER')
+
+        if options.user is None:
+            raise CommandError('Could not automatically deduce user: please '
+                               'supply the -u/--user option.')
 
         options.app_root = os.path.abspath(options.app_root)
 
