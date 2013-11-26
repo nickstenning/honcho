@@ -100,3 +100,30 @@ If you supply multiple comma-separated arguments to the ``-e`` option, Honcho wi
     $ honcho -e .env.one,.env.two run sh -c 'env | grep -i animal'
     ANIMAL_1=giraffe
     ANIMAL_2=elephant
+
+Differences to Foreman
+----------------------
+
+Honcho is based heavily on the Foreman_ project. There are some important
+differences between the two tools, some of which are simply the result of
+differences between Ruby and Python. The following is a non-exhaustive list of
+these differences:
+
+.. _Foreman: https://github.com/ddollar/foreman
+
+Buffered output
+'''''''''''''''
+
+By default, Python will buffer a program's output more aggressively than Ruby
+when a process has ``STDOUT`` connected to something other than a TTY. This can
+catch people out when running Python programs through Honcho: if the program
+only generates small amounts of output, it will be buffered, unavailable to
+Honcho, and will not display.
+
+One way around this is to set the ``PYTHONUNBUFFERED`` environment variable in
+your ``Procfile`` or your ``.env`` file. Be sure you understand the performance
+implications of unbuffered I/O if you do this.
+
+For example::
+
+    myprogram: PYTHONUNBUFFERED=true python myprogram.py
