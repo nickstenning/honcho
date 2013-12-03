@@ -6,5 +6,3 @@ def test_unicode_decode_error():
                                        'Procfile.unicode_decode', 'start'])
     assert_equal(ret, 0)
     assert_regexp_matches(out, "normal output")
-    err = "UnicodeDecodeError while decoding line from process"
-    assert_regexp_matches(out, err)

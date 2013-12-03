@@ -208,7 +208,7 @@ def _enqueue_output(proc, queue):
         for line in iter(proc.stdout.readline, b''):
             try:
                 line = line.decode('utf-8')
-            except UnicodeDecodeError, e:
+            except UnicodeDecodeError as e:
                 queue.put((proc, e))
                 continue
             if not line.endswith('\n'):
