@@ -115,7 +115,7 @@ class ProcessManager(object):
                 self.returncode = 130
                 self.terminate()
             else:
-                print(line, end='', file=proc.printer)
+                self._print_line(proc, line)
 
             for proc in self.processes:
                 if not proc.dead and proc.poll() is not None:
@@ -138,7 +138,7 @@ class ProcessManager(object):
             except Empty:
                 break
             else:
-                print(line, end='', file=proc.printer)
+                self._print_line(proc, line)
 
         return self.returncode
 
@@ -172,8 +172,8 @@ class ProcessManager(object):
             kill(None, None)
         else:
             # the default is POSIX
-            signal.signal(signal.SIGALRM, kill) # @UndefinedVariable
-            signal.alarm(5) # @UndefinedVariable
+            signal.signal(signal.SIGALRM, kill)  # @UndefinedVariable
+            signal.alarm(5)  # @UndefinedVariable
 
     def _process_count(self):
         return [p.poll() for p in self.processes].count(None)
@@ -185,7 +185,7 @@ class ProcessManager(object):
             t.start()
 
     def _init_printers(self):
-        width = max(len(p.name) for p in filter( lambda x: not x.quiet, self.processes))
+        width = max(len(p.name) for p in filter(lambda x: not x.quiet, self.processes))
         width = max(width, len(self.system_printer.name))
 
         self.system_printer.width = width
@@ -196,11 +196,21 @@ class ProcessManager(object):
                                    colour=next(self.colours),
                                    width=width)
 
+    def _print_line(self, proc, line):
+        if isinstance(line, UnicodeDecodeError):
+            print("UnicodeDecodeError while decoding line from process {0:s}".format(proc.name), file=self.system_printer)
+        else:
+            print(line, end='', file=proc.printer)
+
 
 def _enqueue_output(proc, queue):
     if not proc.quiet:
         for line in iter(proc.stdout.readline, b''):
-            line = line.decode('utf-8')
+            try:
+                line = line.decode('utf-8')
+            except UnicodeDecodeError, e:
+                queue.put((proc, e))
+                continue
             if not line.endswith('\n'):
                 line += '\n'
             queue.put((proc, line))
