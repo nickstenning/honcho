@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import re
+import shlex
 import sys
 from collections import defaultdict
 try:
@@ -149,6 +150,16 @@ class Honcho(compat.with_metaclass(Commander, object)):
     def run(self, options):
         "Run a command using your application's environment"
         self.set_env(self.read_env(options))
+        try:
+            procfile = self.make_procfile(options.procfile)
+        except CommandError:
+            procfile = Procfile('')
+
+        if len(options.command) == 1:
+            try:
+                options.command = shlex.split(procfile.commands[options.command[0]])
+            except KeyError:
+                pass
 
         if compat.ON_WINDOWS:
             # do not quote on Windows, subprocess will handle it for us
