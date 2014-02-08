@@ -104,12 +104,26 @@ If you supply multiple comma-separated arguments to the ``-e`` option, Honcho wi
 Differences to Foreman
 ----------------------
 
-Honcho is based heavily on the Foreman_ project. There are some important
-differences between the two tools, some of which are simply the result of
-differences between Ruby and Python. The following is a non-exhaustive list of
-these differences:
+One of the curses of maintaining a "clone" of someone else's program is that 
+you are forever asked to reimplement whatever dumb features upstream has 
+introduced. So, while Honcho is based heavily on the Foreman_ project, there 
+are some important differences between the two tools, some of which are simply 
+the result of differences between Ruby and Python, and others are matters of 
+software design. The following is a non-exhaustive list of these differences:
 
 .. _Foreman: https://github.com/ddollar/foreman
+
+No `honcho run {target}`
+''''''''''''''''''''''''
+
+Foreman allows you to specify a Procfile target to both the `start` and `run` 
+subcommands. To me, it seems obvious that this functionality belongs only in 
+`honcho start`, a command that always reads the Procfile and has no other use 
+for its ARGV, as opposed to `honcho run`, which is intended for running a 
+shell command in the environment provided by Honcho and `.env` files. Because 
+I don't have to guess at whether or not ARGV is a process name or a shell 
+command, `honcho start` even supports multiple processes: 
+`honcho start web worker`.
 
 Buffered output
 '''''''''''''''
