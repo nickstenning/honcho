@@ -27,7 +27,9 @@ Documentation index
    Introduction <self>
    using_procfiles
    export
+   contributing
    api
+   authors
 
 .. _what_are_procfiles:
 
