@@ -6,3 +6,5 @@
 /dist
 /.project
 /.pydevproject
+/.coverage
+/htmlcov
