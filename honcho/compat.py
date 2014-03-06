@@ -21,6 +21,7 @@ try:
 except NameError:
     xrange = range
 
+
 # Python 3 doesn't understand __metaclass__ magic
 def with_metaclass(meta, *bases):
     """Create a base class with metaclass."""

@@ -1,7 +1,7 @@
 import textwrap
 
 from honcho.procfile import Procfile
-from ..helpers import *
+from ..helpers import assert_equal
 
 FIXTURES = [
     [

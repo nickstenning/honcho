@@ -1,13 +1,14 @@
 import os
 import re
 from subprocess import Popen, PIPE
-from nose.tools import *
-from mock import *
+from nose.tools import assert_equal, assert_true  # noqa
+from mock import patch, MagicMock, call  # noqa
 
 FIXTURE_ROOT = os.path.join(os.path.dirname(__file__), 'fixtures')
 
-
-if not 'assert_regexp_matches' in globals():
+try:
+    from nose.tools import assert_regexp_matches
+except ImportError:
 
     def assert_regexp_matches(text, expected_regexp, msg=None):
         """Fail the test unless the text matches the regular expression."""
@@ -17,6 +18,7 @@ if not 'assert_regexp_matches' in globals():
             msg = msg or "Regexp didn't match"
             msg = '%s: %r not found in %r' % (msg, expected_regexp.pattern, text)
             raise AssertionError(msg)
+
 
 def assert_regexp_fails(text, failed_regexp, msg=None):
     """Fail the test if the text matches the regular expression."""

@@ -1,5 +1,4 @@
 import random
-import time
 import sys
 
 words = [word.strip() for word in open('/usr/share/dict/words')]

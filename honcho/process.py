@@ -198,7 +198,8 @@ class ProcessManager(object):
 
     def _print_line(self, proc, line):
         if isinstance(line, UnicodeDecodeError):
-            print("UnicodeDecodeError while decoding line from process {0:s}".format(proc.name), file=self.system_printer)
+            print("UnicodeDecodeError while decoding line from process {0:s}".format(proc.name),
+                  file=self.system_printer)
         else:
             print(line, end='', file=proc.printer)
 

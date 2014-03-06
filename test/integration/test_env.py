@@ -1,4 +1,4 @@
-from ..helpers import *
+from ..helpers import assert_regexp_matches, assert_equal, get_honcho_output
 from honcho import compat
 
 
@@ -15,7 +15,7 @@ def test_env_run():
     if compat.ON_WINDOWS:
         command = ['run', 'cmd', '/c', 'echo', '%TEST_ANIMAL%']
     else:
-        command  = ['run', 'sh', '-c', 'echo $TEST_ANIMAL']
+        command = ['run', 'sh', '-c', 'echo $TEST_ANIMAL']
     ret, out, err = get_honcho_output(command)
 
     assert_equal(ret, 0)

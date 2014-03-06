@@ -2,6 +2,7 @@ import signal
 import sys
 import time
 
+
 def handler(signum, frame):
     print "Ignoring you"
     sys.stdout.flush()
