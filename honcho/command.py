@@ -5,7 +5,7 @@ import re
 import sys
 from collections import defaultdict
 try:
-    from shlex import quote as shellquote # Python 3
+    from shlex import quote as shellquote  # Python 3
 except ImportError:
     from pipes import quote as shellquote
 
@@ -162,8 +162,10 @@ class Honcho(compat.with_metaclass(Commander, object)):
         sys.exit(p.returncode)
 
     @option('-p', '--port', type=int, default=5000, metavar='N')
-    @option('-c', '--concurrency', help='The number of each process type to run.', type=str, metavar='process=num,process=num')
-    @option('-q', '--quiet', help='Any processes that you want to quiet ouput of.', type=str, metavar='process1,process2,process3')
+    @option('-c', '--concurrency', help='The number of each process type to run.',
+            type=str, metavar='process=num,process=num')
+    @option('-q', '--quiet', help='Any processes that you want to quiet ouput of.',
+            type=str, metavar='process1,process2,process3')
     @arg('processes', nargs='*', help='Process(es) to start. All processes will be run if omitted.')
     def start(self, options):
         "Start the application (or a specific PROCESS)"
@@ -173,7 +175,6 @@ class Honcho(compat.with_metaclass(Commander, object)):
         port = int(os.environ.get('PORT', options.port))
         concurrency = self.parse_concurrency(options.concurrency)
         quiet = self.parse_quiet(options.quiet)
-
 
         processes = options.processes
 
@@ -307,7 +308,6 @@ class Honcho(compat.with_metaclass(Commander, object)):
             return result
         result = desc.split(',')
         return result
-
 
 
 def main():

@@ -6,5 +6,9 @@ python:
   - 3.3
   - pypy
 install:
-  - pip install . --use-mirrors
+  - pip install -r requirements_dev.txt
+  - pip install coveralls
 script: nosetests
+after_success:
+  - tox -e coverage
+  - coveralls

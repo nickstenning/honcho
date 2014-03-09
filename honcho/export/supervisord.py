@@ -8,7 +8,7 @@ class Export(BaseExport):
         commands = []
         port = options.port
         for name, cmd in procfile.commands.items():
-            for num in compat.xrange(1, concurrency[name]+1):
+            for num in compat.xrange(1, concurrency[name] + 1):
                 full_name_parts = [options.app, name]
                 env = environment.copy()
                 if concurrency[name] > 1:
@@ -21,7 +21,7 @@ class Export(BaseExport):
                     cmd,
                     '-'.join(full_name_parts),
                     num,
-                    [(key, '"%s"' % pipes.quote(value)) for key,value in env.items()] # quote env values
+                    [(key, '"%s"' % pipes.quote(value)) for key, value in env.items()]  # quote env values
                 ))
             port += 100
 

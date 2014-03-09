@@ -1,7 +1,7 @@
 import datetime
 
 from honcho.printer import Printer
-from ..helpers import *
+from ..helpers import MagicMock, patch
 
 
 class TestPrinter(object):

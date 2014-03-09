@@ -1,6 +1,6 @@
 from honcho import colour, compat
 
-from ..helpers import *
+from ..helpers import assert_equal
 
 
 def test_colours():
