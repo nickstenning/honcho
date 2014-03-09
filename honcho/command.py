@@ -41,7 +41,7 @@ arg = option
 
 
 class Commander(type):
-    def __new__(cls, name, bases, attrs):
+    def __new__(cls, name, bases, attrs):  # noqa
         subcommands = {}
         commands = attrs.get('commands', [])
         for command in commands:
