@@ -107,7 +107,7 @@ class ProcessManager(object):
 
         while True:
             try:
-                proc, line = self.queue.get(timeout=0.1)
+                proc, line = self.queue.get(timeout=0.11)
             except Empty:
                 pass
             except KeyboardInterrupt:
