@@ -110,3 +110,29 @@ def test_start_quiet_multi():
     assert_regexp_matches(out, r'baz\.1 \(quiet\) *\| (....)?process terminated\n')
 
     assert_equal(err, '')
+
+def test_check_race_condition():
+    '''
+    check for proper output at least 10 times
+    '''
+    for i in range(10):
+        ret, out, err = get_honcho_output(['-f', 'Procfile.default', 'start'])
+
+        # print ret, out, err
+        assert_equal(ret, 0)
+
+        err_msg = "Regexp didn't match on iteration #{0}".format(i)
+
+        assert_regexp_matches(out, r'foo\.1 *\| (....)?normal output', err_msg)
+        assert_regexp_matches(out, r'foo\.1 *\| (....)?error output', err_msg)
+        assert_regexp_matches(out, r'bar\.1 *\| (....)?normal output', err_msg)
+        assert_regexp_matches(out, r'bar\.1 *\| (....)?error output', err_msg)
+        assert_regexp_matches(out, r'baz\.1 *\| (....)?normal output', err_msg)
+        assert_regexp_matches(out, r'baz\.1 *\| (....)?error output', err_msg)
+
+        assert_regexp_matches(out, r'foo\.1 *\| (....)?started with pid \d+\n', err_msg)
+        assert_regexp_matches(out, r'foo\.1 *\| (....)?process terminated\n', err_msg)
+        assert_regexp_matches(out, r'bar\.1 *\| (....)?started with pid \d+\n', err_msg)
+        assert_regexp_matches(out, r'bar\.1 *\| (....)?process terminated\n', err_msg)
+        assert_regexp_matches(out, r'baz\.1 *\| (....)?started with pid \d+\n', err_msg)
+        assert_regexp_matches(out, r'baz\.1 *\| (....)?process terminated\n', err_msg)
