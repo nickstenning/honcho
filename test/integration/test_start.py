@@ -118,7 +118,6 @@ def test_check_race_condition():
     for i in range(10):
         ret, out, err = get_honcho_output(['-f', 'Procfile.default', 'start'])
 
-        # print ret, out, err
         assert_equal(ret, 0)
 
         err_msg = "Regexp didn't match on iteration #{0}".format(i)
