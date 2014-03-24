@@ -111,6 +111,7 @@ def test_start_quiet_multi():
 
     assert_equal(err, '')
 
+
 def test_check_race_condition():
     '''
     check for proper output at least 10 times
