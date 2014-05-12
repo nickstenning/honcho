@@ -12,7 +12,7 @@ from nose.tools import assert_true
 Options = namedtuple("Options", ("app", "app_root", "format", "log", "port", "user", "shell", "location"))
 
 DEFAULT_OPTIONS = Options(app="app", app_root="/path/to/app", format="supervisord", log="/path/to/log",
-                          port=5000, user=os.getlogin(), shell="/bin/sh", location="/path/to/export")
+                          port=5000, user=os.getlogin(), shell="/usr/local/shell", location="/path/to/export")
 
 DEFAULT_ENV = {}
 
@@ -38,6 +38,7 @@ def test_supervisord_export():
 
     assert_true(parser.has_section(section))
     assert_equal(DEFAULT_OPTIONS.user, parser.get(section, "user"))
+    assert_equal("{0} -c 'python simple.py'".format(DEFAULT_OPTIONS.shell), parser.get(section, "command"))
 
 
 def test_supervisord_concurrency():
