@@ -1,5 +1,6 @@
 import os
 import re
+from honcho.procfile import Procfile
 from subprocess import Popen, PIPE
 from nose.tools import assert_equal, assert_true  # noqa
 from mock import patch, MagicMock, call  # noqa
@@ -43,3 +44,8 @@ def get_honcho_output(args):
     retcode = process.returncode
 
     return retcode, output, error
+
+
+def get_procfile(name):
+    with open(os.path.join(FIXTURE_ROOT, name)) as f:
+        return Procfile(f.read())
