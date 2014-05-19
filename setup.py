@@ -11,7 +11,7 @@ if sys.version_info[:2] < (2, 7):
     requirements.append('argparse')
     requirements.append('ordereddict')
 
-if sys.version_info[:2] == (3, 2):
+if (3, 0) <= sys.version_info[:2] < (3, 3):
     export_requirements = ['jinja2>=2.6,<2.7']
 else:
     export_requirements = ['jinja2>=2.7,<2.8']
