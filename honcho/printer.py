@@ -3,6 +3,7 @@ import sys
 
 
 class Printer(object):
+
     def __init__(self, output=sys.stdout, name='unknown', colour=None, width=0):
         self.output = output
         self.name = name
@@ -13,13 +14,14 @@ class Printer(object):
 
     def write(self, *args, **kwargs):
         new_args = []
-
         for arg in args:
             lines = arg.split('\n')
-            lines = [self._prefix() + l if l else l for l in lines]
-            msg = '\n'.join(lines).encode('utf-8')
-            new_args.append(msg)
-
+            new_lines = []
+            for line in lines:
+                safe_line = line.encode('utf-8')
+                new_lines.append(
+                    self._prefix() + safe_line if safe_line else safe_line)
+            new_args.append('\n'.join(new_lines))
         self.output.write(*new_args, **kwargs)
 
     def _prefix(self):

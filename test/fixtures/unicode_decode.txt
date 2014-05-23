@@ -1,0 +1,2 @@
+6.44 μs
+normal output
