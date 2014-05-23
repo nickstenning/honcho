@@ -1,5 +1,5 @@
 from honcho.process import ProcessManager
-from ..helpers import *
+from ..helpers import call, patch, assert_equal
 
 
 class TestProcessManager(object):
@@ -10,6 +10,7 @@ class TestProcessManager(object):
         pm.add_process('foo', 'ruby server.rb')
         pm.add_process('bar', 'python worker.py')
 
-        expected = [call('ruby server.rb', name='foo', quiet=False), call('python worker.py', name='bar', quiet=False)]
+        expected = [call('ruby server.rb', name='foo', quiet=False),
+                    call('python worker.py', name='bar', quiet=False)]
 
         assert_equal(process_mock.mock_calls, expected)

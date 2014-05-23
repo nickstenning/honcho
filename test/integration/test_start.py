@@ -1,5 +1,6 @@
 import re
-from ..helpers import *
+from ..helpers import (get_honcho_output, assert_equal, assert_regexp_matches,
+                       assert_true, assert_regexp_fails)
 
 from honcho import compat
 
@@ -89,6 +90,7 @@ def test_start_quiet_simple():
     assert_regexp_matches(out, r'baz\.1 \(quiet\) *\| (....)?process terminated\n')
 
     assert_equal(err, '')
+
 
 def test_start_quiet_multi():
     ret, out, err = get_honcho_output(['-f', 'Procfile.default', 'start', '-qbaz,bar'])

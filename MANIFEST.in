@@ -1,1 +1,5 @@
 recursive-include honcho *conf
+include AUTHORS.rst
+include CONTRIBUTING.rst
+include LICENSE
+include README.rst

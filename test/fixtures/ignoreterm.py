@@ -1,9 +1,11 @@
+from __future__ import print_function
 import signal
 import sys
 import time
 
+
 def handler(signum, frame):
-    print "Ignoring you"
+    print("Ignoring you")
     sys.stdout.flush()
 
 signal.signal(signal.SIGQUIT, handler)
@@ -12,6 +14,6 @@ signal.signal(signal.SIGTERM, handler)
 
 if __name__ == '__main__':
     while True:
-        print "Still here"
+        print("Still here")
         sys.stdout.flush()
         time.sleep(1)
