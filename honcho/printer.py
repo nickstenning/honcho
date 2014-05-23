@@ -18,11 +18,19 @@ class Printer(object):
             lines = arg.split('\n')
             new_lines = []
             for line in lines:
-                safe_line = line.encode('utf-8')
+                # now this is really uggly but I cant seem to find a way to 
+                # properly encode/decode/wtf in py3
+                if sys.version_info[0] > 2:
+                    safe_line = line
+                else:
+                    safe_line = line.encode('utf-8')
                 new_lines.append(
                     self._prefix() + safe_line if safe_line else safe_line)
             new_args.append('\n'.join(new_lines))
-        self.output.write(*new_args, **kwargs)
+        try:
+            self.output.write(*new_args, **kwargs)
+        except UnicodeEncodeError:
+            self.output.write('Problem encoding message', **kwargs)
 
     def _prefix(self):
         time = datetime.now().strftime('%H:%M:%S')
