@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import re
+import signal
 import sys
 from collections import defaultdict
 try:
@@ -158,6 +159,10 @@ class Honcho(compat.with_metaclass(Commander, object)):
             cmd = ' '.join(shellquote(arg) for arg in options.command)
 
         p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
+
+        # Ignore SIGINT; let the child process handle that
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+
         p.wait()
         sys.exit(p.returncode)
 
