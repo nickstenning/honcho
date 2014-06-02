@@ -110,3 +110,25 @@ def test_start_quiet_multi():
     assert_regexp_matches(out, r'baz\.1 \(quiet\) *\| (....)?process terminated\n')
 
     assert_equal(err, '')
+
+
+def test_start_quiet_all():
+    ret, out, err = get_honcho_output(['-f', 'Procfile.default', 'start', '-qfoo,baz,bar'])
+
+    assert_equal(ret, 0)
+
+    assert_regexp_fails(out, r'foo\.1 \(quiet\) *\| (....)?normal output')
+    assert_regexp_fails(out, r'foo\.1 \(quiet\) *\| (....)?error output')
+    assert_regexp_fails(out, r'bar\.1 \(quiet\) *\| (....)?normal output')
+    assert_regexp_fails(out, r'bar\.1 \(quiet\) *\| (....)?error output')
+    assert_regexp_fails(out, r'baz\.1 \(quiet\) *\| (....)?normal output')
+    assert_regexp_fails(out, r'baz\.1  \(quiet\)*\| (....)?error output')
+
+    assert_regexp_matches(out, r'foo\.1 \(quiet\) *\| (....)?started with pid \d+\n')
+    assert_regexp_matches(out, r'foo\.1 \(quiet\) *\| (....)?process terminated\n')
+    assert_regexp_matches(out, r'bar\.1 \(quiet\) *\| (....)?started with pid \d+\n')
+    assert_regexp_matches(out, r'bar\.1 \(quiet\) *\| (....)?process terminated\n')
+    assert_regexp_matches(out, r'baz\.1 \(quiet\) *\| (....)?started with pid \d+\n')
+    assert_regexp_matches(out, r'baz\.1 \(quiet\) *\| (....)?process terminated\n')
+
+    assert_equal(err, '')

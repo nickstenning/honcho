@@ -185,9 +185,7 @@ class ProcessManager(object):
             t.start()
 
     def _init_printers(self):
-        width = max(len(p.name) for p in filter(lambda x: not x.quiet, self.processes))
-        width = max(width, len(self.system_printer.name))
-
+        width = self._printer_width()
         self.system_printer.width = width
 
         for proc in self.processes:
@@ -195,6 +193,11 @@ class ProcessManager(object):
                                    name=proc.name,
                                    colour=next(self.colours),
                                    width=width)
+
+    def _printer_width(self):
+        name_lengths = [len(p.name) for p in self.processes if not p.quiet]
+        name_lengths.append(len(self.system_printer.name))
+        return max(name_lengths)
 
     def _print_line(self, proc, line):
         if isinstance(line, UnicodeDecodeError):
