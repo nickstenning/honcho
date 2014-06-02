@@ -31,7 +31,7 @@ def assert_regexp_fails(text, failed_regexp, msg=None):
         raise AssertionError(msg)
 
 
-def get_honcho_output(args):
+def get_honcho_output(args, input=None):
     os.chdir(FIXTURE_ROOT)
     cmd = ['honcho']
     cmd.extend(args)
@@ -39,8 +39,8 @@ def get_honcho_output(args):
     # The below is mostly copy-pasted from subprocess.py's check_output (to
     # support python 2.6)
 
-    process = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-    output, error = process.communicate()
+    process = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    output, error = process.communicate(input)
     retcode = process.returncode
 
     return retcode, output, error
