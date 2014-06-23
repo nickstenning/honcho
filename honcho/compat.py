@@ -21,12 +21,6 @@ try:
 except NameError:
     xrange = range
 
-
-# Python 3 doesn't understand __metaclass__ magic
-def with_metaclass(meta, *bases):
-    """Create a base class with metaclass."""
-    return meta('NewBase', bases, {})
-
 # Python 3 does not have StringIO, we should use the io module instead
 try:
     from StringIO import StringIO  # noqa
@@ -38,3 +32,9 @@ try:
     from ConfigParser import ConfigParser  # noqa
 except ImportError:
     from configparser import ConfigParser  # noqa
+
+# Python 3 exposed quote as public API in the shlex module
+try:
+    from pipes import quote as shellquote  # noqa
+except ImportError:
+    from shlex import quote as shellquote  # noqa
