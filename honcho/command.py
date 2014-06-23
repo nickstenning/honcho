@@ -51,7 +51,7 @@ subparsers = parser.add_subparsers(title='tasks')
 
 
 def command_check(args):
-    procfile = _make_procfile(args.procfile)
+    procfile = _procfile(_procfile_path(args.app_root, args.procfile))
 
     log.info('Valid procfile detected ({0})'.format(', '.join(procfile.commands)))
 
@@ -78,8 +78,9 @@ def command_export(args):
 
     args.app_root = os.path.abspath(args.app_root)
 
-    procfile = _make_procfile(args.procfile)
-    env = _read_env(args.app_root, args.procfile, args.env)
+    procfile_path = _procfile_path(args.app_root, args.procfile)
+    procfile = _procfile(procfile_path)
+    env = _read_env(procfile_path, args.env)
     concurrency = _parse_concurrency(args.concurrency)
 
     mod = __import__('.'.join(['honcho', 'export', args.format]),
@@ -139,7 +140,8 @@ parser_help.set_defaults(func=command_help)
 
 
 def command_run(args):
-    os.environ.update(_read_env(args.app_root, args.procfile, args.env))
+    procfile_path = _procfile_path(args.app_root, args.procfile)
+    os.environ.update(_read_env(procfile_path, args.env))
 
     if compat.ON_WINDOWS:
         # do not quote on Windows, subprocess will handle it for us
@@ -164,8 +166,9 @@ parser_run.set_defaults(func=command_run)
 
 
 def command_start(args):
-    os.environ.update(_read_env(args.app_root, args.procfile, args.env))
-    procfile = _make_procfile(args.procfile)
+    procfile_path = _procfile_path(args.app_root, args.procfile)
+    procfile = _procfile(procfile_path)
+    os.environ.update(_read_env(procfile_path, args.env))
 
     port = int(os.environ.get('PORT', args.port))
     concurrency = _parse_concurrency(args.concurrency)
@@ -226,7 +229,11 @@ def main(argv=None):
         sys.exit(1)
 
 
-def _make_procfile(filename):
+def _procfile_path(app_root, procfile):
+    return os.path.join(app_root, procfile)
+
+
+def _procfile(filename):
     try:
         with open(filename) as f:
             content = f.read()
@@ -241,8 +248,8 @@ def _make_procfile(filename):
     return procfile
 
 
-def _read_env(app_root, procfile, env):
-    app_root = app_root or os.path.dirname(procfile)
+def _read_env(procfile_path, env):
+    app_root = os.path.dirname(procfile_path)
     files = [e.strip() for e in env.split(',')]
     content = []
     for envfile in files:
