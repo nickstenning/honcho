@@ -1,14 +1,13 @@
 import argparse
 import logging
 import os
-import re
 import sys
 from collections import defaultdict
 
 from honcho import __version__
 from honcho.procfile import Procfile
 from honcho.process import Process, ProcessManager
-from honcho import compat
+from honcho import compat, environ
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -253,26 +252,7 @@ def _read_env(app_root, procfile, env):
         except IOError:
             pass
 
-    return _parse_env('\n'.join(content))
-
-
-def _parse_env(content):
-    values = {}
-    for line in content.splitlines():
-        m1 = re.match(r'\A([A-Za-z_0-9]+)=(.*)\Z', line)
-        if m1:
-            key, val = m1.group(1), m1.group(2)
-
-            m2 = re.match(r"\A'(.*)'\Z", val)
-            if m2:
-                val = m2.group(1)
-
-            m3 = re.match(r'\A"(.*)"\Z', val)
-            if m3:
-                val = re.sub(r'\\(.)', r'\1', m3.group(1))
-
-            values[key] = val
-    return values
+    return environ.parse('\n'.join(content))
 
 
 def _parse_concurrency(desc):
