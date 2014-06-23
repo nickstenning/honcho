@@ -9,7 +9,10 @@ from honcho.procfile import Procfile
 from honcho.process import Process, ProcessManager
 from honcho import compat, environ
 
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s [%(process)d] [%(levelname)s] '
+                           '%(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S',
+                    level=logging.INFO)
 log = logging.getLogger(__name__)
 
 PATH = os.path.dirname(__file__)
