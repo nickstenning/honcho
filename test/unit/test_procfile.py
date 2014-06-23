@@ -53,7 +53,7 @@ def test_procfiles():
     for content, commands in FIXTURES:
         content = textwrap.dedent(content)
         procfile = Procfile(content)
-        assert_equal(procfile.commands, commands)
+        yield assert_equal, procfile.commands, commands
 
 
 def test_procfile_ordered():
