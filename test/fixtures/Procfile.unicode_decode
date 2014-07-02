@@ -1,1 +1,1 @@
-unicode: python unicode_decode.py
+unicode: tail unicode_decode.txt
