@@ -145,21 +145,33 @@ parser_help.set_defaults(func=command_help)
 def command_run(args):
     procfile_path = _procfile_path(args.app_root, args.procfile)
     os.environ.update(_read_env(procfile_path, args.env))
+    cmd = None
 
-    if compat.ON_WINDOWS:
-        # do not quote on Windows, subprocess will handle it for us
-        # using the MSFT quoting rules
-        cmd = args.command
-    else:
-        cmd = ' '.join(compat.shellquote(arg) for arg in args.command)
+    if len(args.command) == 1:
+        # try to interpret as a single process name
+        try:
+            procfile = _procfile(procfile_path)
+        except CommandError:
+            pass  # missing or empty procfile
+        else:
+            process = args.command[0]
+            cmd = procfile.commands.get(process)
 
-    p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    if cmd is None:
+        if compat.ON_WINDOWS:
+            # do not quote on Windows, subprocess will handle it for us
+            # using the MSFT quoting rules
+            cmd = args.command
+        else:
+            cmd = ' '.join(compat.shellquote(arg) for arg in args.command)
+
+    p = Process(cmd, stdin=sys.stdin, stdout=sys.stdout, stderr=sys.stderr)
     p.wait()
     sys.exit(p.returncode)
 
 parser_run = subparsers.add_parser(
     'run',
-    help="run a command using your application's environment",
+    help="run a specific PROCESS in the foreground (or an arbitrary shell command)",
     **_parser_defaults)
 parser_run.add_argument(
     'command',

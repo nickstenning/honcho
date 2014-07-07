@@ -42,3 +42,45 @@ def test_run_keeps_stderr_and_stdout_separate():
     assert_equal(ret, 0)
     assert_equal(out, 'normal output\n')
     assert_equal(err, 'error output\n')
+
+
+def test_run_dereferences_process_from_procfile():
+    ret, out, err = get_honcho_output(['-f', 'Procfile.simple', 'run', 'foo'])
+
+    assert_equal(ret, 0)
+    assert_equal(out, 'normal output\n')
+    assert_equal(err, 'error output\n')
+
+
+def test_run_works_with_a_one_word_command_and_no_procfile():
+    ret, out, err = get_honcho_output(['run', 'python'])
+
+    assert_equal(ret, 0)
+    assert_equal(out, '')
+    assert_equal(err, '')
+
+
+def test_run_falls_back_to_shell_command():
+    ret, out, err = get_honcho_output(['-f', 'Procfile.simple', 'run', 'python', 'simple.py'])
+
+    assert_equal(ret, 0)
+    assert_equal(out, 'normal output\n')
+    assert_equal(err, 'error output\n')
+
+
+def test_pdb_works_with_run_process():
+    ret, out, err = get_honcho_output(['-f', 'Procfile.pdb', 'run', 'foo'], input='quit')
+
+    assert_equal(ret, 1)
+    assert out.startswith('normal output\n')
+    assert '(Pdb)' in out
+    assert 'BdbQuit' in err
+
+
+def test_pdb_works_with_run_command_for_that_matter():
+    ret, out, err = get_honcho_output(['run', 'python', 'with_pdb.py'], input='quit')
+
+    assert_equal(ret, 1)
+    assert out.startswith('normal output\n')
+    assert '(Pdb)' in out
+    assert 'BdbQuit' in err
