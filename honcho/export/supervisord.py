@@ -5,7 +5,9 @@ from honcho.export.base import BaseExport
 
 class Export(BaseExport):
     def render(self, procfile, options, environment, concurrency):
+        import os.path
         commands = []
+        virtualenv = ""
         port = options.port
         for name, cmd in procfile.commands.items():
             for num in compat.xrange(0, concurrency[name]):
@@ -16,6 +18,8 @@ class Export(BaseExport):
                     full_name_parts.append(str(num))
                 else:
                     env['PORT'] = str(port)
+                if options.virtualenv:
+                    cmd = ". "+options.virtualenv+" && "+cmd
                 commands.append((
                     name,
                     cmd,
