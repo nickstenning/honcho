@@ -66,6 +66,7 @@ parser_check.set_defaults(func=command_check)
 
 
 def command_export(args):
+
     if args.log == "/var/log/APP":
         args.log = args.log.replace('APP', args.app)
 
@@ -127,6 +128,12 @@ parser_export.add_argument(
     type=str, metavar="FORMAT")
 parser_export.set_defaults(func=command_export)
 
+parser_export.add_argument(
+    '-V','--virtualenv',
+    help="Specify a virtualenv",
+    type=str
+)
+
 
 def command_help(args):
     argv = ['--help']
@@ -176,7 +183,6 @@ def command_start(args):
     port = int(os.environ.get('PORT', args.port))
     concurrency = _parse_concurrency(args.concurrency)
     quiet = _parse_quiet(args.quiet)
-
     processes = args.processes
 
     if len(processes) > 0:
