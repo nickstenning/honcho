@@ -16,6 +16,8 @@ class Export(BaseExport):
                     full_name_parts.append(str(num))
                 else:
                     env['PORT'] = str(port)
+                if options.virtualenv:
+                    cmd = ". "+options.virtualenv+" && "+cmd
                 commands.append((
                     name,
                     cmd,
