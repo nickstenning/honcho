@@ -117,6 +117,10 @@ parser_export.add_argument(
     help="the shell that should run the application",
     default='/bin/sh', type=str)
 parser_export.add_argument(
+     '-V','--virtualenv',
+     help="Specify a virtualenv activation binary",
+     type=str)
+parser_export.add_argument(
     'location',
     help="folder to export to",
     default=EXPORT_CHOICES[0], type=str, metavar="LOCATION")
