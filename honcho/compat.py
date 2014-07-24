@@ -4,6 +4,13 @@ support.
 """
 import sys
 
+# Wrap stdout and stderr, to fix UnicodeEncodeError when environment
+# variables PYTHONUNBUFFERED=true
+import codecs
+import locale
+sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
+sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr)
+
 # This works for both 32 and 64 bit Windows
 ON_WINDOWS = 'win32' in str(sys.platform).lower()
 
