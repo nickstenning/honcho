@@ -10,11 +10,11 @@ import codecs
 import locale
 try:
     # Python 3
-    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout.detach())
-    sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr.detach())
+    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr.buffer, 'strict')
 except AttributeError:
-    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
-    sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr)
+    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout, 'strict')
+    sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr, 'strict')
 
 # This works for both 32 and 64 bit Windows
 ON_WINDOWS = 'win32' in str(sys.platform).lower()
