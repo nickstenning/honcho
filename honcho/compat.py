@@ -8,8 +8,13 @@ import sys
 # variables PYTHONUNBUFFERED=true
 import codecs
 import locale
-sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
-sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr)
+try:
+    # Python 3
+    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout.detach())
+    sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr.detach())
+except AttributeError:
+    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
+    sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr)
 
 # This works for both 32 and 64 bit Windows
 ON_WINDOWS = 'win32' in str(sys.platform).lower()
