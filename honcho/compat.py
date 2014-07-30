@@ -13,8 +13,8 @@ try:
     sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout.buffer, 'strict')
     sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr.buffer, 'strict')
 except AttributeError:
-    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout, 'strict')
-    sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr, 'strict')
+    sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
+    sys.stderr = codecs.getwriter(locale.getpreferredencoding())(sys.stderr)
 
 # This works for both 32 and 64 bit Windows
 ON_WINDOWS = 'win32' in str(sys.platform).lower()
