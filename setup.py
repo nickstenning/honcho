@@ -25,7 +25,7 @@ except:
 setup(
     name='honcho',
     version=__version__,
-    packages=find_packages(exclude=['test*']),
+    packages=find_packages(exclude=['honcho.test*']),
     include_package_data=True,
 
     # metadata for upload to PyPI

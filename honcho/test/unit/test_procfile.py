@@ -1,7 +1,7 @@
 import textwrap
+from ..helpers import TestCase
 
 from honcho.procfile import Procfile
-from ..helpers import assert_equal
 
 FIXTURES = [
     [
@@ -49,22 +49,23 @@ FIXTURES = [
 ]
 
 
-def test_procfiles():
-    for content, commands in FIXTURES:
-        content = textwrap.dedent(content)
+class TestProcfiles(TestCase):
+
+    def test_procfiles(self):
+        for content, commands in FIXTURES:
+            content = textwrap.dedent(content)
+            procfile = Procfile(content)
+            self.assertEqual(procfile.commands, commands)
+
+    def test_procfile_ordered(self):
+        content = textwrap.dedent("""
+        one: onecommand
+        two: twocommand
+        three: twocommand
+        four: fourcommand
+        """)
+
         procfile = Procfile(content)
-        yield assert_equal, procfile.commands, commands
 
-
-def test_procfile_ordered():
-    content = textwrap.dedent("""
-    one: onecommand
-    two: twocommand
-    three: twocommand
-    four: fourcommand
-    """)
-
-    procfile = Procfile(content)
-
-    order = [k for k in procfile.commands]
-    assert_equal(['one', 'two', 'three', 'four'], order)
+        order = [k for k in procfile.commands]
+        self.assertEqual(['one', 'two', 'three', 'four'], order)

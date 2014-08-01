@@ -1,18 +1,19 @@
 import datetime
+from ..helpers import TestCase
+from mock import MagicMock, patch
 
 from honcho.printer import Printer
-from ..helpers import MagicMock, patch
 
 
-class TestPrinter(object):
-    def setup(self):
+class TestPrinter(TestCase):
+    def setUp(self):  # noqa
         self.out = MagicMock()
 
         self._dt_patch = patch('honcho.printer.datetime')
         self._dt = self._dt_patch.start()
         self._dt.now.return_value = datetime.datetime(2012, 8, 11, 12, 42)
 
-    def teardown(self):
+    def tearDown(self):  # noqa
         self._dt_patch.stop()
 
     def test_defaults_simple(self):

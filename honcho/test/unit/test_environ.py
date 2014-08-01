@@ -1,7 +1,7 @@
 import textwrap
+from ..helpers import TestCase
 
 from honcho import environ
-from ..helpers import assert_equal
 
 FIXTURES = [
     [
@@ -54,8 +54,9 @@ FIXTURES = [
 ]
 
 
-def test_environ_parse():
-    for content, commands in FIXTURES:
-        content = textwrap.dedent(content)
-        result = environ.parse(content)
-        yield assert_equal, result, commands
+class TestEnviron(TestCase):
+    def test_environ_parse(self):
+        for content, commands in FIXTURES:
+            content = textwrap.dedent(content)
+            result = environ.parse(content)
+            yield self.assertEqual, result, commands
