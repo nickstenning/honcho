@@ -18,15 +18,12 @@ class Printer(object):
 
         self._write_prefix = True
 
-    def write(self, *args, **kwargs):
-        new_args = []
+    def write(self, string):
+        lines = string.split('\n')
+        lines = [self._prefix() + l if l else l for l in lines]
+        new_string = '\n'.join(lines)
 
-        for arg in args:
-            lines = arg.split('\n')
-            lines = [self._prefix() + l if l else l for l in lines]
-            new_args.append('\n'.join(lines))
-
-        self.output.write(*new_args, **kwargs)
+        self.output.write(new_string)
 
     def _prefix(self):
         time = self._env.now().strftime('%H:%M:%S')

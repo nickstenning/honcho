@@ -39,6 +39,22 @@ class TestCase(unittest.TestCase):
                     text)
                 raise self.failureException(msg)
 
+    if not hasattr(unittest.TestCase, 'assertIn'):
+        def assertIn(self, member, container, msg=None):  # noqa
+                """Just like self.assertTrue(a in b), but with a nicer default message."""
+                if member not in container:
+                    standardMsg = '%s not found in %s' % (repr(member),  # noqa
+                                                          repr(container))
+                    self.fail(self._formatMessage(msg, standardMsg))
+
+    if not hasattr(unittest.TestCase, 'assertNotIn'):
+        def assertNotIn(self, member, container, msg=None):  # noqa
+            """Just like self.assertTrue(a not in b), but with a nicer default message."""
+            if member in container:
+                standardMsg = '%s unexpectedly found in %s' % (repr(member),  # noqa
+                                                               repr(container))
+                self.fail(self._formatMessage(msg, standardMsg))
+
 
 def get_honcho_output(args):
     os.chdir(FIXTURE_ROOT)

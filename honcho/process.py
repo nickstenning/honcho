@@ -85,7 +85,9 @@ class ProcessManager(object):
                       (e.g. 'python run.py')
 
         """
-        self.processes.append(self._process(cmd, name=name, quiet=quiet))
+        proc = self._process(cmd, name=name, quiet=quiet)
+        self.processes.append(proc)
+        return proc
 
     def loop(self):
         """
@@ -106,7 +108,7 @@ class ProcessManager(object):
         self._init_printers()
 
         for proc in self.processes:
-            print("started with pid {0}".format(proc.pid), file=proc.printer)
+            proc.printer.write("started with pid {0}\n".format(proc.pid))
 
         while True:
             try:
@@ -122,7 +124,7 @@ class ProcessManager(object):
 
             for proc in self.processes:
                 if not proc.dead and proc.poll() is not None:
-                    print('process terminated', file=proc.printer)
+                    proc.printer.write('process terminated\n')
                     proc.dead = True
 
                     # Set the returncode of the ProcessManager instance if not
@@ -204,10 +206,11 @@ class ProcessManager(object):
 
     def _print_line(self, proc, line):
         if isinstance(line, UnicodeDecodeError):
-            print("UnicodeDecodeError while decoding line from process {0:s}".format(proc.name),
-                  file=self.system_printer)
+            self.system_printer.write(
+                "UnicodeDecodeError while decoding line from process {0:s}\n"
+                .format(proc.name))
         else:
-            print(line, end='', file=proc.printer)
+            proc.printer.write(line)
 
 
 def _enqueue_output(proc, queue):
