@@ -60,11 +60,12 @@ class ProcessManager(object):
         pm.loop()
 
     """
-    def __init__(self):
+    def __init__(self, printer=Printer):
+        self._printer = printer
         self.processes = []
         self.colours = get_colours()
         self.queue = Queue()
-        self.system_printer = Printer(sys.stdout, name='system')
+        self.system_printer = self._printer(sys.stdout, name='system')
         self.returncode = None
 
         self._terminating = False
@@ -189,10 +190,10 @@ class ProcessManager(object):
         self.system_printer.width = width
 
         for proc in self.processes:
-            proc.printer = Printer(sys.stdout,
-                                   name=proc.name,
-                                   colour=next(self.colours),
-                                   width=width)
+            proc.printer = self._printer(sys.stdout,
+                                         name=proc.name,
+                                         colour=next(self.colours),
+                                         width=width)
 
     def _printer_width(self):
         name_lengths = [len(p.name) for p in self.processes if not p.quiet]
