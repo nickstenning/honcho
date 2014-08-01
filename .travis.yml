@@ -7,11 +7,11 @@ python:
   - pypy
 install:
   - pip install -r requirements_dev.txt
-  - pip install coverage flake8 nose mock pep8-naming
+  - pip install coverage flake8 nose pep8-naming
   - pip install coveralls
 script:
-  - nosetests --with-coverage --cover-branches --cover-package honcho test/unit
-  - nosetests test/integration
-  - flake8 honcho test
+  - nosetests --with-coverage --cover-branches --cover-package honcho honcho/test/unit
+  - nosetests honcho/test/integration
+  - flake8 honcho
 after_success:
   - coveralls
