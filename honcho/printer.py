@@ -1,9 +1,16 @@
-from datetime import datetime
 import sys
+
+from honcho.environ import Env
 
 
 class Printer(object):
-    def __init__(self, output=sys.stdout, name='unknown', colour=None, width=0):
+    def __init__(self,
+                 output=sys.stdout,
+                 name='unknown',
+                 colour=None,
+                 width=0,
+                 env=None):
+        self._env = env if env is not None else Env()
         self.output = output
         self.name = name
         self.colour = colour
@@ -22,7 +29,7 @@ class Printer(object):
         self.output.write(*new_args, **kwargs)
 
     def _prefix(self):
-        time = datetime.now().strftime('%H:%M:%S')
+        time = self._env.now().strftime('%H:%M:%S')
         name = self.name.ljust(self.width)
         prefix = '{time} {name} | '.format(time=time, name=name)
         if self.colour:

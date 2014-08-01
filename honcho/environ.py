@@ -1,4 +1,11 @@
+import datetime
 import re
+
+
+class Env(object):
+
+    def now(self):
+        return datetime.datetime.now()
 
 
 def parse(content):
