@@ -60,8 +60,10 @@ class ProcessManager(object):
         pm.loop()
 
     """
-    def __init__(self, printer=Printer):
+    def __init__(self, printer=Printer, process=Process):
         self._printer = printer
+        self._process = process
+
         self.processes = []
         self.colours = get_colours()
         self.queue = Queue()
@@ -83,7 +85,7 @@ class ProcessManager(object):
                       (e.g. 'python run.py')
 
         """
-        self.processes.append(Process(cmd, name=name, quiet=quiet))
+        self.processes.append(self._process(cmd, name=name, quiet=quiet))
 
     def loop(self):
         """
