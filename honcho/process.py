@@ -143,7 +143,7 @@ class ProcessManager(object):
 
         return self.returncode
 
-    def terminate(self):
+    def terminate(self, kill_fallback=True):
         """
 
         Terminate all the child processes of this ProcessManager, bringing the
@@ -168,13 +168,14 @@ class ProcessManager(object):
                     print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
                     proc.kill()
 
-        if ON_WINDOWS:
-            # SIGALRM is not supported on Windows: just kill instead
-            kill(None, None)
-        else:
-            # the default is POSIX
-            signal.signal(signal.SIGALRM, kill)  # @UndefinedVariable
-            signal.alarm(5)  # @UndefinedVariable
+        if kill_fallback:
+            if ON_WINDOWS:
+                # SIGALRM is not supported on Windows: just kill instead
+                kill(None, None)
+            else:
+                # the default is POSIX
+                signal.signal(signal.SIGALRM, kill)  # @UndefinedVariable
+                signal.alarm(5)  # @UndefinedVariable
 
     def _process_count(self):
         return [p.poll() for p in self.processes].count(None)
