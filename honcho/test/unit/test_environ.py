@@ -59,4 +59,4 @@ class TestEnviron(TestCase):
         for content, commands in FIXTURES:
             content = textwrap.dedent(content)
             result = environ.parse(content)
-            yield self.assertEqual, result, commands
+            self.assertEqual(result, commands)
