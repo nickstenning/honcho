@@ -210,8 +210,8 @@ class ProcessManager(object):
 
 
 def _enqueue_output(proc, queue):
-    if not proc.quiet:
-        for line in iter(proc.stdout.readline, b''):
+    for line in iter(proc.stdout.readline, b''):
+        if not proc.quiet:
             try:
                 line = line.decode('utf-8')
             except UnicodeDecodeError as e:
@@ -220,4 +220,4 @@ def _enqueue_output(proc, queue):
             if not line.endswith('\n'):
                 line += '\n'
             queue.put((proc, line))
-        proc.stdout.close()
+    proc.stdout.close()
