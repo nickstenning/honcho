@@ -6,6 +6,7 @@ import subprocess
 from ..helpers import TestCase
 from honcho.process import Process
 from honcho.process import ProcessManager
+from honcho.process import SYSTEM_PRINTER_NAME
 
 
 class FakePopen(object):
@@ -37,20 +38,28 @@ class FakePopen(object):
         self.killed = True
 
 
-PrinterLine = namedtuple('PrinterLine', 'string name width colour')
+PrinterLine = namedtuple('PrinterLine', 'index string name width colour')
 
 
 class FakePrinter(object):
 
     def __init__(self, output=None, width=0):
         self.lines = []
+        self.index = 0
         self.width = width
 
     def write(self, string, name="", colour=None):
-        self.lines.append(PrinterLine(string, name, self.width, colour))
+        self.lines.append(PrinterLine(self.index, string, name, self.width, colour))
+        self.index += 1
 
     def got_line(self, string):
-        return any(line.string == string for line in self.lines)
+        return self.find_line(string) is not None
+
+    def find_line(self, string):
+        for line in self.lines:
+            if line.string == string:
+                return line
+        return None
 
     def last_write(self):
         return self.data[-1]
@@ -192,6 +201,17 @@ class TestProcessManager(TestCase):
         self.assertEqual('ruby server.rb', proc.command)
         self.assertFalse(proc.quiet)
 
+    def test_sets_default_printer_width(self):
+        printer = FakePrinter()
+        ProcessManager(process=FakeProcess, printer=printer)
+        self.assertEqual(len(SYSTEM_PRINTER_NAME), printer.width)
+
+    def test_add_process_updates_printer_width(self):
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
+        pm.add_process('interesting', 'ruby server.rb')
+        self.assertEqual(len('interesting'), printer.width)
+
     def test_printer_receives_started_with_pid(self):
         printer = FakePrinter()
         pm = ProcessManager(process=FakeProcess, printer=printer)
@@ -205,12 +225,61 @@ class TestProcessManager(TestCase):
         printer = FakePrinter()
         pm = ProcessManager(process=FakeProcess, printer=printer)
         proc = pm.add_process('foo', 'ruby server.rb')
-        proc.pid = 345
         proc.stdout = FakeOutput(attached_process=proc)
         proc.stdout.lines = [b'hello\n', b'world\n']
         pm.loop()
         self.assertTrue(printer.got_line("hello\n"))
         self.assertTrue(printer.got_line("world\n"))
+
+    def test_printer_receives_output_lines_in_order(self):
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
+        p1 = pm.add_process('foo', 'ruby server.rb')
+        p1.stdout = FakeOutput(attached_process=p1)
+        p1.stdout.lines = [b'hello\n', b'world\n', b'giraffe\n']
+        p2 = pm.add_process('bar', 'python worker.py')
+        p2.stdout = FakeOutput(attached_process=p2)
+        p2.stdout.lines = [b'donkeys\n', b'eat\n', b'grass\n']
+        pm.loop()
+        p1l1 = printer.find_line("hello\n")
+        p1l2 = printer.find_line("world\n")
+        p1l3 = printer.find_line("giraffe\n")
+        p2l1 = printer.find_line("donkeys\n")
+        p2l2 = printer.find_line("eat\n")
+        p2l3 = printer.find_line("grass\n")
+        self.assertTrue(p1l1.index < p1l2.index < p1l3.index)
+        self.assertTrue(p2l1.index < p2l2.index < p2l3.index)
+
+    def test_processes_have_different_colours(self):
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
+        p1 = pm.add_process('foo', 'ruby server.rb')
+        p1.stdout = FakeOutput(attached_process=p1)
+        p1.stdout.lines = [b'elephants\n']
+        p2 = pm.add_process('bar', 'python worker.py')
+        p2.stdout = FakeOutput(attached_process=p2)
+        p2.stdout.lines = [b'anteaters\n']
+        pm.loop()
+        p1l1 = printer.find_line("elephants\n")
+        p2l1 = printer.find_line("anteaters\n")
+        self.assertNotEqual(p1l1.colour, p2l1.colour)
+
+    def test_process_colours_are_consistent(self):
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
+        p1 = pm.add_process('foo', 'ruby server.rb')
+        p1.stdout = FakeOutput(attached_process=p1)
+        p1.stdout.lines = [b'hello\n', b'world\n']
+        p2 = pm.add_process('bar', 'python worker.py')
+        p2.stdout = FakeOutput(attached_process=p2)
+        p2.stdout.lines = [b'donkeys\n', b'giraffes\n']
+        pm.loop()
+        p1l1 = printer.find_line("hello\n")
+        p1l2 = printer.find_line("world\n")
+        p2l1 = printer.find_line("donkeys\n")
+        p2l2 = printer.find_line("giraffes\n")
+        self.assertEqual(p1l1.colour, p1l2.colour)
+        self.assertEqual(p2l1.colour, p2l2.colour)
 
     def test_doesnt_print_quiet_processes(self):
         printer = FakePrinter()
