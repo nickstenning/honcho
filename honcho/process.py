@@ -10,6 +10,8 @@ from .compat import ON_WINDOWS
 from .compat import Queue, Empty
 from .printer import Printer
 
+SYSTEM_PRINTER_NAME = "system"
+
 
 class Process(object):
     """
@@ -28,8 +30,6 @@ class Process(object):
 
         self.name = name
         self.quiet = quiet
-        self.reader = None
-        self.printer = None
         self.dead = False
 
         self._popen = popen
@@ -97,16 +97,17 @@ class ProcessManager(object):
         pm.loop()
 
     """
-    def __init__(self, printer=Printer, process=Process):
-        self._printer = printer
-        self._process = process
 
-        self.processes = []
-        self.colours = get_colours()
-        self.queue = Queue()
-        self.system_printer = self._printer(sys.stdout, name='system')
+    def __init__(self, printer=None, process=Process):
         self.returncode = None
 
+        self._colours = get_colours()
+        self._printer = printer if printer is not None else Printer(sys.stdout)
+        self._printer.width = max(self._printer.width,
+                                  len(SYSTEM_PRINTER_NAME))
+        self._process = process
+        self._processes = []
+        self._queue = Queue()
         self._terminating = False
 
     def add_process(self, name, cmd, quiet=False):
@@ -123,7 +124,9 @@ class ProcessManager(object):
 
         """
         proc = self._process(cmd, name=name, quiet=quiet)
-        self.processes.append(proc)
+        proc.colour = next(self._colours)
+        self._printer.width = max(self._printer.width, len(name))
+        self._processes.append(proc)
         return proc
 
     def loop(self):
@@ -142,14 +145,13 @@ class ProcessManager(object):
         """
 
         self._init_readers()
-        self._init_printers()
 
-        for proc in self.processes:
-            proc.printer.write("started with pid {0}\n".format(proc.pid))
+        for proc in self._processes:
+            self._print("started with pid {0}\n".format(proc.pid), process=proc)
 
         while True:
             try:
-                proc, line = self.queue.get(timeout=0.1)
+                proc, line = self._queue.get(timeout=0.1)
             except Empty:
                 pass
             except KeyboardInterrupt:
@@ -157,11 +159,11 @@ class ProcessManager(object):
                 self.returncode = 130
                 self.terminate()
             else:
-                self._print_line(proc, line)
+                self._print(line, process=proc)
 
-            for proc in self.processes:
+            for proc in self._processes:
                 if not proc.dead and proc.poll() is not None:
-                    proc.printer.write('process terminated\n')
+                    self._print('process terminated\n', process=proc)
                     proc.dead = True
 
                     # Set the returncode of the ProcessManager instance if not
@@ -176,11 +178,11 @@ class ProcessManager(object):
 
         while True:
             try:
-                proc, line = self.queue.get(timeout=0.1)
+                proc, line = self._queue.get(timeout=0.1)
             except Empty:
                 break
             else:
-                self._print_line(proc, line)
+                self._print(line, process=proc)
 
         return self.returncode
 
@@ -196,17 +198,17 @@ class ProcessManager(object):
 
         self._terminating = True
 
-        print("sending SIGTERM to all processes", file=self.system_printer)
-        for proc in self.processes:
+        self._print("sending SIGTERM to all processes")
+        for proc in self._processes:
             if proc.poll() is None:
-                print("sending SIGTERM to pid {0:d}".format(proc.pid), file=self.system_printer)
+                self._print("sending SIGTERM to pid {0:d}".format(proc.pid))
                 proc.terminate()
 
         def kill(signum, frame):
             # If anything is still alive, SIGKILL it
-            for proc in self.processes:
+            for proc in self._processes:
                 if proc.poll() is None:
-                    print("sending SIGKILL to pid {0:d}".format(proc.pid), file=self.system_printer)
+                    self._print("sending SIGKILL to pid {0:d}".format(proc.pid))
                     proc.kill()
 
         if kill_fallback:
@@ -219,36 +221,23 @@ class ProcessManager(object):
                 signal.alarm(5)  # @UndefinedVariable
 
     def _process_count(self):
-        return [p.poll() for p in self.processes].count(None)
+        return [p.poll() for p in self._processes].count(None)
 
     def _init_readers(self):
-        for proc in self.processes:
-            t = Thread(target=_enqueue_output, args=(proc, self.queue))
+        for proc in self._processes:
+            t = Thread(target=_enqueue_output, args=(proc, self._queue))
             t.daemon = True  # thread dies with the program
             t.start()
 
-    def _init_printers(self):
-        width = self._printer_width()
-        self.system_printer.width = width
-
-        for proc in self.processes:
-            proc.printer = self._printer(sys.stdout,
-                                         name=proc.name,
-                                         colour=next(self.colours),
-                                         width=width)
-
-    def _printer_width(self):
-        name_lengths = [len(p.name) for p in self.processes if not p.quiet]
-        name_lengths.append(len(self.system_printer.name))
-        return max(name_lengths)
-
-    def _print_line(self, proc, line):
-        if isinstance(line, UnicodeDecodeError):
-            self.system_printer.write(
-                "UnicodeDecodeError while decoding line from process {0:s}\n"
-                .format(proc.name))
+    def _print(self, string, process=None):
+        if process is None:
+            self._printer.write(string, name=SYSTEM_PRINTER_NAME)
         else:
-            proc.printer.write(line)
+            if isinstance(string, UnicodeDecodeError):
+                self._print("UnicodeDecodeError while decoding line from "
+                            "process {0:s}\n" .format(process.name))
+                return
+            self._printer.write(string, name=process.name, colour=process.colour)
 
 
 def _enqueue_output(proc, queue):
@@ -259,7 +248,5 @@ def _enqueue_output(proc, queue):
             except UnicodeDecodeError as e:
                 queue.put((proc, e))
                 continue
-            if not line.endswith('\n'):
-                line += '\n'
             queue.put((proc, line))
     proc.stdout.close()

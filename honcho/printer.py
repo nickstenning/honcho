@@ -4,35 +4,23 @@ from honcho.environ import Env
 
 
 class Printer(object):
-    def __init__(self,
-                 output=sys.stdout,
-                 name='unknown',
-                 colour=None,
-                 width=0,
-                 env=None):
+    def __init__(self, output=sys.stdout, width=0, env=None):
         self._env = env if env is not None else Env()
         self.output = output
-        self.name = name
-        self.colour = colour
         self.width = width
 
-        self._write_prefix = True
-
-    def write(self, string):
-        lines = string.split('\n')
-        lines = [self._prefix() + l if l else l for l in lines]
-        new_string = '\n'.join(lines)
-
-        self.output.write(new_string)
-
-    def _prefix(self):
+    def write(self, string, name="", colour=None):
         time = self._env.now().strftime('%H:%M:%S')
-        name = self.name.ljust(self.width)
-        prefix = '{time} {name} | '.format(time=time, name=name)
-        if self.colour:
-            return _colour_string(self.colour, prefix)
-        else:
-            return prefix
+
+        name = name.ljust(self.width)
+        if name:
+            name += " "
+
+        for line in string.splitlines():
+            prefix = '{time} {name}| '.format(time=time, name=name)
+            if colour:
+                prefix = _colour_string(colour, prefix)
+            self.output.write(prefix + line + "\n")
 
 
 def _ansi(code):

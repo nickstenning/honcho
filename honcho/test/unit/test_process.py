@@ -1,3 +1,4 @@
+from collections import namedtuple
 import time
 from threading import Thread
 import subprocess
@@ -36,14 +37,20 @@ class FakePopen(object):
         self.killed = True
 
 
+PrinterLine = namedtuple('PrinterLine', 'string name width colour')
+
+
 class FakePrinter(object):
 
-    def __init__(self, output=None, name=None, **kwargs):
-        self.name = name
-        self.data = []
+    def __init__(self, output=None, width=0):
+        self.lines = []
+        self.width = width
 
-    def write(self, string):
-        self.data.append(string)
+    def write(self, string, name="", colour=None):
+        self.lines.append(PrinterLine(string, name, self.width, colour))
+
+    def got_line(self, string):
+        return any(line.string == string for line in self.lines)
 
     def last_write(self):
         return self.data[-1]
@@ -86,7 +93,6 @@ class FakeProcess(object):
         self.name = name
         self.quiet = quiet
         self.reader = None
-        self.printer = None
         self.dead = False
         self.pid = 123
         self.returncode = 0
@@ -186,77 +192,67 @@ class TestProcessManager(TestCase):
         self.assertEqual('ruby server.rb', proc.command)
         self.assertFalse(proc.quiet)
 
-    def test_process_printer_is_set(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
-        proc = pm.add_process('foo', 'ruby server.rb')
-        proc.stdout = FakeOutput(attached_process=proc)
-        pm.loop()
-        self.assertTrue(proc.printer is not None)
-
-    def test_process_printer_receives_started_with_pid(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
+    def test_printer_receives_started_with_pid(self):
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
         proc = pm.add_process('foo', 'ruby server.rb')
         proc.pid = 345
         proc.stdout = FakeOutput(attached_process=proc)
         pm.loop()
-        self.assertEqual("started with pid 345\n", proc.printer.data[0])
+        self.assertTrue(printer.got_line("started with pid 345\n"))
 
-    def test_process_printer_receives_output_lines(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
+    def test_printer_receives_output_lines(self):
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
         proc = pm.add_process('foo', 'ruby server.rb')
         proc.pid = 345
         proc.stdout = FakeOutput(attached_process=proc)
         proc.stdout.lines = [b'hello\n', b'world\n']
         pm.loop()
-        self.assertIn("hello\n", proc.printer.data)
-        self.assertIn("world\n", proc.printer.data)
+        self.assertTrue(printer.got_line("hello\n"))
+        self.assertTrue(printer.got_line("world\n"))
 
-    def test_process_printer_appends_missing_newlines(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
-        proc = pm.add_process('foo', 'ruby server.rb')
-        proc.stdout = FakeOutput(attached_process=proc)
-        proc.stdout.lines = [b'hello', b'world']
-        pm.loop()
-        self.assertIn("hello\n", proc.printer.data)
-        self.assertIn("world\n", proc.printer.data)
-
-    def test_process_printer_doesnt_print_quiet_processes(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
+    def test_doesnt_print_quiet_processes(self):
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
         proc = pm.add_process('foo', 'ruby server.rb', quiet=True)
         proc.stdout = FakeOutput(attached_process=proc)
         proc.stdout.lines = [b'hello\n', b'world\n']
         pm.loop()
-        self.assertNotIn("hello\n", proc.printer.data)
-        self.assertNotIn("world\n", proc.printer.data)
+        self.assertFalse(printer.got_line("hello\n"))
+        self.assertFalse(printer.got_line("hello\n"))
 
-    def test_process_printer_handles_bad_utf8(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
+    def test_handles_bad_utf8(self):
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
         proc = pm.add_process('foo', 'ruby server.rb')
         proc.stdout = FakeOutput(attached_process=proc)
         proc.stdout.lines = [b'hello\n', b'\xfe\xff', b'world\n']
         pm.loop()
-        self.assertIn("hello\n", proc.printer.data)
-        self.assertIn("world\n", proc.printer.data)
-        self.assertIn(
-            "UnicodeDecodeError while decoding line from process foo\n",
-            pm.system_printer.data)
+        self.assertTrue(printer.got_line("hello\n"))
+        self.assertTrue(printer.got_line("world\n"))
+        self.assertTrue(printer.got_line(
+            "UnicodeDecodeError while decoding line from process foo\n"))
 
-    def test_process_printer_receives_process_terminated(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
+    def test_printer_receives_process_terminated(self):
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
         proc = pm.add_process('foo', 'ruby server.rb')
         proc.stdout = FakeOutput(attached_process=proc)
         pm.loop()
-        self.assertEqual("process terminated\n", proc.printer.data[1])
+        self.assertTrue(printer.got_line("process terminated\n"))
 
     def test_process_stdout_is_closed(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
         proc = pm.add_process('foo', 'ruby server.rb')
         proc.stdout = FakeOutput(attached_process=proc)
         pm.loop()
         self.assertTrue(proc.stdout.closed)
 
     def test_processmanager_returncode_set_by_exiting_process(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
         proc = pm.add_process('foo', 'ruby server.rb')
         proc.stdout = FakeOutput(attached_process=proc)
         proc.returncode = 123
@@ -264,7 +260,8 @@ class TestProcessManager(TestCase):
         self.assertEqual(123, pm.returncode)
 
     def test_processmanager_terminate_terminates_processes(self):
-        pm = ProcessManager(process=FakeProcess, printer=FakePrinter)
+        printer = FakePrinter()
+        pm = ProcessManager(process=FakeProcess, printer=printer)
         proc = pm.add_process('foo', 'ruby server.rb')
         proc.stdout = FakeBlockingOutput()
 
