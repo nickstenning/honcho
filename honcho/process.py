@@ -11,19 +11,28 @@ from .compat import Queue, Empty
 from .printer import Printer
 
 
-class Process(subprocess.Popen):
+class Process(object):
     """
 
     A simple utility wrapper around subprocess.Popen that stores
     a number of attributes needed by Honcho.
 
     """
-    def __init__(self, cmd, name=None, quiet=False, *args, **kwargs):
+    def __init__(self,
+                 cmd,
+                 name=None,
+                 quiet=False,
+                 popen=subprocess.Popen,
+                 *args,
+                 **kwargs):
+
         self.name = name
         self.quiet = quiet
         self.reader = None
         self.printer = None
         self.dead = False
+
+        self._popen = popen
 
         if self.quiet:
             self.name = "{0} (quiet)".format(self.name)
@@ -37,7 +46,39 @@ class Process(subprocess.Popen):
         }
         defaults.update(kwargs)
 
-        super(Process, self).__init__(cmd, *args, **defaults)
+        self.proc = self._popen(cmd, *args, **defaults)
+
+    def poll(self):
+        return self.proc.poll()
+
+    def kill(self):
+        return self.proc.kill()
+
+    def terminate(self):
+        return self.proc.terminate()
+
+    def wait(self):
+        return self.proc.wait()
+
+    @property
+    def pid(self):
+        return self.proc.pid
+
+    @property
+    def returncode(self):
+        return self.proc.returncode
+
+    @property
+    def stdout(self):
+        return self.proc.stdout
+
+    @property
+    def stderr(self):
+        return self.proc.stderr
+
+    @property
+    def stdin(self):
+        return self.proc.stdin
 
 
 class ProcessManager(object):

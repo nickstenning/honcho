@@ -1,8 +1,39 @@
 import time
 from threading import Thread
+import subprocess
 
 from ..helpers import TestCase
+from honcho.process import Process
 from honcho.process import ProcessManager
+
+
+class FakePopen(object):
+
+    POLL_RESULT = object()
+    WAIT_RESULT = object()
+
+    def __init__(self, args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self.stdout = object()
+        self.stderr = object()
+        self.stdin = object()
+        self.pid = 0x42
+        self.returncode = 0
+        self.terminated = False
+        self.killed = False
+
+    def poll(self):
+        return self.POLL_RESULT
+
+    def wait(self):
+        return self.WAIT_RESULT
+
+    def terminate(self):
+        self.terminated = True
+
+    def kill(self):
+        self.killed = True
 
 
 class FakePrinter(object):
@@ -81,6 +112,69 @@ class FakeProcess(object):
     # Beyond here are helper methods for managing the process in the tests.
     def _stop(self):
         self._running = False
+
+
+class TestProcess(TestCase):
+
+    def test_command(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertEqual('echo 123', proc.proc.args)
+
+    def test_default_stdout(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertEqual(subprocess.PIPE, proc.proc.kwargs['stdout'])
+
+    def test_default_stderr(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertEqual(subprocess.STDOUT, proc.proc.kwargs['stderr'])
+
+    def test_default_shell(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertTrue(proc.proc.kwargs['shell'])
+
+    def test_default_bufsize(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertEqual(1, proc.proc.kwargs['bufsize'])
+
+    def test_quiet(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertFalse(proc.quiet)
+
+    def test_quiet_name(self):
+        proc = Process('echo 123', name='foo', quiet=True, popen=FakePopen)
+        self.assertEqual('foo (quiet)', proc.name)
+
+    def test_poll(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertEqual(FakePopen.POLL_RESULT, proc.poll())
+
+    def test_kill(self):
+        proc = Process('echo 123', popen=FakePopen)
+        proc.kill()
+        self.assertTrue(proc.proc.killed)
+
+    def test_terminate(self):
+        proc = Process('echo 123', popen=FakePopen)
+        proc.terminate()
+        self.assertTrue(proc.proc.terminated)
+
+    def test_wait(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertEqual(FakePopen.WAIT_RESULT, proc.wait())
+
+    def test_pid(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertEqual(proc.proc.pid, proc.pid)
+
+    def test_returncode(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertEqual(proc.proc.returncode, proc.returncode)
+
+    def test_stdout_stderr_stdin(self):
+        proc = Process('echo 123', popen=FakePopen)
+        self.assertEqual(proc.proc.stdout, proc.stdout)
+        self.assertEqual(proc.proc.stderr, proc.stderr)
+        self.assertEqual(proc.proc.stdin, proc.stdin)
 
 
 class TestProcessManager(TestCase):
