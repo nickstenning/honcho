@@ -5,14 +5,10 @@ import subprocess
 import sys
 from threading import Thread
 
-try:
-    from Queue import Queue, Empty
-except ImportError:
-    from queue import Queue, Empty  # Python 3.x
-
 from .colour import get_colours
-from .printer import Printer
 from .compat import ON_WINDOWS
+from .compat import Queue, Empty
+from .printer import Printer
 
 
 class Process(subprocess.Popen):

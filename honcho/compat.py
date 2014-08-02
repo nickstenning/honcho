@@ -38,3 +38,9 @@ try:
     from pipes import quote as shellquote  # noqa
 except ImportError:
     from shlex import quote as shellquote  # noqa
+
+# Python 3 renamed Queue to queue
+try:
+    from Queue import Queue, Empty  # noqa
+except ImportError:
+    from queue import Queue, Empty  # noqa
