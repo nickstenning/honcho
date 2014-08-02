@@ -125,7 +125,7 @@ class ProcessManager(object):
         """
         proc = self._process(cmd, name=name, quiet=quiet)
         proc.colour = next(self._colours)
-        self._printer.width = max(self._printer.width, len(name))
+        self._printer.width = max(self._printer.width, len(proc.name))
         self._processes.append(proc)
         return proc
 
