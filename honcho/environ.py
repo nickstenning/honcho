@@ -1,11 +1,34 @@
 import datetime
+import errno
+import os
 import re
+
+from .compat import ON_WINDOWS
+
+if ON_WINDOWS:
+    import ctypes
 
 
 class Env(object):
 
     def now(self):
         return datetime.datetime.now()
+
+    if ON_WINDOWS:
+        # Shamelessly cribbed from
+        # https://docs.python.org/2/faq/windows.html#how-do-i-emulate-os-kill-in-windows
+        def killpg(self, pid, signum=None):
+            """kill function for Win32"""
+            kernel32 = ctypes.windll.kernel32
+            handle = kernel32.OpenProcess(1, 0, pid)
+            return (0 != kernel32.TerminateProcess(handle, 0))
+    else:
+        def killpg(self, pid, signum=None):
+            try:
+                os.killpg(pid, signum)
+            except OSError as e:
+                if e.errno not in [errno.EPERM, errno.ESRCH]:
+                    raise
 
 
 def parse(content):

@@ -7,7 +7,8 @@ from collections import defaultdict
 
 from honcho import __version__
 from honcho.procfile import Procfile
-from honcho.process import Process, ProcessManager
+from honcho.process import Popen
+from honcho.manager import Manager
 from honcho import compat, environ
 
 logging.basicConfig(format='%(asctime)s [%(process)d] [%(levelname)s] '
@@ -28,9 +29,6 @@ try:
 except AttributeError:
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
     sys.stderr = codecs.getwriter("utf-8")(sys.stderr)
-
-
-process_manager = ProcessManager()
 
 
 class CommandError(Exception):
@@ -163,7 +161,7 @@ def command_run(args):
     else:
         cmd = ' '.join(compat.shellquote(arg) for arg in args.command)
 
-    p = Process(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    p = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
     p.wait()
     sys.exit(p.returncode)
 
@@ -199,14 +197,18 @@ def command_start(args):
     else:
         commands = procfile.commands
 
+    manager = Manager()
+
     for name, cmd in compat.iteritems(commands):
         for i in compat.xrange(concurrency[name]):
             n = '{name}.{num}'.format(name=name, num=i + 1)
-            os.environ['PORT'] = str(port + i)
-            process_manager.add_process(n, cmd, quiet=(name in quiet))
+            env = os.environ.copy()
+            env['PORT'] = str(port + i)
+            manager.add_process(n, cmd, quiet=(name in quiet), env=env)
         port += 100
 
-    sys.exit(process_manager.loop())
+    manager.loop()
+    sys.exit(manager.returncode)
 
 parser_start = subparsers.add_parser(
     'start',

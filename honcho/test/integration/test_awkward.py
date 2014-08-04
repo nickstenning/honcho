@@ -9,6 +9,6 @@ class TestAwkward(TestCase):
 
         self.assertEqual(ret, 0)
 
-        self.assertRegexpMatches(out, r'awkward\.1 \| (....)?started with pid \d+\n')
+        self.assertRegexpMatches(out, r'system    \| (....)?awkward\.1 started \(pid=\d+\)\n')
         self.assertRegexpMatches(out, r'awkward\.1 \| (....)?(Hello with no line break){10}\n')
-        self.assertRegexpMatches(out, r'awkward\.1 \| (....)?process terminated\n')
+        self.assertRegexpMatches(out, r'system    \| (....)?awkward\.1 stopped \(rc=0\)\n')

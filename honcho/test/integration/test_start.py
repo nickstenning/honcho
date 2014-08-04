@@ -12,9 +12,8 @@ class TestStart(TestCase):
 
         self.assertEqual(ret, 0)
 
-        self.assertRegexpMatches(out, r'foo\.1  \| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'foo\.1  \| (....)?process terminated\n')
-        self.assertRegexpMatches(out, r'system \| (....)?sending SIGTERM to all processes\n')
+        self.assertRegexpMatches(out, r'system \| (....)?foo\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?foo\.1 stopped \(rc=0\)\n')
 
         count = len(re.findall(r'foo\.1  \| (....)?(normal|error) output\n', out))
         self.assertEqual(count, 2)
@@ -24,9 +23,8 @@ class TestStart(TestCase):
 
         self.assertEqual(ret, 0)
 
-        self.assertRegexpMatches(out, r'foo\.1  \| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'foo\.1  \| (....)?process terminated\n')
-        self.assertRegexpMatches(out, r'system \| (....)?sending SIGTERM to all processes\n')
+        self.assertRegexpMatches(out, r'system \| (....)?foo\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?foo\.1 stopped \(rc=0\)\n')
 
         count = len(re.findall(r'foo\.1  \| (....)?(normal|error) output\n', out))
         self.assertEqual(count, 2)
@@ -36,11 +34,10 @@ class TestStart(TestCase):
 
         self.assertEqual(ret, 0)
 
-        self.assertRegexpMatches(out, r'foo\.1  \| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'foo\.1  \| (....)?process terminated\n')
-        self.assertRegexpMatches(out, r'bar\.1  \| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'foo\.1  \| (....)?process terminated\n')
-        self.assertRegexpMatches(out, r'system \| (....)?sending SIGTERM to all processes\n')
+        self.assertRegexpMatches(out, r'system \| (....)?foo\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?foo\.1 stopped \(rc=.+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?bar\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?bar\.1 stopped \(rc=.+\)\n')
 
         count = len(re.findall(r'foo\.1  \| (....)?(normal|error) output\n', out))
         self.assertEqual(count, 2)
@@ -79,11 +76,11 @@ class TestStart(TestCase):
         self.assertRegexpMatches(out, r'foo\.1 *\| (....)?error output')
         self.assertRegexpMatches(out, r'bar\.1 *\| (....)?normal output')
         self.assertRegexpMatches(out, r'bar\.1 *\| (....)?error output')
-        self.assertNotRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?normal output')
-        self.assertNotRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?error output')
+        self.assertNotRegexpMatches(out, r'baz\.1 *\| (....)?normal output')
+        self.assertNotRegexpMatches(out, r'baz\.1 *\| (....)?error output')
 
-        self.assertRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?process terminated\n')
+        self.assertRegexpMatches(out, r'system \| (....)?baz\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?baz\.1 stopped \(rc=.+\)\n')
 
         self.assertEqual(err, '')
 
@@ -94,15 +91,15 @@ class TestStart(TestCase):
 
         self.assertRegexpMatches(out, r'foo\.1 *\| (....)?normal output')
         self.assertRegexpMatches(out, r'foo\.1 *\| (....)?error output')
-        self.assertNotRegexpMatches(out, r'bar\.1 \(quiet\) *\| (....)?normal output')
-        self.assertNotRegexpMatches(out, r'bar\.1 \(quiet\) *\| (....)?error output')
-        self.assertNotRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?normal output')
-        self.assertNotRegexpMatches(out, r'baz\.1  \(quiet\)*\| (....)?error output')
+        self.assertNotRegexpMatches(out, r'bar\.1 *\| (....)?normal output')
+        self.assertNotRegexpMatches(out, r'bar\.1 *\| (....)?error output')
+        self.assertNotRegexpMatches(out, r'baz\.1 *\| (....)?normal output')
+        self.assertNotRegexpMatches(out, r'baz\.1 *\| (....)?error output')
 
-        self.assertRegexpMatches(out, r'bar\.1 \(quiet\) *\| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'bar\.1 \(quiet\) *\| (....)?process terminated\n')
-        self.assertRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?process terminated\n')
+        self.assertRegexpMatches(out, r'system \| (....)?bar\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?bar\.1 stopped \(rc=.+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?baz\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?baz\.1 stopped \(rc=.+\)\n')
 
         self.assertEqual(err, '')
 
@@ -111,18 +108,14 @@ class TestStart(TestCase):
 
         self.assertEqual(ret, 0)
 
-        self.assertNotRegexpMatches(out, r'foo\.1 \(quiet\) *\| (....)?normal output')
-        self.assertNotRegexpMatches(out, r'foo\.1 \(quiet\) *\| (....)?error output')
-        self.assertNotRegexpMatches(out, r'bar\.1 \(quiet\) *\| (....)?normal output')
-        self.assertNotRegexpMatches(out, r'bar\.1 \(quiet\) *\| (....)?error output')
-        self.assertNotRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?normal output')
-        self.assertNotRegexpMatches(out, r'baz\.1  \(quiet\)*\| (....)?error output')
+        self.assertNotRegexpMatches(out, r'normal output')
+        self.assertNotRegexpMatches(out, r'error output')
 
-        self.assertRegexpMatches(out, r'foo\.1 \(quiet\) *\| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'foo\.1 \(quiet\) *\| (....)?process terminated\n')
-        self.assertRegexpMatches(out, r'bar\.1 \(quiet\) *\| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'bar\.1 \(quiet\) *\| (....)?process terminated\n')
-        self.assertRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?started with pid \d+\n')
-        self.assertRegexpMatches(out, r'baz\.1 \(quiet\) *\| (....)?process terminated\n')
+        self.assertRegexpMatches(out, r'system \| (....)?foo\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?foo\.1 stopped \(rc=.+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?bar\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?bar\.1 stopped \(rc=.+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?baz\.1 started \(pid=\d+\)\n')
+        self.assertRegexpMatches(out, r'system \| (....)?baz\.1 stopped \(rc=.+\)\n')
 
         self.assertEqual(err, '')
