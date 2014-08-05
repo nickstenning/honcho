@@ -1,4 +1,5 @@
 import argparse
+import codecs
 import logging
 import os
 import sys
@@ -19,6 +20,15 @@ PATH = os.path.dirname(__file__)
 BASENAME = os.path.basename(os.getcwd())
 
 EXPORT_CHOICES = ['supervisord', 'upstart']
+
+try:
+    # Python 3
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer)
+    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer)
+except AttributeError:
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
+    sys.stderr = codecs.getwriter("utf-8")(sys.stderr)
+
 
 process_manager = ProcessManager()
 
