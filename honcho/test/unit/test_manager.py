@@ -1,11 +1,13 @@
 import datetime
 import multiprocessing
 
-from ..helpers import TestCase
+from ..helpers import TestCase, monkeypatch_process_for_coverage
 from honcho.compat import Empty
 from honcho.printer import Message
 from honcho.manager import Manager
 from honcho.manager import SYSTEM_PRINTER_NAME
+
+multiprocessing.Process = monkeypatch_process_for_coverage(multiprocessing.Process)
 
 HISTORIES = {
     'one': {
