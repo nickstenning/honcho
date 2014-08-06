@@ -99,3 +99,5 @@ def monkeypatch_process_for_coverage(process_cls):
                     cov.stop()
                     cov.save()
         return ProcessWithCoverage
+    else:
+        return process_cls
