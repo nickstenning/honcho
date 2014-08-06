@@ -57,7 +57,8 @@ _parser_defaults = {
 
 parser = argparse.ArgumentParser(**_parser_defaults)
 
-subparsers = parser.add_subparsers(title='tasks')
+subparsers = parser.add_subparsers(title='tasks', dest='command')
+subparsers.required = True
 
 
 def command_check(args):
@@ -69,7 +70,6 @@ parser_check = subparsers.add_parser(
     'check',
     help="validate a Procfile",
     **_parser_defaults)
-parser_check.set_defaults(func=command_check)
 
 
 def command_export(args):
@@ -132,7 +132,6 @@ parser_export.add_argument(
     help="format in which to export",
     default=EXPORT_CHOICES[0], choices=EXPORT_CHOICES,
     type=str, metavar="FORMAT")
-parser_export.set_defaults(func=command_export)
 
 
 def command_help(args):
@@ -146,7 +145,6 @@ parser_help = subparsers.add_parser(
     help="describe available tasks or one specific task",
     **_parser_defaults)
 parser_help.add_argument('task', help='task to show help for', nargs='?')
-parser_help.set_defaults(func=command_help)
 
 
 def command_run(args):
@@ -156,9 +154,9 @@ def command_run(args):
     if compat.ON_WINDOWS:
         # do not quote on Windows, subprocess will handle it for us
         # using the MSFT quoting rules
-        cmd = args.command
+        cmd = args.argv
     else:
-        cmd = ' '.join(compat.shellquote(arg) for arg in args.command)
+        cmd = ' '.join(compat.shellquote(arg) for arg in args.argv)
 
     p = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
     p.wait()
@@ -169,10 +167,9 @@ parser_run = subparsers.add_parser(
     help="run a command using your application's environment",
     **_parser_defaults)
 parser_run.add_argument(
-    'command',
+    'argv',
     nargs=argparse.REMAINDER,
     help='command to run')
-parser_run.set_defaults(func=command_run)
 
 
 def command_start(args):
@@ -226,7 +223,15 @@ parser_start.add_argument(
 parser_start.add_argument(
     'processes', nargs='*',
     help='process(es) to start (default: all processes will be run)')
-parser_start.set_defaults(func=command_start)
+
+
+COMMANDS = {
+    'check': command_check,
+    'export': command_export,
+    'help': command_help,
+    'run': command_run,
+    'start': command_start,
+}
 
 
 def main(argv=None):
@@ -234,8 +239,9 @@ def main(argv=None):
         args = parser.parse_args(argv)
     else:
         args = parser.parse_args()
+
     try:
-        args.func(args)
+        COMMANDS[args.command](args)
     except CommandError as e:
         log.error(str(e))
         sys.exit(1)
