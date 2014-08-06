@@ -6,7 +6,6 @@ import sys
 from collections import defaultdict
 
 from honcho import __version__
-from honcho.procfile import Procfile
 from honcho.process import Popen
 from honcho.manager import Manager
 from honcho import compat, environ
@@ -64,7 +63,7 @@ subparsers = parser.add_subparsers(title='tasks')
 def command_check(args):
     procfile = _procfile(_procfile_path(args.app_root, args.procfile))
 
-    log.info('Valid procfile detected ({0})'.format(', '.join(procfile.commands)))
+    log.info('Valid procfile detected ({0})'.format(', '.join(procfile.processes)))
 
 parser_check = subparsers.add_parser(
     'check',
@@ -185,21 +184,19 @@ def command_start(args):
     concurrency = _parse_concurrency(args.concurrency)
     quiet = _parse_quiet(args.quiet)
 
-    processes = args.processes
-
-    if len(processes) > 0:
-        commands = {}
-        for process in processes:
+    if args.processes:
+        processes = {}
+        for name in args.processes:
             try:
-                commands[process] = procfile.commands[process]
+                processes[name] = procfile.processes[name]
             except KeyError:
-                raise CommandError("Process type '{0}' does not exist in Procfile".format(process))
+                raise CommandError("Process type '{0}' does not exist in Procfile".format(name))
     else:
-        commands = procfile.commands
+        processes = procfile.processes
 
     manager = Manager()
 
-    for name, cmd in compat.iteritems(commands):
+    for name, cmd in compat.iteritems(processes):
         for i in compat.xrange(concurrency[name]):
             n = '{name}.{num}'.format(name=name, num=i + 1)
             env = os.environ.copy()
@@ -255,10 +252,10 @@ def _procfile(filename):
     except IOError:
         raise CommandError('Procfile does not exist or is not a file')
 
-    procfile = Procfile(content)
-
-    if not procfile.commands:
-        raise CommandError('No processes defined in Procfile')
+    try:
+        procfile = environ.parse_procfile(content)
+    except AssertionError as e:
+        raise CommandError(str(e))
 
     return procfile
 

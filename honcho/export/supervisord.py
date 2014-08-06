@@ -5,9 +5,9 @@ from honcho.export.base import BaseExport
 
 class Export(BaseExport):
     def render(self, procfile, options, environment, concurrency):
-        commands = []
+        processes = []
         port = options.port
-        for name, cmd in procfile.commands.items():
+        for name, cmd in procfile.processes.items():
             for num in compat.xrange(0, concurrency[name]):
                 full_name_parts = [options.app, name]
                 env = environment.copy()
@@ -16,7 +16,7 @@ class Export(BaseExport):
                     full_name_parts.append(str(num))
                 else:
                     env['PORT'] = str(port)
-                commands.append((
+                processes.append((
                     name,
                     cmd,
                     '-'.join(full_name_parts),
@@ -32,7 +32,7 @@ class Export(BaseExport):
             'port':        options.port,
             'user':        options.user,
             'shell':       options.shell,
-            'commands':    commands,
+            'processes':   processes,
             'concurrency': concurrency
         }
         filename = "{0}.conf".format(options.app)

@@ -16,7 +16,7 @@ class Export(BaseExport):
             'shell':       options.shell
         }
 
-        for name, cmd in procfile.commands.iteritems():
+        for name, cmd in compat.iteritems(procfile.processes):
             ctx = context.copy()
             ctx.update({'command': cmd,
                         'name':    name})

@@ -3,10 +3,13 @@ import errno
 import os
 import re
 
-from .compat import ON_WINDOWS
+from . import compat
 
-if ON_WINDOWS:
+if compat.ON_WINDOWS:
     import ctypes
+
+
+PROCFILE_LINE = re.compile(r'^([A-Za-z0-9_]+):\s*(.+)$')
 
 
 class Env(object):
@@ -14,7 +17,7 @@ class Env(object):
     def now(self):
         return datetime.datetime.now()
 
-    if ON_WINDOWS:
+    if compat.ON_WINDOWS:
         # Shamelessly cribbed from
         # https://docs.python.org/2/faq/windows.html#how-do-i-emulate-os-kill-in-windows
         def killpg(self, pid, signum=None):
@@ -29,6 +32,27 @@ class Env(object):
             except OSError as e:
                 if e.errno not in [errno.EPERM, errno.ESRCH]:
                     raise
+
+
+class Procfile(object):
+    """A data structure representing a Procfile"""
+
+    def __init__(self):
+        self.processes = compat.OrderedDict()
+
+    def add_process(self, name, command):
+        assert name not in self.processes, \
+            "process names must be unique within a Procfile"
+        self.processes[name] = command
+
+
+def parse_procfile(contents):
+    p = Procfile()
+    for line in contents.splitlines():
+        m = PROCFILE_LINE.match(line)
+        if m:
+            p.add_process(m.group(1), m.group(2))
+    return p
 
 
 def parse(content):

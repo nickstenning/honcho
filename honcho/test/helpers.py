@@ -1,7 +1,7 @@
 import os
 import re
 import unittest
-from honcho.procfile import Procfile
+from honcho import environ
 from subprocess import Popen, PIPE
 
 TEST_ROOT = os.path.abspath(os.path.dirname(__file__))
@@ -73,7 +73,7 @@ def get_honcho_output(args):
 
 def get_procfile(name):
     with open(os.path.join(FIXTURE_ROOT, name)) as f:
-        return Procfile(f.read())
+        return environ.parse_procfile(f.read())
 
 
 def monkeypatch_process_for_coverage(process_cls):

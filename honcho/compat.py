@@ -44,3 +44,9 @@ try:
     from Queue import Queue, Empty  # noqa
 except ImportError:
     from queue import Queue, Empty  # noqa
+
+# Python <2.7 doesn't have OrderedDict in the collections module
+try:
+    from collections import OrderedDict  # noqa
+except ImportError:
+    from ordereddict import OrderedDict  # noqa
