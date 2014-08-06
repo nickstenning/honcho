@@ -1,3 +1,5 @@
+from collections import defaultdict
+from collections import namedtuple
 import datetime
 import errno
 import os
@@ -76,3 +78,50 @@ def parse(content):
 
             values[key] = val
     return values
+
+
+ProcessParams = namedtuple("ProcessParams", "name cmd quiet env")
+
+
+def expand_processes(processes, concurrency=None, env=None, quiet=None, port=None):
+    """
+    Get a list of the processes that need to be started given the specified
+    list of process types, concurrency, environment, quietness, and base port
+    number.
+
+    Returns a list of ProcessParams objects, which have `name`, `cmd`, `env`,
+    and `quiet` attributes, corresponding to the parameters to the constructor
+    of `honcho.process.Process`.
+    """
+    if env is not None and env.get("PORT") is not None:
+        port = int(env.get("PORT"))
+
+    if port is not None:
+        assert port % 1000 == 0, "port must be multiple of 1000"
+
+    if quiet is None:
+        quiet = []
+
+    con = defaultdict(lambda: 1)
+    if concurrency is not None:
+        con.update(concurrency)
+
+    out = []
+
+    for name, cmd in compat.iteritems(processes):
+        for i in range(con[name]):
+            n = "{0}.{1}".format(name, i + 1)
+            c = cmd
+            q = name in quiet
+            e = {}
+            if env is not None:
+                e.update(env)
+            if port is not None:
+                e['PORT'] = str(port + i)
+
+            params = ProcessParams(n, c, q, e)
+            out.append(params)
+        if port is not None:
+            port += 100
+
+    return out

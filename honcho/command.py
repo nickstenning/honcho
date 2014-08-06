@@ -175,14 +175,14 @@ parser_run.add_argument(
 def command_start(args):
     procfile_path = _procfile_path(args.app_root, args.procfile)
     procfile = _procfile(procfile_path)
-    os.environ.update(_read_env(procfile_path, args.env))
 
     port = int(os.environ.get('PORT', args.port))
     concurrency = _parse_concurrency(args.concurrency)
+    env = _read_env(procfile_path, args.env)
     quiet = _parse_quiet(args.quiet)
 
     if args.processes:
-        processes = {}
+        processes = compat.OrderedDict()
         for name in args.processes:
             try:
                 processes[name] = procfile.processes[name]
@@ -193,13 +193,14 @@ def command_start(args):
 
     manager = Manager()
 
-    for name, cmd in compat.iteritems(processes):
-        for i in compat.xrange(concurrency[name]):
-            n = '{name}.{num}'.format(name=name, num=i + 1)
-            env = os.environ.copy()
-            env['PORT'] = str(port + i)
-            manager.add_process(n, cmd, quiet=(name in quiet), env=env)
-        port += 100
+    for p in environ.expand_processes(processes,
+                                      concurrency=concurrency,
+                                      env=env,
+                                      quiet=quiet,
+                                      port=port):
+        e = os.environ.copy()
+        e.update(p.env)
+        manager.add_process(p.name, p.cmd, quiet=p.quiet, env=e)
 
     manager.loop()
     sys.exit(manager.returncode)
