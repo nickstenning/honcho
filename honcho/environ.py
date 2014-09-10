@@ -2,6 +2,7 @@ from collections import defaultdict
 from collections import namedtuple
 import datetime
 import errno
+import shlex
 import os
 import re
 
@@ -64,19 +65,20 @@ def parse(content):
     """
     values = {}
     for line in content.splitlines():
-        m1 = re.match(r'\A([A-Za-z_0-9]+)=(.*)\Z', line)
-        if m1:
-            key, val = m1.group(1), m1.group(2)
+        lexer = shlex.shlex(line, posix=True)
+        lexer.wordchars += '/.+-():'
+        tokens = list(lexer)
 
-            m2 = re.match(r"\A'(.*)'\Z", val)
-            if m2:
-                val = m2.group(1)
+        # parses the assignment statement
+        if len(tokens) != 3:
+            continue
+        name, op, value = tokens
+        if op != '=':
+            continue
+        if not re.match(r'[A-Za-z_][A-Za-z_0-9]*', name):
+            continue
+        values[name] = value
 
-            m3 = re.match(r'\A"(.*)"\Z', val)
-            if m3:
-                val = re.sub(r'\\(.)', r'\1', m3.group(1))
-
-            values[key] = val
     return values
 
 

@@ -52,6 +52,20 @@ ENVFILE_FIXTURES = [
         """,
         {'MYVAR': "hello'world"}
     ],
+    [
+        # Quotation mark surrounded
+        r"""
+        MYVAR='"surrounded"'
+        """,
+        {'MYVAR': '"surrounded"'}
+    ],
+    [
+        # Escaped quotation mark surrounded
+        r"""
+        MYVAR=\"escaped\"
+        """,
+        {'MYVAR': '"escaped"'}
+    ],
 ]
 
 PROCFILE_FIXTURES = [
