@@ -23,3 +23,11 @@ class TestEnv(TestCase):
 
         self.assertEqual(ret, 0)
         self.assertEqual(out, 'giraffe\n')
+
+    def test_env_quoted(self):
+        procfile = 'Procfile.envwin_shlex' if compat.ON_WINDOWS else 'Procfile.env_shlex'
+        ret, out, err = get_honcho_output(['-f', procfile, '-e', '.env_shlex', 'start'])
+
+        self.assertEqual(ret, 0)
+
+        self.assertRegexpMatches(out, r'animals\.1 \| (....)?I like "lion"s and also "tiger"s')
