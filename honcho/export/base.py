@@ -1,8 +1,11 @@
 from __future__ import print_function
+
 import os
 import pwd
 import sys
-from honcho.command import CommandError, PATH
+from pkg_resources import resource_filename
+
+from honcho.command import CommandError
 
 try:
     from jinja2 import Template
@@ -60,9 +63,9 @@ class BaseExport(object):
             raise CommandError("Can not write to file {0}"
                                .format(path))
 
-    def get_template(self, name):
-        path = os.path.join(PATH, 'data/export/', self.options.format, name)
-
+    def get_template(self, name, package, directory='data/export/'):
+        relative_path = os.path.join(directory, self.options.format, name)
+        path = resource_filename(package, relative_path)
         try:
             return Template(open(path).read())
         except IOError:

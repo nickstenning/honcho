@@ -17,7 +17,6 @@ logging.basicConfig(format='%(asctime)s [%(process)d] [%(levelname)s] '
                     level=logging.INFO)
 log = logging.getLogger(__name__)
 
-PATH = os.path.dirname(__file__)
 BASENAME = os.path.basename(os.getcwd())
 
 export_choices = dict((_export.name, _export)
