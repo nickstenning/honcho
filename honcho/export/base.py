@@ -64,6 +64,15 @@ class BaseExport(object):
                                .format(path))
 
     def get_template(self, name, package, directory='data/export/'):
+        """Gets a Jinja2 template from specified directory.
+
+        :param name: the name of specified template file.
+        :param package: the top-level package for located the template
+                        directory.
+        :param directory: the template directory which contains the template
+                          file.
+        :returns: a :class:`jinja2.Template` instance.
+        """
         relative_path = os.path.join(directory, self.options.format, name)
         path = resource_filename(package, relative_path)
         try:
