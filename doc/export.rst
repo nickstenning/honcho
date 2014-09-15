@@ -55,11 +55,19 @@ When exporting to upstart, each process gets its own .conf file.
 Adding New Format Support
 -------------------------
 
-You can support new exporting formats by writing plugins. Honcho discovers exporting plugins with the `entry points mechanism`_ of setuptools.
+You can support new exporting formats by writing plugins. Honcho discovers
+exporting plugins with the `entry points mechanism`_ of setuptools.
 
-First, you need to write a class inherited from :class:`honcho.export.base.BaseExport` and override the :meth:`~honcho.export.base.BaseExport.render` method. Inside the ``render`` method, ``self.get_template('foo.html', __package__, 'data/templates')`` could be used to find your Jinja2 template files. There are some exists exporting classes (e.g. :class:`honcho.export.upstart.Export`) which could be consulted.
+First, you need to write a class inherited from :class:`honcho.export.base.BaseExport`
+and override the :meth:`~honcho.export.base.BaseExport.render` method. Inside
+the ``render`` method, ``self.get_template('foo.html', __package__, 'data/templates')``
+could be used to find your Jinja2 template files. There are some exists
+exporting classes (e.g. :class:`honcho.export.upstart.Export`) which could be
+consulted.
 
-Next, you can create a ``setup.py`` file for building distribution package, and specify the prepared exporting classes in the ``entry_points`` section. For example::
+Next, you can create a ``setup.py`` file for building distribution package, and
+specify the prepared exporting classes in the ``entry_points`` section. For
+example::
 
     from setuptools import setup
 
@@ -74,6 +82,7 @@ Next, you can create a ``setup.py`` file for building distribution package, and 
         },
     )
 
-After installed, the format supporting by the new exporting implementation can be discovered by the ``honcho export`` command.
+After installed, the format supporting by the new exporting implementation can
+be discovered by the ``honcho export`` command.
 
 .. _`entry points mechanism`: https://pythonhosted.org/setuptools/setuptools.html#dynamic-discovery-of-services-and-plugins
