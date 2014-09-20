@@ -36,5 +36,6 @@ class Export(BaseExport):
             'concurrency': concurrency
         }
         filename = "{0}.conf".format(options.app)
-        content = self.get_template("supervisord.conf").render(context)
+        template = self.get_template('supervisord.conf', package='honcho')
+        content = template.render(context)
         return [(filename, content)]

@@ -44,6 +44,10 @@ setup(
     entry_points={
         'console_scripts': [
             'honcho=honcho.command:main'
-        ]
+        ],
+        'honcho_exporters': [
+            'upstart=honcho.export.upstart:Export',
+            'supervisord=honcho.export.supervisord:Export',
+        ],
     }
 )

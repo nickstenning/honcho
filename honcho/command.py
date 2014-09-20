@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 from collections import defaultdict
+from pkg_resources import iter_entry_points
 
 from honcho import __version__
 from honcho.process import Popen
@@ -16,10 +17,10 @@ logging.basicConfig(format='%(asctime)s [%(process)d] [%(levelname)s] '
                     level=logging.INFO)
 log = logging.getLogger(__name__)
 
-PATH = os.path.dirname(__file__)
 BASENAME = os.path.basename(os.getcwd())
 
-EXPORT_CHOICES = ['supervisord', 'upstart']
+export_choices = dict((_export.name, _export)
+                      for _export in iter_entry_points('honcho_exporters'))
 
 try:
     # Python 3
@@ -93,10 +94,8 @@ def command_export(args):
     env = _read_env(procfile_path, args.env)
     concurrency = _parse_concurrency(args.concurrency)
 
-    mod = __import__('.'.join(['honcho', 'export', args.format]),
-                     fromlist=['Export'])
-
-    export = mod.Export(procfile, args, env, concurrency)
+    export_class = export_choices[args.format].load()
+    export = export_class(procfile, args, env, concurrency)
     export.export()
 
 parser_export = subparsers.add_parser(
@@ -126,11 +125,11 @@ parser_export.add_argument(
 parser_export.add_argument(
     'location',
     help="folder to export to",
-    default=EXPORT_CHOICES[0], type=str, metavar="LOCATION")
+    type=str, metavar="LOCATION")
 parser_export.add_argument(
     'format',
     help="format in which to export",
-    default=EXPORT_CHOICES[0], choices=EXPORT_CHOICES,
+    choices=list(export_choices),
     type=str, metavar="FORMAT")
 
 
