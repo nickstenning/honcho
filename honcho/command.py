@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 BASENAME = os.path.basename(os.getcwd())
 
 export_choices = dict((_export.name, _export)
-                      for _export in iter_entry_points('honcho_exports'))
+                      for _export in iter_entry_points('honcho_exporters'))
 
 try:
     # Python 3

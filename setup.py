@@ -45,7 +45,7 @@ setup(
         'console_scripts': [
             'honcho=honcho.command:main'
         ],
-        'honcho_exports': [
+        'honcho_exporters': [
             'upstart=honcho.export.upstart:Export',
             'supervisord=honcho.export.supervisord:Export',
         ],

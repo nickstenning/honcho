@@ -75,7 +75,7 @@ example::
         name='honcho-foo',
         ...
         entry_points={
-            'honcho_exports': [
+            'honcho_exporters': [
                 'honcho_foo.export.foo:FooExport',
                 'honcho_foo.export.foobar:FooBarExport',
             ],
