@@ -3,6 +3,7 @@ import codecs
 import logging
 import os
 import sys
+import signal
 from collections import defaultdict
 from pkg_resources import iter_entry_points
 
@@ -157,7 +158,9 @@ def command_run(args):
     else:
         cmd = ' '.join(compat.shellquote(arg) for arg in args.argv)
 
-    p = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr)
+    p = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr,
+              start_new_session=False)
+    signal.signal(signal.SIGINT, signal.SIG_IGN)
     p.wait()
     sys.exit(p.returncode)
 
