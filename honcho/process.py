@@ -66,6 +66,7 @@ class Process(object):
 class Popen(subprocess.Popen):
 
     def __init__(self, cmd, **kwargs):
+        start_new_session = kwargs.pop('start_new_session', True)
         options = {
             'stdout': subprocess.PIPE,
             'stderr': subprocess.STDOUT,
@@ -81,9 +82,10 @@ class Popen(subprocess.Popen):
             create_new_process_group = 0x00000200
             detached_process = 0x00000008
             options.update(creationflags=detached_process | create_new_process_group)
-        elif sys.version_info < (3, 2):
-            options.update(preexec_fn=os.setsid)
-        else:
-            options.update(start_new_session=True)
+        elif start_new_session:
+            if sys.version_info < (3, 2):
+                options.update(preexec_fn=os.setsid)
+            else:
+                options.update(start_new_session=True)
 
         super(Popen, self).__init__(cmd, **options)
