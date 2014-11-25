@@ -10,7 +10,6 @@ from .environ import Env
 from .process import Process
 from .printer import Printer, Message
 
-KILL_WAIT = 5
 SIGNALS = {
     signal.SIGINT: {
         'name': 'SIGINT',
@@ -41,10 +40,11 @@ class Manager(object):
         m.loop()
     """
 
-    def __init__(self, printer=None):
+    def __init__(self, printer=None, kill_grace_time=5):
         self.events = multiprocessing.Queue()
         self.returncode = None
 
+        self._kill_grace_time = kill_grace_time
         self._colours = get_colours()
         self._env = Env()
 
@@ -126,10 +126,10 @@ class Manager(object):
                 self.terminate()
 
             if exit_start is not None:
-                # If we've been in this loop for more than KILL_WAIT seconds,
+                # If we've been in this loop for more than kill_grace_time seconds,
                 # it's time to SIGKILL all remaining children.
                 waiting = self._env.now() - exit_start
-                if waiting > datetime.timedelta(seconds=KILL_WAIT):
+                if waiting > datetime.timedelta(seconds=self._kill_grace_time):
                     self.kill()
 
     def terminate(self):

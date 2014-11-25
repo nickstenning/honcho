@@ -51,6 +51,9 @@ _parent_parser.add_argument(
 _parent_parser.add_argument(
     '-v', '--version',
     action='version', version='%(prog)s ' + __version__)
+_parent_parser.add_argument(
+    '-t', '--timeout',
+    help="SIGINT->SIGKILL grace timeout.", default=5)
 
 _parser_defaults = {
     'parents': [_parent_parser],
@@ -193,7 +196,7 @@ def command_start(args):
     else:
         processes = procfile.processes
 
-    manager = Manager()
+    manager = Manager(kill_grace_time=args.timout)
 
     for p in environ.expand_processes(processes,
                                       concurrency=concurrency,
