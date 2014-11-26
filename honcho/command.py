@@ -2,8 +2,10 @@ import argparse
 import codecs
 import logging
 import os
+import pdb
 import sys
 import signal
+import traceback
 from collections import defaultdict
 from pkg_resources import iter_entry_points
 
@@ -51,6 +53,10 @@ _parent_parser.add_argument(
 _parent_parser.add_argument(
     '-v', '--version',
     action='version', version='%(prog)s ' + __version__)
+_parent_parser.add_argument(
+    '--pdb',
+    action='store_true',
+    help='Activate pdb on exception; for debugging')
 
 _parser_defaults = {
     'parents': [_parent_parser],
@@ -259,8 +265,13 @@ def main(argv=None):
     try:
         COMMANDS[args.command](args)
     except CommandError as e:
-        log.error(str(e))
-        sys.exit(1)
+        if args.pdb:
+            type, value, tb = sys.exc_info()
+            traceback.print_exc()
+            pdb.post_mortem(tb)
+        else:
+            log.error(str(e))
+            sys.exit(1)
 
 
 def _procfile_path(app_root, procfile):
