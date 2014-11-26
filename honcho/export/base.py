@@ -46,7 +46,11 @@ def dashrepl(value):
 
 def _default_template_env():
     env = jinja2.Environment(
-        loader=jinja2.PackageLoader(__name__, 'templates'))
+        loader=jinja2.ChoiceLoader([
+            jinja2.PackageLoader(__name__, 'templates'),
+            jinja2.FileSystemLoader('/'),
+        ])
+    )
     env.filters['shellquote'] = shellquote
     env.filters['dashrepl'] = dashrepl
     return env

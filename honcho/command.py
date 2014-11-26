@@ -97,6 +97,7 @@ def command_export(args):
         'log': args.log,
         'shell': args.shell,
         'user': args.user or args.app,
+        'template': args.template,
     }
 
     _mkdir(args.location)
@@ -133,6 +134,10 @@ parser_export.add_argument(
     '-s', '--shell',
     help="the shell that should run the application",
     default='/bin/sh', type=str)
+parser_export.add_argument(
+    '-t', '--template',
+    help="alternate template to use for creating export files",
+    default=None, type=str)
 parser_export.add_argument(
     'format',
     help="format to export to; one of %(choices)s",
