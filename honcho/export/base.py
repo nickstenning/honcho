@@ -19,10 +19,17 @@ except ImportError:
 
 
 class BaseExport(object):
-    def __init__(self, template_env=None):
-        if template_env is None:
-            template_env = _default_template_env()
-        self._template_env = template_env
+    def __init__(self, template_dir=None, template_env=None):
+        if template_env is not None:
+            self._template_env = template_env
+            return
+
+        if template_dir is not None:
+            loader = jinja2.FileSystemLoader([template_dir])
+        else:
+            loader = self.get_template_loader()
+
+        self._template_env = _default_template_env(loader)
 
     def get_template(self, path):
         """
@@ -31,6 +38,10 @@ class BaseExport(object):
         subclasses.
         """
         return self._template_env.get_template(path)
+
+    def get_template_loader(self):
+        raise NotImplementedError("You must implement a get_template_loader "
+                                  "method.")
 
     def render(self, processes, context):
         raise NotImplementedError("You must implement a render method.")
@@ -44,9 +55,8 @@ def dashrepl(value):
     return re.sub(patt, '-', value)
 
 
-def _default_template_env():
-    env = jinja2.Environment(
-        loader=jinja2.PackageLoader(__name__, 'templates'))
+def _default_template_env(loader):
+    env = jinja2.Environment(loader=loader)
     env.filters['shellquote'] = shellquote
     env.filters['dashrepl'] = dashrepl
     return env

@@ -1,14 +1,19 @@
 from itertools import groupby
 
+import jinja2
+
 from honcho.export.base import BaseExport
 from honcho.export.base import dashrepl
 
 
 class Export(BaseExport):
+    def get_template_loader(self):
+        return jinja2.PackageLoader(__name__, 'templates/upstart')
+
     def render(self, processes, context):
-        master_tpl = self.get_template('upstart/master.conf')
-        process_master_tpl = self.get_template('upstart/process_master.conf')
-        process_tpl = self.get_template('upstart/process.conf')
+        master_tpl = self.get_template('master.conf')
+        process_master_tpl = self.get_template('process_master.conf')
+        process_tpl = self.get_template('process.conf')
 
         groups = groupby(processes, lambda p: p.name.split('.')[0])
 

@@ -90,7 +90,7 @@ def command_export(args):
                                          port=port)
 
     export_ctor = export_choices[args.format].load()
-    export = export_ctor()
+    export = export_ctor(template_dir=args.template_dir)
 
     context = {
         'app': args.app,
@@ -134,6 +134,10 @@ parser_export.add_argument(
     '-s', '--shell',
     help="the shell that should run the application",
     default='/bin/sh', type=str)
+parser_export.add_argument(
+    '-t', '--template-dir',
+    help="directory to search for custom templates",
+    default=None, type=str, metavar='DIR')
 parser_export.add_argument(
     'format',
     help="format to export to; one of %(choices)s",

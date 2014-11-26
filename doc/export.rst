@@ -32,6 +32,9 @@ Options
     -l DIR, --log DIR
         Specify the directory to place process logs in.
 
+    -t DIR, --template-dir DIR
+        Specify alternate template directory to use for creating export files.
+
 
 Examples
 --------
