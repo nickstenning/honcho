@@ -124,14 +124,14 @@ parser_export.add_argument(
     help="the shell that should run the application",
     default='/bin/sh', type=str)
 parser_export.add_argument(
-    'location',
-    help="folder to export to",
-    type=str, metavar="LOCATION")
-parser_export.add_argument(
     'format',
     help="format in which to export",
     choices=list(export_choices),
     type=str, metavar="FORMAT")
+parser_export.add_argument(
+    'location',
+    help="folder to export to",
+    type=str, metavar="LOCATION")
 
 
 def command_help(args):
