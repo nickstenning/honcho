@@ -125,7 +125,7 @@ parser_export.add_argument(
     default='/bin/sh', type=str)
 parser_export.add_argument(
     'format',
-    help="format in which to export",
+    help="format to export to; one of %(choices)s",
     choices=list(export_choices),
     type=str, metavar="FORMAT")
 parser_export.add_argument(
