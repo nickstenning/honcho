@@ -83,8 +83,6 @@ class BaseExport(object):
 
     def export(self):
         self._mkdir(self.options.location)
-        self._mkdir(self.options.log)
-        self._chown(self.options.log)
 
         files = self.render(self.procfile,
                             self.options,
