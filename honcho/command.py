@@ -228,12 +228,25 @@ parser_start.add_argument(
     help='process(es) to start (default: all processes will be run)')
 
 
+def command_version(args):
+    print('{prog} {version}'.format(
+        prog=parser.prog,
+        version=__version__))
+
+
+parser_version = subparsers.add_parser(
+    'version',
+    help="display honcho version",
+    **_parser_defaults)
+
+
 COMMANDS = {
     'check': command_check,
     'export': command_export,
     'help': command_help,
     'run': command_run,
     'start': command_start,
+    'version': command_version,
 }
 
 
