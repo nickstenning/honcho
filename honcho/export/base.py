@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import os
 import re
 import sys
 
@@ -19,17 +20,22 @@ except ImportError:
 
 
 class BaseExport(object):
-    def __init__(self, template_env=None):
+    # Override this in subclasses -- e.g.: `supervisord`, `upstart`, etc.
+    default_template_dir = ''
+
+    def __init__(self, template_dir=None, template_env=None):
         if template_env is None:
             template_env = _default_template_env()
         self._template_env = template_env
+        self._template_dir = template_dir or self.default_template_dir
 
-    def get_template(self, path):
+    def get_template(self, name):
         """
         Retrieve the template at the specified path. Returns an instance of
         :py:class:`Jinja2.Template` by default, but may be overridden by
         subclasses.
         """
+        path = os.path.join(self._template_dir, name)
         return self._template_env.get_template(path)
 
     def render(self, processes, context):
@@ -46,7 +52,11 @@ def dashrepl(value):
 
 def _default_template_env():
     env = jinja2.Environment(
-        loader=jinja2.PackageLoader(__name__, 'templates'))
+        loader=jinja2.ChoiceLoader([
+            jinja2.PackageLoader(__name__, 'templates'),
+            jinja2.FileSystemLoader(['/', '.']),
+        ])
+    )
     env.filters['shellquote'] = shellquote
     env.filters['dashrepl'] = dashrepl
     return env
