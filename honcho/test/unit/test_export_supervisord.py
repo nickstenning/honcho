@@ -1,3 +1,4 @@
+import logging
 import os
 from collections import defaultdict, namedtuple
 from ..helpers import TestCase
@@ -15,6 +16,8 @@ DEFAULT_OPTIONS = Options(app="app", app_root="/path/to/app", format="supervisor
 DEFAULT_ENV = {}
 
 DEFAULT_CONCURRENCY = defaultdict(lambda: 1)
+
+logger = logging.getLogger(__name__)
 
 
 def get_render(procfile, options, environment, concurrency):
@@ -48,6 +51,7 @@ class TestExportSupervisord(TestCase):
 
         self.assertEqual(1, len(render))
         (fname, contents), = render
+        logger.debug('contents =\n%s', contents)
 
         parser = compat.ConfigParser()
         parser.readfp(compat.StringIO(contents))
