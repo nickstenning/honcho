@@ -48,7 +48,7 @@ copyright = u'2014, Nick Stenning'
 # built documents.
 #
 # The short X.Y version.
-from ..honcho import __version__
+from honcho import __version__
 version = __version__
 # The full version, including alpha/beta/rc tags.
 release = __version__

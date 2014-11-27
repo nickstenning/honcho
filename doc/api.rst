@@ -6,7 +6,7 @@ API Documentation
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: honcho.procfile
+.. automodule:: honcho.environ
     :members:
     :undoc-members:
     :show-inheritance:
