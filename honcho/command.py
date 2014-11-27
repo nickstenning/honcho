@@ -110,7 +110,10 @@ parser_export.add_argument(
     '-l', '--log',
     help="directory to place process logs in",
     default="/var/log/APP", type=str, metavar='DIR')
-parser_export.add_argument('-p', '--port', default=5000, type=int, metavar='N')
+parser_export.add_argument(
+    '-p', '--port',
+    help='port to use as the base for this application in exported config file',
+    default=5000, type=int, metavar='N')
 parser_export.add_argument(
     '-c', '--concurrency',
     help='number of each process type to run.',
