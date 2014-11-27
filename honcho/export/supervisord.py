@@ -8,12 +8,11 @@ class Export(BaseExport):
         processes = []
         port = options.port
         for name, cmd in procfile.processes.items():
-            for num in compat.xrange(0, concurrency[name]):
+            for num in compat.xrange(1, concurrency[name] + 1):
                 full_name_parts = [options.app, name]
                 env = environment.copy()
                 if concurrency[name] > 1:
                     env['PORT'] = str(port + num)
-                    full_name_parts.append(str(num))
                 else:
                     env['PORT'] = str(port)
                 processes.append((
