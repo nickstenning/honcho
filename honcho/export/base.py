@@ -90,6 +90,7 @@ class BaseExport(object):
                             self.concurrency)
 
         for name, content in files:
+            print("[honcho export] writing: %s" % name, file=sys.stderr)
             self._write(name, content)
 
         return files

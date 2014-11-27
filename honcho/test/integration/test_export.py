@@ -69,7 +69,7 @@ class TestExport(TestCase):
 
             self.assertEqual(ret, 0)
             self.assertEqual(out, '')
-            self.assertEqual(err, '')
+            self.assertEqual(err, '[honcho export] writing: fixtures.conf\n')
             self.assertTrue(path.exists(path.join(temp_dir, 'fixtures.conf')))
 
     def test_export_upstart(self):
@@ -83,7 +83,9 @@ class TestExport(TestCase):
 
             self.assertEqual(ret, 0)
             self.assertEqual(out, '')
-            self.assertEqual(err, '')
+            self.assertEqual(err, '[honcho export] writing: fixtures-foo.conf\n'
+                                  '[honcho export] writing: fixtures-foo-1.conf\n'
+                                  '[honcho export] writing: fixtures.conf\n')
             for filename in ('fixtures.conf', 'fixtures-foo.conf', 'fixtures-foo-1.conf'):
                 self.assertTrue(path.exists(path.join(temp_dir, filename)),
                                 'File %r was not generated!' % filename)
