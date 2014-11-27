@@ -52,22 +52,31 @@ When exporting to upstart, each process gets its own .conf file.
     $ honcho export -c web=1,worker=2,worker_low=1 -a honcho upstart /etc/init
 
 
-Adding New Format Support
--------------------------
+Adding New Export Format Support
+--------------------------------
 
-You can support new exporting formats by writing plugins. Honcho discovers
-exporting plugins with the `entry points mechanism`_ of setuptools.
+You can support new export formats by writing plugins. Honcho discovers
+export plugins with the `entry points mechanism`_ of setuptools.
 
 First, you need to write a class inherited from :class:`honcho.export.base.BaseExport`
 and override the :meth:`~honcho.export.base.BaseExport.render` method. Inside
-the ``render`` method, ``self.get_template('foo.html', __package__, 'data/templates')``
-could be used to find your Jinja2 template files. There are some exists
-exporting classes (e.g. :class:`honcho.export.upstart.Export`) which could be
-consulted.
+the :meth:`~honcho.export.base.BaseExport.render` method, you could locate your
+Jinja2 template file using something like:
 
-Next, you can create a ``setup.py`` file for building distribution package, and
-specify the prepared exporting classes in the ``entry_points`` section. For
-example::
+.. code-block:: python
+
+    self.get_template('foo.html', __package__, 'data/templates')
+
+There are some existing export classes which could be consulted -- e.g.:
+
+* :class:`honcho.export.supervisord.Export`
+* :class:`honcho.export.upstart.Export`
+
+Next, you can create a :file:`setup.py` file for building a package, and specify
+the new export classes in the ``entry_points`` section. For
+example:
+
+.. code-block:: python
 
     from setuptools import setup
 
@@ -82,7 +91,7 @@ example::
         },
     )
 
-After installed, the format supporting by the new exporting implementation can
-be discovered by the ``honcho export`` command.
+After installing the package, the new export format will be shown by the
+``honcho export`` command.
 
 .. _`entry points mechanism`: https://pythonhosted.org/setuptools/setuptools.html#dynamic-discovery-of-services-and-plugins
