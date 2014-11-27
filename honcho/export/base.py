@@ -1,7 +1,6 @@
 from __future__ import print_function
 
 import os
-import pwd
 import sys
 from pkg_resources import resource_filename
 
@@ -27,15 +26,6 @@ class BaseExport(object):
         self.environment = environment
         self.concurrency = concurrency
 
-        try:
-            user_entry = pwd.getpwnam(options.user)
-        except KeyError:
-            raise CommandError("No such user available: {0}"
-                               .format(options.user))
-
-        self.uid = user_entry.pw_uid
-        self.gid = user_entry.pw_gid
-
     def _mkdir(self, directory):
         if os.path.exists(directory):
             return
@@ -45,14 +35,6 @@ class BaseExport(object):
             print(e)
             raise CommandError("Can not create {0}"
                                .format(directory))
-
-    def _chown(self, filename):
-        try:
-            os.chown(filename, self.uid, self.gid)
-        except OSError:
-            raise CommandError("Can not chown {0} to {1}"
-                               .format(self.options.log,
-                                       self.options.user))
 
     def _write(self, filename, content):
         path = os.path.join(self.options.location, filename)
