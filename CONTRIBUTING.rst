@@ -118,4 +118,37 @@ within tox. E.g. if youd'd like to use nose ``-x`` flag (stop after first error)
 
     tox -e pypy -- -x
 
+If while running ``honcho``, you get an error and it's not very helpful -- e.g.::
 
+    $ honcho export supervisord .
+    [Errno 13] Permission denied: '/var/log/export_test'
+    2014-11-26 11:01:26 [23742] [ERROR] Can not create /var/log/export_test
+
+you can try using the ``--pdb`` option to try to diagnose it::
+
+    $ honcho export supervisord . --pdb
+    [Errno 13] Permission denied: '/var/log/export_test'
+    Traceback (most recent call last):
+      File "/Users/marca/dev/git-repos/honcho/honcho/command.py", line 253, in main
+        COMMANDS[args.command](args)
+      File "/Users/marca/dev/git-repos/honcho/honcho/command.py", line 106, in command_export
+        export.export()
+      File "/Users/marca/dev/git-repos/honcho/honcho/export/base.py", line 86, in export
+        self._mkdir(self.options.log)
+      File "/Users/marca/dev/git-repos/honcho/honcho/export/base.py", line 47, in _mkdir
+        .format(directory))
+    CommandError: Can not create /var/log/export_test
+    > /Users/marca/dev/git-repos/honcho/honcho/export/base.py(47)_mkdir()
+    -> .format(directory))
+    (Pdb) directory
+    '/var/log/export_test'
+    (Pdb) bt
+      /Users/marca/dev/git-repos/honcho/honcho/command.py(253)main()
+    -> COMMANDS[args.command](args)
+      /Users/marca/dev/git-repos/honcho/honcho/command.py(106)command_export()
+    -> export.export()
+      /Users/marca/dev/git-repos/honcho/honcho/export/base.py(86)export()
+    -> self._mkdir(self.options.log)
+    > /Users/marca/dev/git-repos/honcho/honcho/export/base.py(47)_mkdir()
+    -> .format(directory))
+    (Pdb)
