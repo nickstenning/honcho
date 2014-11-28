@@ -29,29 +29,6 @@ class NamedTemporaryDirectory:
 
 class TestExport(TestCase):
 
-    def test_export_usage(self):
-        # Invoking `honcho export` with no other args should print usage
-        ret, out, err = get_honcho_output(['export'])
-
-        self.assertEqual(ret, 2)
-        regexes = (
-            'usage: honcho export',
-            r'\[-h\]',
-            r'\[-e ENV\]',
-            r'\[-d APP_ROOT\]',
-            r'\[-f PROCFILE\]',
-            r'\[-a APP\]',
-            r'\[-l DIR\]',
-            r'\[-p N\]',
-            r'\[-c process=num,process=num\]',
-            r'\[-u USER\]',
-            r'\[-s SHELL\]',
-            # r'\[-t TEMPLATE\]',
-            'FORMAT LOCATION',
-        )
-        for regex in regexes:
-            self.assertRegexpMatches(err, regex)
-
     def test_export_unknown_format(self):
         ret, out, err = get_honcho_output([
             'export',                  # command
