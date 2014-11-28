@@ -129,7 +129,7 @@ parser_export.add_argument(
 parser_export.add_argument(
     'format',
     help="format to export to; one of %(choices)s",
-    choices=list(export_choices),
+    choices=sorted(export_choices.keys()),
     type=str, metavar="FORMAT")
 parser_export.add_argument(
     'location',
