@@ -28,36 +28,6 @@ class NamedTemporaryDirectory:
 
 
 class TestExport(TestCase):
-
-    def test_export_unknown_format(self):
-        ret, out, err = get_honcho_output([
-            'export',                  # command
-            '-f', 'Procfile.simple',   # Procfile input
-            'unknown_format',          # output FORMAT; not a legal one
-        ])
-
-        self.assertEqual(ret, 2)
-        self.assertRegexpMatches(
-            err,
-            "honcho export: error: argument FORMAT: "
-            "invalid choice: 'unknown_format' "
-            r"\(choose from 'supervisord', 'upstart'\)"
-        )
-
-    def test_export_too_few_arguments(self):
-        ret, out, err = get_honcho_output([
-            'export',                  # command
-            '-f', 'Procfile.simple',   # Procfile input
-            'supervisord',             # output FORMAT
-            # No location given
-        ])
-
-        self.assertEqual(ret, 2)
-        self.assertRegexpMatches(
-            err,
-            'too few arguments'
-            '|the following arguments are required: LOCATION')
-
     def test_export_supervisord(self):
         with NamedTemporaryDirectory() as temp_dir:
             ret, out, err = get_honcho_output([
@@ -84,6 +54,7 @@ class TestExport(TestCase):
             self.assertEqual(ret, 0)
             self.assertEqual(out, '')
             self.assertEqual(err, '')
-            for filename in ('fixtures.conf', 'fixtures-foo.conf', 'fixtures-foo-1.conf'):
-                self.assertTrue(path.exists(path.join(temp_dir, filename)),
-                                'File %r was not generated!' % filename)
+            for filename in ('fixtures.conf',
+                             'fixtures-foo.conf',
+                             'fixtures-foo-1.conf'):
+                self.assertTrue(path.exists(path.join(temp_dir, filename)))

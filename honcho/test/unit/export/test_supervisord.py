@@ -1,68 +1,28 @@
-import logging
-import os
-from collections import defaultdict, namedtuple
-from honcho.test.helpers import TestCase
-from honcho.test.helpers import get_procfile
+from mock import MagicMock
+from mock import patch
 
-from honcho import compat
+from honcho.test.helpers import TestCase
+
 from honcho.export.supervisord import Export
 
 
-Options = namedtuple("Options", ("app", "app_root", "format", "log", "port", "user", "shell", "location"))
-
-DEFAULT_OPTIONS = Options(app="app", app_root="/path/to/app", format="supervisord", log="/path/to/log",
-                          port=5000, user=os.getlogin(), shell="/usr/local/shell", location="/path/to/export")
-
-DEFAULT_ENV = {}
-
-DEFAULT_CONCURRENCY = defaultdict(lambda: 1)
-
-logger = logging.getLogger(__name__)
-
-
-def get_render(procfile, options, environment, concurrency):
-    export = Export(procfile, options, environment, concurrency)
-    return export.render(export.procfile, export.options, export.environment, export.concurrency)
-
-
 class TestExportSupervisord(TestCase):
+    def setUp(self):  # noqa
+        self.export = Export()
 
-    def test_supervisord_export(self):
-        procfile = get_procfile("Procfile.simple")
-        render = get_render(procfile, DEFAULT_OPTIONS, DEFAULT_ENV, DEFAULT_CONCURRENCY)
+    @patch.object(Export, 'get_template')
+    def test_render_adds_processes_to_context(self, fake_get_template):
+        p1, p2 = object(), object()
 
-        self.assertEqual(1, len(render))
-        (fname, contents), = render
+        self.export.render([p1, p2], {'app': 'elephant'})
 
-        parser = compat.ConfigParser()
-        parser.readfp(compat.StringIO(contents))
+        fake_get_template.return_value.render.assert_called_with(
+            {'app': 'elephant',
+             'processes': [p1, p2]})
 
-        section = "program:app-foo"
+    def test_render_uses_app_name_as_filename(self):
+        self.export.get_template = MagicMock()
 
-        self.assertTrue(parser.has_section(section))
-        self.assertEqual(DEFAULT_OPTIONS.user, parser.get(section, "user"))
-        self.assertEqual("{0} -c 'python simple.py'"
-                         .format(DEFAULT_OPTIONS.shell),
-                         parser.get(section, "command"))
+        results = self.export.render([], {'app': 'elephant'})
 
-    def test_supervisord_concurrency(self):
-        procfile = get_procfile("Procfile.simple")
-        render = get_render(procfile, DEFAULT_OPTIONS, DEFAULT_ENV, {"foo": 4})
-
-        self.assertEqual(1, len(render))
-        (fname, contents), = render
-        logger.debug('contents =\n%s', contents)
-
-        parser = compat.ConfigParser()
-        parser.readfp(compat.StringIO(contents))
-
-        for job_index in compat.xrange(4):
-            section = "program:app-foo-{0}".format(job_index)
-            self.assertTrue(parser.has_section(section))
-            self.assertEqual('PORT="{0}"'
-                             .format(DEFAULT_OPTIONS.port + job_index),
-                             parser.get(section, "environment"))
-
-        self.assertEqual(
-            parser.get("group:app", "programs"),
-            ",".join("app-foo-{0}".format(i) for i in compat.xrange(4)))
+        self.assertEqual('elephant.conf', results[0][0])

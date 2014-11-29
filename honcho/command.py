@@ -78,17 +78,32 @@ def command_export(args):
     if args.log == "/var/log/APP":
         args.log = args.log.replace('APP', args.app)
 
-    args.user = args.user or args.app
-    args.app_root = os.path.abspath(args.app_root)
-
     procfile_path = _procfile_path(args.app_root, args.procfile)
     procfile = _procfile(procfile_path)
     env = _read_env(procfile_path, args.env)
     concurrency = _parse_concurrency(args.concurrency)
 
-    export_class = export_choices[args.format].load()
-    export = export_class(procfile, args, env, concurrency)
-    export.export()
+    processes = environ.expand_processes(procfile.processes,
+                                         concurrency=concurrency,
+                                         env=env,
+                                         port=args.port)
+
+    export_ctor = export_choices[args.format].load()
+    export = export_ctor()
+
+    context = {
+        'app': args.app,
+        'app_root': os.path.abspath(args.app_root),
+        'log': args.log,
+        'shell': args.shell,
+        'user': args.user or args.app,
+    }
+
+    _mkdir(args.location)
+
+    for filename, contents in export.render(processes, context):
+        path = os.path.join(args.location, filename)
+        _write_file(path, contents)
 
 parser_export = subparsers.add_parser(
     'export',
@@ -307,6 +322,25 @@ def _parse_quiet(desc):
     result = desc.split(',')
     return result
 
+
+def _mkdir(path):
+    if os.path.exists(path):
+        return
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        print(e)
+        raise CommandError("Can not create {0}"
+                           .format(path))
+
+
+def _write_file(path, content):
+    try:
+        with open(path, 'w') as fp:
+            fp.write(content)
+    except IOError:
+        raise CommandError("Can not write to file {0}"
+                           .format(path))
 
 if __name__ == '__main__':
     main()
