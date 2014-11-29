@@ -74,30 +74,3 @@ def get_honcho_output(args):
 def get_procfile(name):
     with open(os.path.join(FIXTURE_ROOT, name)) as f:
         return environ.parse_procfile(f.read())
-
-
-def monkeypatch_process_for_coverage(process_cls):
-    try:
-        import coverage as _coverage  # noqa
-    except:
-        # give up monkey-patching if coverage not installed
-        return process_cls
-
-    from coverage.collector import Collector
-    from coverage.control import coverage
-    # detect if coverage was running in forked process
-    if Collector._collectors:
-        class ProcessWithCoverage(process_cls):
-            def _bootstrap(self):
-                cov = coverage(data_suffix=True)
-                cov.start()
-                cov._warn_no_data = False
-                cov._warn_unimported_source = False
-                try:
-                    return process_cls._bootstrap(self)
-                finally:
-                    cov.stop()
-                    cov.save()
-        return ProcessWithCoverage
-    else:
-        return process_cls
