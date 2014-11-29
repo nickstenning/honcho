@@ -78,16 +78,7 @@ def command_export(args):
     if args.log == "/var/log/APP":
         args.log = args.log.replace('APP', args.app)
 
-    if args.user is None:
-        if compat.ON_WINDOWS:
-            args.user = os.environ.get('USERNAME')
-        else:
-            args.user = os.environ.get('USER')
-
-    if args.user is None:
-        raise CommandError('Could not automatically deduce user: please '
-                           'supply the -u/--user option.')
-
+    args.user = args.user or args.app
     args.app_root = os.path.abspath(args.app_root)
 
     procfile_path = _procfile_path(args.app_root, args.procfile)
