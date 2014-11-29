@@ -16,10 +16,9 @@ class Export(BaseExport):
             'shell':       options.shell
         }
 
-        master_template = self.get_template('process_master.conf',
-                                            package='honcho')
-        process_template = self.get_template('process.conf', package='honcho')
-        app_template = self.get_template('master.conf', package='honcho')
+        master_template = self.get_template('upstart/process_master.conf')
+        process_template = self.get_template('upstart/process.conf')
+        app_template = self.get_template('upstart/master.conf')
 
         for name, cmd in compat.iteritems(procfile.processes):
             ctx = context.copy()
