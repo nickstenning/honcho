@@ -1,8 +1,8 @@
 import logging
 import os
 from collections import defaultdict, namedtuple
-from ..helpers import TestCase
-from ..helpers import get_procfile
+from honcho.test.helpers import TestCase
+from honcho.test.helpers import get_procfile
 
 from honcho import compat
 from honcho.export.supervisord import Export
