@@ -1,7 +1,8 @@
-.PHONY: clean-pyc clean-build docs test
+.PHONY: clean-pyc clean-docs clean-build docs test
 
 help:
 	@echo "clean-build - remove build artifacts"
+	@echo "clean-docs - remove documentation artifacts"
 	@echo "clean-pyc - remove Python file artifacts"
 	@echo "clean - remove artifacts"
 	@echo "lint - check style with flake8"
@@ -12,7 +13,7 @@ help:
 	@echo "release - package and upload a release"
 	@echo "sdist - package"
 
-clean: clean-build clean-pyc
+clean: clean-build clean-docs clean-pyc
 
 clean-build:
 	rm -fr build/
@@ -20,6 +21,9 @@ clean-build:
 	rm -fr *.egg-info
 	find . -name '*.egg-info' -type d -exec rm -rf {} +
 	rm -fr *.egg
+
+clean-docs:
+	$(MAKE) -C doc clean
 
 clean-pyc:
 	find . -name '*.pyc' -type f -exec rm -f {} +
@@ -40,7 +44,6 @@ coverage:
 	tox -e coverage
 
 docs:
-	$(MAKE) -C doc clean
 	$(MAKE) -C doc html
 
 release: clean
