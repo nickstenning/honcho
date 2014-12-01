@@ -37,7 +37,7 @@ class TestExportSupervisord(TestCase):
         parser = compat.ConfigParser()
         parser.readfp(compat.StringIO(contents))
 
-        section = "program:app-foo"
+        section = "program:app-foo-1"
 
         self.assertTrue(parser.has_section(section))
         self.assertEqual(DEFAULT_OPTIONS.user, parser.get(section, "user"))
@@ -56,7 +56,7 @@ class TestExportSupervisord(TestCase):
         parser = compat.ConfigParser()
         parser.readfp(compat.StringIO(contents))
 
-        for job_index in compat.xrange(4):
+        for job_index in compat.xrange(1, 5):
             section = "program:app-foo-{0}".format(job_index)
             self.assertTrue(parser.has_section(section))
             self.assertEqual('PORT="{0}"'
@@ -65,4 +65,4 @@ class TestExportSupervisord(TestCase):
 
         self.assertEqual(
             parser.get("group:app", "programs"),
-            ",".join("app-foo-{0}".format(i) for i in compat.xrange(4)))
+            ",".join("app-foo-{0}".format(i) for i in compat.xrange(1, 5)))
