@@ -41,9 +41,7 @@ class TestExportSupervisord(TestCase):
 
         self.assertTrue(parser.has_section(section))
         self.assertEqual(DEFAULT_OPTIONS.user, parser.get(section, "user"))
-        self.assertEqual("{0} -c 'python simple.py'"
-                         .format(DEFAULT_OPTIONS.shell),
-                         parser.get(section, "command"))
+        self.assertEqual("python simple.py", parser.get(section, "command"))
 
     def test_supervisord_concurrency(self):
         procfile = get_procfile("Procfile.simple")
