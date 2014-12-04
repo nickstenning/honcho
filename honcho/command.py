@@ -336,6 +336,9 @@ def _mkdir(path):
 
 def _write_file(path, content):
     try:
+        if not content.endswith('\n'):
+            content += '\n'
+
         with open(path, 'w') as fp:
             fp.write(content)
     except IOError:
