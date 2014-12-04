@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import argparse
 import codecs
 import logging
@@ -103,6 +105,7 @@ def command_export(args):
 
     for filename, contents in export.render(processes, context):
         path = os.path.join(args.location, filename)
+        print("Writing: %s" % path, file=sys.stderr)
         _write_file(path, contents)
 
 parser_export = subparsers.add_parser(
