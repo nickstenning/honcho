@@ -39,6 +39,9 @@ class BaseExport(object):
     def _write(self, filename, content):
         path = os.path.join(self.options.location, filename)
 
+        if not content.endswith('\n'):
+            content += '\n'
+
         try:
             open(path, 'w').write(content)
         except IOError:
