@@ -17,6 +17,8 @@ except ImportError:
           file=sys.stderr)
     sys.exit(1)
 
+patt = re.compile(r'\W', re.UNICODE)
+
 
 class BaseExport(object):
     def __init__(self, template_env=None):
@@ -40,7 +42,6 @@ def dashrepl(value):
     """
     Replace any non-word characters with a dash.
     """
-    patt = re.compile(r'\W', re.UNICODE)
     return re.sub(patt, '-', value)
 
 
