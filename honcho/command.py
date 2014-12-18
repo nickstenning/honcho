@@ -35,29 +35,27 @@ except AttributeError:
 class CommandError(Exception):
     pass
 
-_parent_parser = argparse.ArgumentParser(
-    'honcho',
-    description='Manage Procfile-based applications',
-    add_help=False)
-_parent_parser.add_argument(
-    '-e', '--env',
-    help='environment file[,file]', default='.env')
-_parent_parser.add_argument(
-    '-d', '--app-root',
-    help='procfile directory', default='.')
-_parent_parser.add_argument(
-    '-f', '--procfile',
-    help='procfile path', default='Procfile')
-_parent_parser.add_argument(
-    '-v', '--version',
-    action='version', version='%(prog)s ' + __version__)
-
 _parser_defaults = {
-    'parents': [_parent_parser],
     'formatter_class': argparse.ArgumentDefaultsHelpFormatter,
 }
 
-parser = argparse.ArgumentParser(**_parser_defaults)
+parser = argparse.ArgumentParser(
+    'honcho',
+    description='Manage Procfile-based applications',
+    add_help=False,
+    **_parser_defaults)
+parser.add_argument(
+    '-e', '--env',
+    help='environment file[,file]', default='.env')
+parser.add_argument(
+    '-d', '--app-root',
+    help='procfile directory', default='.')
+parser.add_argument(
+    '-f', '--procfile',
+    help='procfile path', default='Procfile')
+parser.add_argument(
+    '-v', '--version',
+    action='version', version='%(prog)s ' + __version__)
 
 subparsers = parser.add_subparsers(title='tasks', dest='command')
 subparsers.required = True
