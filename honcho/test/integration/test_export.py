@@ -39,7 +39,6 @@ class TestExport(TestCase):
 
             self.assertEqual(ret, 0)
             self.assertEqual(out, '')
-            self.assertEqual(err, '')
             self.assertTrue(path.exists(path.join(temp_dir, 'fixtures.conf')))
 
     def test_export_upstart(self):
@@ -53,7 +52,6 @@ class TestExport(TestCase):
 
             self.assertEqual(ret, 0)
             self.assertEqual(out, '')
-            self.assertEqual(err, '')
             for filename in ('fixtures.conf',
                              'fixtures-foo.conf',
                              'fixtures-foo-1.conf'):
