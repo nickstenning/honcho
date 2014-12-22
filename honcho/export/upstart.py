@@ -1,44 +1,33 @@
-from honcho import compat
+from itertools import groupby
+
 from honcho.export.base import BaseExport
+from honcho.export.base import dashrepl
 
 
 class Export(BaseExport):
-    def render(self, procfile, options, environment, concurrency):
-        files = []
+    def render(self, processes, context):
+        master_tpl = self.get_template('upstart/master.conf')
+        process_master_tpl = self.get_template('upstart/process_master.conf')
+        process_tpl = self.get_template('upstart/process.conf')
 
-        context = {
-            'app':         options.app,
-            'app_root':    options.app_root,
-            'environment': environment,
-            'log':         options.log,
-            'port':        options.port,
-            'user':        options.user,
-            'shell':       options.shell
-        }
+        groups = groupby(processes, lambda p: p.name.split('.')[0])
 
-        master_template = self.get_template('process_master.conf',
-                                            package='honcho')
-        process_template = self.get_template('process.conf', package='honcho')
-        app_template = self.get_template('master.conf', package='honcho')
+        master = "{0}.conf".format(context['app'])
+        yield master, master_tpl.render(context)
 
-        for name, cmd in compat.iteritems(procfile.processes):
+        for name, procs in groups:
+            group_name = "{0}-{1}".format(context['app'], name)
+
             ctx = context.copy()
-            ctx.update({'command': cmd,
-                        'name':    name})
+            ctx.update({'group_name': group_name})
 
-            master = "{0}-{1}.conf".format(options.app, name)
-            master_content = master_template.render(ctx)
-            files.append((master, master_content))
+            process_master = "{0}.conf".format(group_name)
+            yield process_master, process_master_tpl.render(ctx)
 
-            for num in compat.xrange(1, concurrency[name] + 1):
-                ctx.update({'num': num})
-                process = "{0}-{1}-{2}.conf".format(options.app, name, num)
-                process_content = process_template.render(ctx)
-                files.append((process, process_content))
-
-        app = "{0}.conf".format(options.app)
-        app_content = app_template.render(context)
-
-        files.append((app, app_content))
-
-        return files
+            for p in procs:
+                ctx = context.copy()
+                ctx.update({'group_name': group_name,
+                            'process': p})
+                process = "{0}-{1}.conf".format(context['app'],
+                                                dashrepl(p.name))
+                yield process, process_tpl.render(ctx)
