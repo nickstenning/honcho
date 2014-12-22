@@ -1,2 +1,0 @@
-foo: cmd /c "echo "Started foo" & exit 123"
-bar: cmd /c "echo "Started bar" & exit 42"

@@ -1,2 +1,0 @@
-foo: echo "Started foo" && exit 123
-bar: echo "Started bar" && exit 42

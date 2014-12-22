@@ -1,4 +1,0 @@
-web: echo PORT=$PORT && sleep 1
-worker: echo PORT=$PORT && sleep 1
-redis: echo PORT=$PORT && sleep 1
-es: echo PORT=$PORT && sleep 1
