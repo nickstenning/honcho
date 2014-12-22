@@ -1,44 +1,32 @@
 import sys
-from ..helpers import TestCase
-from ..helpers import get_honcho_output
+import textwrap
 
-from honcho import compat
+from ..helpers import TestCase
+from ..helpers import TestEnv
+
+python_bin = sys.executable
+
+script = textwrap.dedent("""
+    from __future__ import print_function
+    import os
+    import sys
+    print(os.environ.get("ANIMAL", "elephant"))
+    print("error output", file=sys.stderr)
+""")
 
 
 class TestRun(TestCase):
-
-    def test_run_quoting(self):
-        # 'python' is not always in the path on all test os
-        # in particular on Windows, this is not the case
-        python = sys.executable
-        ret, out, err = get_honcho_output(['run', python, '-c',
-                                           'print("hello world")'])
+    def test_run(self):
+        with TestEnv({'test.py': script}) as env:
+            ret, out, err = env.run_honcho(['run', python_bin, 'test.py'])
 
         self.assertEqual(ret, 0)
-        self.assertEqual(out, 'hello world\n')
-
-    def test_run_captures_all_arguments(self):
-        if compat.ON_WINDOWS:
-            return
-        command = ['run', 'env', '-i', 'A=B']
-        ret, out, err = get_honcho_output(command)
-        self.assertEqual(ret, 0)
-        self.assertEqual(out.strip(), "A=B")
-
-    def test_run_captures_all_arguments_windows(self):
-        # note: this is not the same exact test as on Posix
-        # but this captures the gist of the intention
-        if not compat.ON_WINDOWS:
-            return
-        command = ['run', 'cmd', '/a', '/e:on', '/c', 'cd', '&', 'set']
-        ret, out, err = get_honcho_output(command)
-        self.assertEqual(ret, 0)
-        self.assertTrue("honcho" in out)
-        self.assertTrue("HOMEDRIVE" in out)
-
-    def test_run_keeps_stderr_and_stdout_separate(self):
-        ret, out, err = get_honcho_output(['run', 'python', 'simple.py'])
-
-        self.assertEqual(ret, 0)
-        self.assertEqual(out, 'normal output\n')
+        self.assertEqual(out, 'elephant\n')
         self.assertEqual(err, 'error output\n')
+
+    def test_run_env(self):
+        with TestEnv({'.env': 'ANIMAL=giraffe', 'test.py': script}) as env:
+            ret, out, err = env.run_honcho(['run', python_bin, 'test.py'])
+
+        self.assertEqual(ret, 0)
+        self.assertEqual(out, 'giraffe\n')
