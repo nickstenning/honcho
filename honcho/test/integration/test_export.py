@@ -1,5 +1,4 @@
 import os
-import textwrap
 
 from ..helpers import TestCase
 from ..helpers import TestEnv
