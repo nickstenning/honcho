@@ -103,6 +103,7 @@ def command_export(args):
 
     for filename, contents in export.render(processes, context):
         path = os.path.join(args.location, filename)
+        log.info("Writing '%s'", path)
         _write_file(path, contents)
 
 parser_export = subparsers.add_parser(
