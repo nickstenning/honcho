@@ -329,18 +329,17 @@ def _mkdir(path):
     try:
         os.makedirs(path)
     except OSError as e:
-        print(e)
-        raise CommandError("Can not create {0}"
-                           .format(path))
+        log.error("Could not create export directory")
+        raise CommandError(e)
 
 
 def _write_file(path, content):
     try:
         with open(path, 'w') as fp:
             fp.write(content)
-    except IOError:
-        raise CommandError("Can not write to file {0}"
-                           .format(path))
+    except IOError as e:
+        log.error("Could not write to export file")
+        raise CommandError(e)
 
 if __name__ == '__main__':
     main()
