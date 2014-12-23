@@ -58,7 +58,6 @@ def add_common_args(parser, default=argparse.SUPPRESS):
 parser = argparse.ArgumentParser(
     'honcho',
     description='Manage Procfile-based applications',
-    add_help=False,
     **_parser_defaults)
 add_common_args(parser, default=None)
 
