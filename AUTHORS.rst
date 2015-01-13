@@ -17,7 +17,6 @@ Contributors
 * Thomas Orozco
 * Alex Morega
 * Igor Davydenko
-* Jannis Leidel
 * Alen Mujezinovic
 * Jean-Philippe Serafin
 * Alejandro Varas
