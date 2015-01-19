@@ -66,6 +66,12 @@ ENVFILE_FIXTURES = [
         """,
         {'MYVAR': '"escaped"'}
     ],
+    [
+        """
+        MYVAR="test\\nmultiline"
+        """,
+        {'MYVAR': 'test\nmultiline'}
+    ],
 ]
 
 PROCFILE_FIXTURES = [
