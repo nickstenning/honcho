@@ -9,6 +9,12 @@ project endeavours to adhere to `Semantic Versioning`_.
 Unreleased
 ----------
 
+0.6.1 -- 2015-02-07
+-------------------
+
+* CHANGED: Honcho is now release as a universal wheel package (with support for
+  Python 2 and 3).
+
 0.6.0 -- 2015-02-07
 -------------------
 
