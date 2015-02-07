@@ -31,6 +31,10 @@ Unreleased
   exporters and honcho itself).
 * CHANGED: Supervisor exports now sets PORT environment variable consistently
   with other exporters and the rest of honcho.
+* CHANGED: Supervisor export now takes a directory as the location parameter on
+  the command line, e.g. ``honcho export supervisord /etc/supervisord.d``, thus
+  making the use consistent with other exporters. N.B. This is a
+  backwards-incompatible change!
 * FIXED: Addressed numerous text encoding bugs.
 * FIXED: Honcho exporters can now be used on Python 3.2
 * FIXED: Honcho no longer crashes when all processes are made ``--quiet``.
