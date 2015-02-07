@@ -23,10 +23,9 @@ class Env(object):
 
     if compat.ON_WINDOWS:
         def terminate(self, pid):
-            PROCESS_TERMINATE = 1
-            handle = ctypes.windll.kernel32.OpenProcess(PROCESS_TERMINATE,
-                                                        False,
-                                                        pid)
+            # The first argument to OpenProcess represents the desired access
+            # to the process. 1 represents the PROCESS_TERMINATE access right.
+            handle = ctypes.windll.kernel32.OpenProcess(1, False, pid)
             ctypes.windll.kernel32.TerminateProcess(handle, -1)
             ctypes.windll.kernel32.CloseHandle(handle)
     else:
