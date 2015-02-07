@@ -1,6 +1,7 @@
 from collections import namedtuple
 import sys
 
+from .compat import ON_WINDOWS
 
 Message = namedtuple("Message", "type data time name colour")
 
@@ -51,3 +52,16 @@ def _ansi(code):
 
 def _colour_string(colour, s):
     return '{0}{1}{2}'.format(_ansi(colour), s, _ansi(0))
+
+
+if ON_WINDOWS:
+    # The colorama package provides transparent support for ANSI colour codes
+    # on Win32 platforms. We try and import and configure that, but fall back
+    # to no colour if we fail.
+    try:
+        import colorama
+    except ImportError:
+        def _colour_string(colour, s):  # noqa
+            return s
+    else:
+        colorama.init()
