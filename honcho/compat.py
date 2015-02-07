@@ -11,9 +11,11 @@ ON_WINDOWS = 'win32' in str(sys.platform).lower()
 try:
     {}.iteritems
 except AttributeError:
-    iteritems = lambda data: data.items()
+    def iteritems(data):
+        return data.items()
 else:
-    iteritems = lambda data: data.iteritems()
+    def iteritems(data):
+        return data.iteritems()
 
 # Python 3 hasn't xrange, we should use range instead
 try:
