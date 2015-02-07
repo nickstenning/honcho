@@ -5,6 +5,7 @@ import errno
 import shlex
 import os
 import re
+import signal
 
 from . import compat
 
@@ -21,17 +22,29 @@ class Env(object):
         return datetime.datetime.now()
 
     if compat.ON_WINDOWS:
-        # Shamelessly cribbed from
-        # https://docs.python.org/2/faq/windows.html#how-do-i-emulate-os-kill-in-windows
-        def killpg(self, pid, signum=None):
-            """kill function for Win32"""
-            kernel32 = ctypes.windll.kernel32
-            handle = kernel32.OpenProcess(1, 0, pid)
-            return (0 != kernel32.TerminateProcess(handle, 0))
+        def terminate(self, pid):
+            PROCESS_TERMINATE = 1
+            handle = ctypes.windll.kernel32.OpenProcess(PROCESS_TERMINATE,
+                                                        False,
+                                                        pid)
+            ctypes.windll.kernel32.TerminateProcess(handle, -1)
+            ctypes.windll.kernel32.CloseHandle(handle)
     else:
-        def killpg(self, pid, signum=None):
+        def terminate(self, pid):
             try:
-                os.killpg(pid, signum)
+                os.killpg(pid, signal.SIGTERM)
+            except OSError as e:
+                if e.errno not in [errno.EPERM, errno.ESRCH]:
+                    raise
+
+    if compat.ON_WINDOWS:
+        def kill(self, pid):
+            # There's no SIGKILL on Win32...
+            self.terminate(pid)
+    else:
+        def kill(self, pid):
+            try:
+                os.killpg(pid, signal.SIGKILL)
             except OSError as e:
                 if e.errno not in [errno.EPERM, errno.ESRCH]:
                     raise
