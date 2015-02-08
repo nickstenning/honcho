@@ -82,11 +82,12 @@ def command_export(args):
     procfile = _procfile(procfile_path)
     env = _read_env(procfile_path, args.env)
     concurrency = _parse_concurrency(args.concurrency)
+    port = _choose_port(args, env)
 
     processes = environ.expand_processes(procfile.processes,
                                          concurrency=concurrency,
                                          env=env,
-                                         port=args.port)
+                                         port=port)
 
     export_ctor = export_choices[args.format].load()
     export = export_ctor()
@@ -119,8 +120,8 @@ parser_export.add_argument(
     default="/var/log/APP", type=str, metavar='DIR')
 parser_export.add_argument(
     '-p', '--port',
-    help='port to use as the base for this application in exported config file',
-    default=5000, type=int, metavar='N')
+    help="starting port number (default: 5000)",
+    default=argparse.SUPPRESS, type=int, metavar='N')
 parser_export.add_argument(
     '-c', '--concurrency',
     help='number of each process type to run.',
@@ -188,10 +189,10 @@ def command_start(args):
     procfile_path = _procfile_path(args.app_root, args.procfile)
     procfile = _procfile(procfile_path)
 
-    port = int(os.environ.get('PORT', args.port))
     concurrency = _parse_concurrency(args.concurrency)
     env = _read_env(procfile_path, args.env)
     quiet = _parse_quiet(args.quiet)
+    port = _choose_port(args, env)
 
     if args.processes:
         processes = compat.OrderedDict()
@@ -223,8 +224,8 @@ parser_start = subparsers.add_parser(
     **_parser_defaults)
 parser_start.add_argument(
     '-p', '--port',
-    help="starting port number",
-    type=int, default=5000, metavar='N')
+    help="starting port number (default: 5000)",
+    type=int, default=argparse.SUPPRESS, metavar='N')
 parser_start.add_argument(
     '-c', '--concurrency',
     help='the number of each process type to run.',
@@ -322,6 +323,20 @@ def _parse_quiet(desc):
         return result
     result = desc.split(',')
     return result
+
+
+def _choose_port(args, env):
+    env_port = env.pop('PORT', None)
+    os_env_port = os.environ.pop('PORT', None)
+
+    if hasattr(args, 'port'):
+        return args.port
+    elif env_port is not None:
+        return int(env_port)
+    elif os_env_port is not None:
+        return int(os_env_port)
+    else:
+        return 5000
 
 
 def _mkdir(path):
