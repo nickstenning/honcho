@@ -35,29 +35,31 @@ except AttributeError:
 class CommandError(Exception):
     pass
 
-_parent_parser = argparse.ArgumentParser(
-    'honcho',
-    description='Manage Procfile-based applications',
-    add_help=False)
-_parent_parser.add_argument(
-    '-e', '--env',
-    help='environment file[,file]', default='.env')
-_parent_parser.add_argument(
-    '-d', '--app-root',
-    help='procfile directory', default='.')
-_parent_parser.add_argument(
-    '-f', '--procfile',
-    help='procfile path', default='Procfile')
-_parent_parser.add_argument(
-    '-v', '--version',
-    action='version', version='%(prog)s ' + __version__)
-
 _parser_defaults = {
-    'parents': [_parent_parser],
     'formatter_class': argparse.ArgumentDefaultsHelpFormatter,
 }
 
-parser = argparse.ArgumentParser(**_parser_defaults)
+
+def add_common_args(parser, default=argparse.SUPPRESS):
+    parser.add_argument(
+        '-e', '--env',
+        help='environment file[,file]', default=(default or '.env'))
+    parser.add_argument(
+        '-d', '--app-root',
+        help='procfile directory', default=(default or '.'))
+    parser.add_argument(
+        '-f', '--procfile',
+        help='procfile path', default=(default or 'Procfile'))
+    parser.add_argument(
+        '-v', '--version',
+        action='version', version='%(prog)s ' + __version__)
+
+
+parser = argparse.ArgumentParser(
+    'honcho',
+    description='Manage Procfile-based applications',
+    **_parser_defaults)
+add_common_args(parser, default=None)
 
 subparsers = parser.add_subparsers(title='tasks', dest='command')
 subparsers.required = True
@@ -72,6 +74,7 @@ parser_check = subparsers.add_parser(
     'check',
     help="validate a Procfile",
     **_parser_defaults)
+add_common_args(parser_check)
 
 
 def command_export(args):
@@ -143,6 +146,7 @@ parser_export.add_argument(
     'location',
     help="folder to export to",
     type=str, metavar="LOCATION")
+add_common_args(parser_export)
 
 
 def command_help(args):
@@ -183,6 +187,7 @@ parser_run.add_argument(
     'argv',
     nargs=argparse.REMAINDER,
     help='command to run')
+add_common_args(parser_run)
 
 
 def command_start(args):
@@ -237,6 +242,7 @@ parser_start.add_argument(
 parser_start.add_argument(
     'processes', nargs='*',
     help='process(es) to start (default: all processes will be run)')
+add_common_args(parser_start)
 
 
 def command_version(args):
