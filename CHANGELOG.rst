@@ -9,10 +9,16 @@ project endeavours to adhere to `Semantic Versioning`_.
 Unreleased
 ----------
 
+0.6.3 -- 2015-02-07
+-------------------
+
+* CHANGED: The commandline ``-p/--port`` option now takes precedence over all
+  other ways of setting the start port.
+
 0.6.2 -- 2015-02-07
 -------------------
 
-* ADDDED: Colour output is now supported on Windows when the ``colorama``
+* ADDED: Colour output is now supported on Windows when the ``colorama``
   package is installed.
 * FIXED: Honcho no longer always crashes on Windows. Sorry about that.
 
