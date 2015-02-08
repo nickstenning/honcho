@@ -9,6 +9,12 @@ project endeavours to adhere to `Semantic Versioning`_.
 Unreleased
 ----------
 
+0.6.4 -- 2015-02-08
+-------------------
+
+* FIXED: Common arguments (``-f``, ``-d``, etc.) given before the subcommand
+  (``start``, ``run``, etc.) are no longer ignored on Python 2.7.9.
+
 0.6.3 -- 2015-02-07
 -------------------
 
