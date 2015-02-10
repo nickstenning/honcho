@@ -110,9 +110,6 @@ def expand_processes(processes, concurrency=None, env=None, quiet=None, port=Non
     if env is not None and env.get("PORT") is not None:
         port = int(env.get("PORT"))
 
-    if port is not None:
-        assert port % 1000 == 0, "port must be multiple of 1000"
-
     if quiet is None:
         quiet = []
 
