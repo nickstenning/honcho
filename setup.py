@@ -36,7 +36,11 @@ setup(
     long_description=long_description,
     license='MIT',
     keywords='sysadmin process procfile',
-
+    classifiers=[
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3'
+    ],
     install_requires=requirements,
     extras_require={
         'export': export_requirements,
