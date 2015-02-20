@@ -206,9 +206,6 @@ class TestExpandProcesses(TestCase):
         p = ep(("foo", "some command"), port=8000)
         self.assertEqual({"PORT": "8000"}, p[0].env)
 
-    def test_port_invalid(self):
-        self.assertRaises(AssertionError, ep, ("foo", "test"), port=5123)
-
     def test_port_multiple(self):
         p = ep(("foo", "some command"),
                ("bar", "another command"),
