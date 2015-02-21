@@ -12,7 +12,7 @@
         /:/  /       \::/  /        /:/  /       \:\__\         /:/  /       \::/  /
         \/__/         \/__/         \/__/         \/__/         \/__/         \/__/
 
-|Build Status|
+|PyPI| |Build Status|
 
 Honcho is a Python port of Foreman_, a tool for managing Procfile-based applications.
 
@@ -22,6 +22,10 @@ Honcho is a Python port of Foreman_, a tool for managing Procfile-based applicat
 
 .. |Build Status| image:: https://secure.travis-ci.org/nickstenning/honcho.png?branch=master
    :target: http://travis-ci.org/nickstenning/honcho
+
+.. |PyPI| image:: https://pypip.in/version/honcho/badge.svg
+    :target: https://pypi.python.org/pypi/honcho/
+    :alt: Latest Version on PyPI
 
 Installing Honcho
 -----------------
