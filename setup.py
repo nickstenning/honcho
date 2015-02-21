@@ -32,6 +32,7 @@ setup(
     install_requires=[],
     extras_require={
         ':python_version=="2.6"': ['argparse', 'ordereddict'],
+        ':sys_platform=="win32"': ['colorama'],
         'export:python_version=="3.0"': ['jinja2>=2.6,<2.7'],
         'export:python_version=="3.1"': ['jinja2>=2.6,<2.7'],
         'export:python_version=="3.2"': ['jinja2>=2.6,<2.7'],
