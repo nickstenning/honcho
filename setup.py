@@ -4,18 +4,6 @@ from setuptools import setup, find_packages
 
 from honcho import __version__
 
-requirements = []
-export_requirements = []
-
-if sys.version_info[:2] < (2, 7):
-    requirements.append('argparse')
-    requirements.append('ordereddict')
-
-if (3, 0) <= sys.version_info[:2] < (3, 3):
-    export_requirements = ['jinja2>=2.6,<2.7']
-else:
-    export_requirements = ['jinja2>=2.7,<2.8']
-
 HERE = os.path.dirname(__file__)
 try:
     long_description = open(os.path.join(HERE, 'README.rst')).read()
@@ -41,9 +29,13 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3'
     ],
-    install_requires=requirements,
+    install_requires=[],
     extras_require={
-        'export': export_requirements,
+        ':python_version=="2.6"': ['argparse', 'ordereddict'],
+        'export:python_version=="3.0"': ['jinja2>=2.6,<2.7'],
+        'export:python_version=="3.1"': ['jinja2>=2.6,<2.7'],
+        'export:python_version=="3.2"': ['jinja2>=2.6,<2.7'],
+        'export': ['jinja2>=2.7,<2.8'],
     },
     entry_points={
         'console_scripts': [
