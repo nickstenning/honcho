@@ -67,7 +67,7 @@ Ready to contribute? Here's how to set up `honcho` for local development.
 
     $ mkvirtualenv honcho
     $ cd honcho/
-    $ pip install -r requirements_dev.txt
+    $ pip install -e .[export] tox
 
 4. Create a branch for local development::
 
