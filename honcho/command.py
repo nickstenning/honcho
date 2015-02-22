@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import signal
+import warnings
 from collections import defaultdict
 from pkg_resources import iter_entry_points
 
@@ -22,14 +23,6 @@ BASENAME = os.path.basename(os.getcwd())
 
 export_choices = dict((_export.name, _export)
                       for _export in iter_entry_points('honcho_exporters'))
-
-try:
-    # Python 3
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer)
-    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer)
-except AttributeError:
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
-    sys.stderr = codecs.getwriter("utf-8")(sys.stderr)
 
 
 class CommandError(Exception):
@@ -270,6 +263,7 @@ def main(argv=None):
         args = parser.parse_args()
 
     try:
+        _check_output_encoding()
         COMMANDS[args.command](args)
     except CommandError as e:
         log.error(str(e))
@@ -358,6 +352,17 @@ def _write_file(path, content):
     except IOError as e:
         log.error("Could not write to export file")
         raise CommandError(e)
+
+
+def _check_output_encoding():
+    no_encoding = sys.stdout.encoding is None
+    utf8 = codecs.lookup('utf8')
+
+    if no_encoding or codecs.lookup(sys.stdout.encoding) != utf8:
+        log.warn('Your terminal is not configured to receive UTF-8 encoded '
+                 'text. Please adjust your locale settings or force UTF-8 '
+                 'output by setting PYTHONIOENCODING="utf-8".')
+
 
 if __name__ == '__main__':
     main()
