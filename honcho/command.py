@@ -137,7 +137,7 @@ parser_export.add_argument(
     default='/bin/sh', type=str)
 parser_export.add_argument(
     '-t', '--template',
-    help="alternate template to use for creating export files",
+    help="alternate template directory to use for creating export files",
     default=None, type=str)
 parser_export.add_argument(
     'format',

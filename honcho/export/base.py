@@ -24,18 +24,32 @@ class BaseExport(object):
     default_template_dir = ''
 
     def __init__(self, template_dir=None, template_env=None):
-        if template_env is None:
-            template_env = _default_template_env()
-        self._template_env = template_env
-        self._template_dir = template_dir or self.default_template_dir
+        if template_env:
+            self._template_env = template_env
+        else:
+            self._template_env = self._get_template_env(template_dir)
 
-    def get_template(self, name):
+    def _get_template_env(self, template_dir):
+        loader = self._get_loader(template_dir)
+        return _default_template_env(loader)
+
+    def _get_loader(self, template_dir):
+        if template_dir:
+            return jinja2.FileSystemLoader([template_dir])
+        else:
+            return jinja2.PackageLoader(
+                package_name=__name__,
+                package_path=self._get_package_path())
+
+    def _get_package_path(self):
+        return os.path.join('templates', self.default_template_dir)
+
+    def get_template(self, path):
         """
         Retrieve the template at the specified path. Returns an instance of
         :py:class:`Jinja2.Template` by default, but may be overridden by
         subclasses.
         """
-        path = os.path.join(self._template_dir, name)
         return self._template_env.get_template(path)
 
     def render(self, processes, context):
@@ -50,13 +64,8 @@ def dashrepl(value):
     return re.sub(patt, '-', value)
 
 
-def _default_template_env():
-    env = jinja2.Environment(
-        loader=jinja2.ChoiceLoader([
-            jinja2.PackageLoader(__name__, 'templates'),
-            jinja2.FileSystemLoader(['/', '.']),
-        ])
-    )
+def _default_template_env(loader):
+    env = jinja2.Environment(loader=loader)
     env.filters['shellquote'] = shellquote
     env.filters['dashrepl'] = dashrepl
     return env
