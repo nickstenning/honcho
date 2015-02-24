@@ -44,7 +44,7 @@ setup(
     extras_require={
         ':python_version=="2.6"': ['argparse', 'ordereddict'],
         ':sys_platform=="win32"': ['colorama'],
-        'export:python_version in "3.0,3.1,3.2"': ['jinja2>=2.6,<2.7'],
+        'export:python_version in "3.0,3.1,3.2"': ['jinja2>=2.7,<2.8'],
         'export:python_version not in "3.0,3.1,3.2"': ['jinja2>=2.7,<2.8'],
     },
     entry_points={
