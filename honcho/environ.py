@@ -78,13 +78,15 @@ def parse(content):
     values = {}
     for line in content.splitlines():
         lexer = shlex.shlex(line, posix=True)
-        lexer.wordchars += '/.+-():'
         tokens = list(lexer)
 
         # parses the assignment statement
-        if len(tokens) != 3:
+        if len(tokens) < 3:
             continue
-        name, op, value = tokens
+
+        name, op = tokens[:2]
+        value = ''.join(tokens[2:])
+
         if op != '=':
             continue
         if not re.match(r'[A-Za-z_][A-Za-z_0-9]*', name):

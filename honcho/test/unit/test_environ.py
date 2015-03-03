@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import textwrap
 from ..helpers import TestCase
 
@@ -66,6 +68,41 @@ ENVFILE_FIXTURES = [
         """,
         {'MYVAR': '"escaped"'}
     ],
+    [
+        # At-sign in value
+        r"""
+        MYVAR=user@domain.com
+        """,
+        {'MYVAR': 'user@domain.com'}
+    ],
+    [
+        # Much punctuation in value
+        r"""
+        MYVAR=~pun|u@|0n$=
+        """,
+        {'MYVAR': '~pun|u@|0n$='}
+    ],
+    [
+        # Unicode values
+        r"""
+        MYVAR=⋃ñᴉ—☪ó∂ǝ
+        """,
+        {'MYVAR': '⋃ñᴉ—☪ó∂ǝ'}
+    ],
+    [
+        # Unicode keys
+        r"""
+        ṀẎṾẠṚ=value
+        """,
+        {}
+    ],
+    [
+        # Quoted space in value
+        r"""
+        MYVAR='sp ace'
+        """,
+        {'MYVAR': 'sp ace'}
+    ]
 ]
 
 PROCFILE_FIXTURES = [
