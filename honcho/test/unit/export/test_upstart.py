@@ -16,6 +16,22 @@ FIX_NPROC = [FakeProcess('web.1'),
              FakeProcess('worker.2')]
 
 
+class TestExportCustomTemplate(TestCase):
+    def test_render_custom_template_dir(self):
+        template_dir = 'upstart_custom_template.d'
+        export_custom_template_dir = Export(template_dir=template_dir)
+        export_custom_template_dir._template_env.get_template = MagicMock()
+
+        out = list(export_custom_template_dir.render(FIX_1PROC, {'app': 'elephant'}))
+        self.assertEqual(len(out), 3)
+
+        get_template = export_custom_template_dir._template_env.get_template
+        self.assertEqual(get_template.call_count, 3)
+        get_template.assert_any_call('master.conf')
+        get_template.assert_any_call('process_master.conf')
+        get_template.assert_any_call('process.conf')
+
+
 class TestExportUpstart(TestCase):
     def setUp(self):  # noqa
         self.export = Export()
@@ -48,6 +64,9 @@ class TestExportUpstart(TestCase):
                       out)
 
         self.master.render.assert_called_once_with({'app': 'elephant'})
+        self.get_template.assert_any_call('process_master.conf')
+        self.get_template.assert_any_call('process.conf')
+        self.get_template.assert_any_call('master.conf')
 
     def test_render_process_master(self):
         out = self.export.render(FIX_1PROC, {'app': 'elephant'})

@@ -5,10 +5,12 @@ from honcho.export.base import dashrepl
 
 
 class Export(BaseExport):
+    default_template_dir = 'upstart'
+
     def render(self, processes, context):
-        master_tpl = self.get_template('upstart/master.conf')
-        process_master_tpl = self.get_template('upstart/process_master.conf')
-        process_tpl = self.get_template('upstart/process.conf')
+        master_tpl = self.get_template('master.conf')
+        process_master_tpl = self.get_template('process_master.conf')
+        process_tpl = self.get_template('process.conf')
 
         groups = groupby(processes, lambda p: p.name.split('.')[0])
 
