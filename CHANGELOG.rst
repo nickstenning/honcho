@@ -9,6 +9,14 @@ project endeavours to adhere to `Semantic Versioning`_.
 Unreleased
 ----------
 
+* ADDED: Exporter templates can now be overridden by the ``--template-dir``
+  option to ``honcho export``.
+* CHANGED: Colour output is now supported by default on Windows.
+* CHANGED: Base port is no longer required to be a multiple of 1000.
+* FIXED: Output is no longer buffered on Python 3.
+* FIXED: Environment variables in ``.env`` files can now take any POSIX-valid
+  values rather than simple alphanumerics only.
+
 0.6.4 -- 2015-02-08
 -------------------
 
