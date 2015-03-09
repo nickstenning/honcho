@@ -1,62 +1,32 @@
 Exporting
 =========
 
-Honcho allows you to export your Procfile configuration into other formats::
+Honcho allows you to export your Procfile configuration into other formats.
+Basic usage::
 
-  $ honcho export OPTIONS FORMAT LOCATION
+  $ honcho export FORMAT LOCATION
 
-Currently only ``upstart`` and ``supervisord`` formats are supported.
-
-Options
--------
-
-::
-
-    -s SHELL, --shell SHELL
-        Specify the shell that should run the application.
-        Only used for upstart.
-
-    -u USER, --user USER
-        Specify the user the application should be run as.
-
-    -a APP, --app APP
-        Specify the name of the application you are going to export.
-
-    -c process=num,process=num, --concurrency process=num,process=num
-        Specify the number of each process type to run.
-
-    -p N, --port N
-        Specify which port to use as the base for this application.
-        Should be a multiple of 1000.
-
-    -l DIR, --log DIR
-        Specify the directory to place process logs in.
-
-    -t DIR, --template-dir DIR
-        Specify alternate template directory to use for creating export files.
+Exporters for ``upstart`` and ``supervisord`` formats are shipped with Honcho.
 
 
 Examples
 --------
 
-Before exporting, you need to make sure that your user has an access to
-:file:`/var/log/{APP}` folder.
+The following command will create a :file:`myapp.conf` file in the
+:file:`/etc/supervisor/conf.d` directory::
 
-The following command will create a :file:`honcho.conf` file in the :file:`/etc/supervisor/conf.d/` directory.
+    $ honcho export -a myapp supervisord /etc/supervisor/conf.d
 
-::
+Or, for the upstart exporter::
 
-    $ honcho export -c web=1,worker=2,worker_low=1 -a honcho supervisord /etc/supervisor/conf.d/
+    $ honcho export -a myapp upstart /etc/init
 
-When exporting to upstart, each process gets its own .conf file.
-
-::
-
-    $ honcho export -c web=1,worker=2,worker_low=1 -a honcho upstart /etc/init
+By default, one of each process type will be started. You can change this by
+specifying the ``--concurrency`` option to ``honcho export``.
 
 
-Adding New Export Format Support
---------------------------------
+Adding support for new export formats
+-------------------------------------
 
 You can add support for new export formats by writing plugins. Honcho discovers
 export plugins with the `entry points mechanism`_ of setuptools. Export plugins
