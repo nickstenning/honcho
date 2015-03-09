@@ -49,7 +49,10 @@ class FakeEnv(object):
     def now(self):
         return datetime.datetime(2012, 8, 11, 12, 42)
 
-    def killpg(self, pid, sig=None):
+    def terminate(self, pid):
+        pass
+
+    def kill(self, pid):
         pass
 
 

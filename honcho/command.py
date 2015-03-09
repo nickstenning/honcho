@@ -23,41 +23,33 @@ BASENAME = os.path.basename(os.getcwd())
 export_choices = dict((_export.name, _export)
                       for _export in iter_entry_points('honcho_exporters'))
 
-try:
-    # Python 3
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer)
-    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer)
-except AttributeError:
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
-    sys.stderr = codecs.getwriter("utf-8")(sys.stderr)
-
 
 class CommandError(Exception):
     pass
 
-_parent_parser = argparse.ArgumentParser(
+
+def _add_common_args(parser, with_defaults=False):
+    suppress = None if with_defaults else argparse.SUPPRESS
+    parser.add_argument('-e', '--env',
+                        default=(suppress or '.env'),
+                        help='environment file[,file] (default: .env)')
+    parser.add_argument('-d', '--app-root',
+                        metavar='DIR',
+                        default=(suppress or '.'),
+                        help='procfile directory (default: .)')
+    parser.add_argument('-f', '--procfile',
+                        metavar='FILE',
+                        default=(suppress or 'Procfile'),
+                        help='procfile path (default: Procfile)')
+    parser.add_argument('-v', '--version',
+                        action='version',
+                        version='%(prog)s ' + __version__)
+
+
+parser = argparse.ArgumentParser(
     'honcho',
-    description='Manage Procfile-based applications',
-    add_help=False)
-_parent_parser.add_argument(
-    '-e', '--env',
-    help='environment file[,file]', default='.env')
-_parent_parser.add_argument(
-    '-d', '--app-root',
-    help='procfile directory', default='.')
-_parent_parser.add_argument(
-    '-f', '--procfile',
-    help='procfile path', default='Procfile')
-_parent_parser.add_argument(
-    '-v', '--version',
-    action='version', version='%(prog)s ' + __version__)
-
-_parser_defaults = {
-    'parents': [_parent_parser],
-    'formatter_class': argparse.ArgumentDefaultsHelpFormatter,
-}
-
-parser = argparse.ArgumentParser(**_parser_defaults)
+    description='Manage Procfile-based applications')
+_add_common_args(parser, with_defaults=True)
 
 subparsers = parser.add_subparsers(title='tasks', dest='command')
 subparsers.required = True
@@ -70,8 +62,8 @@ def command_check(args):
 
 parser_check = subparsers.add_parser(
     'check',
-    help="validate a Procfile",
-    **_parser_defaults)
+    help="validate a Procfile")
+_add_common_args(parser_check)
 
 
 def command_export(args):
@@ -82,14 +74,15 @@ def command_export(args):
     procfile = _procfile(procfile_path)
     env = _read_env(procfile_path, args.env)
     concurrency = _parse_concurrency(args.concurrency)
+    port = _choose_port(args, env)
 
     processes = environ.expand_processes(procfile.processes,
                                          concurrency=concurrency,
                                          env=env,
-                                         port=args.port)
+                                         port=port)
 
     export_ctor = export_choices[args.format].load()
-    export = export_ctor()
+    export = export_ctor(template_dir=args.template_dir)
 
     context = {
         'app': args.app,
@@ -108,8 +101,8 @@ def command_export(args):
 
 parser_export = subparsers.add_parser(
     'export',
-    help="export a Procfile to another format",
-    **_parser_defaults)
+    help="export a Procfile to another format")
+_add_common_args(parser_export)
 parser_export.add_argument(
     '-a', '--app',
     help="alternative app name", default=BASENAME, type=str, metavar='APP')
@@ -119,8 +112,8 @@ parser_export.add_argument(
     default="/var/log/APP", type=str, metavar='DIR')
 parser_export.add_argument(
     '-p', '--port',
-    help='port to use as the base for this application in exported config file',
-    default=5000, type=int, metavar='N')
+    help="starting port number (default: 5000)",
+    default=argparse.SUPPRESS, type=int, metavar='N')
 parser_export.add_argument(
     '-c', '--concurrency',
     help='number of each process type to run.',
@@ -133,6 +126,10 @@ parser_export.add_argument(
     '-s', '--shell',
     help="the shell that should run the application",
     default='/bin/sh', type=str)
+parser_export.add_argument(
+    '-t', '--template-dir',
+    help="directory to search for custom templates",
+    default=None, type=str, metavar='DIR')
 parser_export.add_argument(
     'format',
     help="format to export to; one of %(choices)s",
@@ -152,8 +149,7 @@ def command_help(args):
 
 parser_help = subparsers.add_parser(
     'help',
-    help="describe available tasks or one specific task",
-    **_parser_defaults)
+    help="describe available tasks or one specific task")
 parser_help.add_argument('task', help='task to show help for', nargs='?')
 
 
@@ -176,8 +172,8 @@ def command_run(args):
 
 parser_run = subparsers.add_parser(
     'run',
-    help="run a command using your application's environment",
-    **_parser_defaults)
+    help="run a command using your application's environment")
+_add_common_args(parser_run)
 parser_run.add_argument(
     'argv',
     nargs=argparse.REMAINDER,
@@ -188,10 +184,10 @@ def command_start(args):
     procfile_path = _procfile_path(args.app_root, args.procfile)
     procfile = _procfile(procfile_path)
 
-    port = int(os.environ.get('PORT', args.port))
     concurrency = _parse_concurrency(args.concurrency)
     env = _read_env(procfile_path, args.env)
     quiet = _parse_quiet(args.quiet)
+    port = _choose_port(args, env)
 
     if args.processes:
         processes = compat.OrderedDict()
@@ -219,12 +215,12 @@ def command_start(args):
 
 parser_start = subparsers.add_parser(
     'start',
-    help="start the application (or a specific PROCESS)",
-    **_parser_defaults)
+    help="start the application (or a specific PROCESS)")
+_add_common_args(parser_start)
 parser_start.add_argument(
     '-p', '--port',
-    help="starting port number",
-    type=int, default=5000, metavar='N')
+    help="starting port number (default: 5000)",
+    type=int, default=argparse.SUPPRESS, metavar='N')
 parser_start.add_argument(
     '-c', '--concurrency',
     help='the number of each process type to run.',
@@ -235,7 +231,7 @@ parser_start.add_argument(
     type=str, metavar='process1,process2,process3')
 parser_start.add_argument(
     'processes', nargs='*',
-    help='process(es) to start (default: all processes will be run)')
+    help='process(es) to start (default: all processes)')
 
 
 def command_version(args):
@@ -246,8 +242,7 @@ def command_version(args):
 
 parser_version = subparsers.add_parser(
     'version',
-    help="display honcho version",
-    **_parser_defaults)
+    help="display honcho version")
 
 
 COMMANDS = {
@@ -267,6 +262,7 @@ def main(argv=None):
         args = parser.parse_args()
 
     try:
+        _check_output_encoding()
         COMMANDS[args.command](args)
     except CommandError as e:
         log.error(str(e))
@@ -324,6 +320,20 @@ def _parse_quiet(desc):
     return result
 
 
+def _choose_port(args, env):
+    env_port = env.pop('PORT', None)
+    os_env_port = os.environ.pop('PORT', None)
+
+    if hasattr(args, 'port'):
+        return args.port
+    elif env_port is not None:
+        return int(env_port)
+    elif os_env_port is not None:
+        return int(os_env_port)
+    else:
+        return 5000
+
+
 def _mkdir(path):
     if os.path.exists(path):
         return
@@ -341,6 +351,17 @@ def _write_file(path, content):
     except IOError as e:
         log.error("Could not write to export file")
         raise CommandError(e)
+
+
+def _check_output_encoding():
+    no_encoding = sys.stdout.encoding is None
+    utf8 = codecs.lookup('utf8')
+
+    if no_encoding or codecs.lookup(sys.stdout.encoding) != utf8:
+        log.warn('Your terminal is not configured to receive UTF-8 encoded '
+                 'text. Please adjust your locale settings or force UTF-8 '
+                 'output by setting PYTHONIOENCODING="utf-8".')
+
 
 if __name__ == '__main__':
     main()

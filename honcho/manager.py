@@ -20,9 +20,6 @@ SIGNALS = {
         'name': 'SIGTERM',
         'rc': 143,
     },
-    signal.SIGKILL: {
-        'name': 'SIGKILL',
-    }
 }
 SYSTEM_PRINTER_NAME = 'system'
 
@@ -127,7 +124,7 @@ class Manager(object):
 
             if exit_start is not None:
                 # If we've been in this loop for more than KILL_WAIT seconds,
-                # it's time to SIGKILL all remaining children.
+                # it's time to kill all remaining children.
                 waiting = self._env.now() - exit_start
                 if waiting > datetime.timedelta(seconds=KILL_WAIT):
                     self.kill()
@@ -139,20 +136,16 @@ class Manager(object):
         if self._terminating:
             return
         self._terminating = True
-        self._killall(signal.SIGTERM)
+        self._killall()
 
     def kill(self):
         """
         Kill all processes managed by this ProcessManager.
         """
-        self._killall(signal.SIGKILL)
+        self._killall(force=True)
 
-    def _kill(self, pid, signum=None):
-        """Kill a single process ID"""
-        self._env.killpg(pid, signum)
-
-    def _killall(self, signum):
-        """Kill all remaining processes with the specified signal"""
+    def _killall(self, force=False):
+        """Kill all remaining processes, forcefully if requested."""
         for_termination = []
 
         for n, p in iteritems(self._processes):
@@ -161,9 +154,13 @@ class Manager(object):
 
         for n in for_termination:
             p = self._processes[n]
+            signame = 'SIGKILL' if force else 'SIGTERM'
             self._system_print("sending %s to %s (pid %s)\n" %
-                               (SIGNALS[signum]['name'], n, p['pid']))
-            self._kill(p['pid'], signum)
+                               (signame, n, p['pid']))
+            if force:
+                self._env.kill(p['pid'])
+            else:
+                self._env.terminate(p['pid'])
 
     def _start(self):
         for name, p in self._processes.items():

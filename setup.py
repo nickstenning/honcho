@@ -1,20 +1,7 @@
 import os
-import sys
 from setuptools import setup, find_packages
 
 from honcho import __version__
-
-requirements = []
-export_requirements = []
-
-if sys.version_info[:2] < (2, 7):
-    requirements.append('argparse')
-    requirements.append('ordereddict')
-
-if (3, 0) <= sys.version_info[:2] < (3, 3):
-    export_requirements = ['jinja2>=2.6,<2.7']
-else:
-    export_requirements = ['jinja2>=2.7,<2.8']
 
 HERE = os.path.dirname(__file__)
 try:
@@ -36,10 +23,29 @@ setup(
     long_description=long_description,
     license='MIT',
     keywords='sysadmin process procfile',
-
-    install_requires=requirements,
+    classifiers=[
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.0',
+        'Programming Language :: Python :: 3.1',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+    ],
+    install_requires=[],
     extras_require={
-        'export': export_requirements,
+        ':python_version=="2.6"': ['argparse', 'ordereddict'],
+        ':sys_platform=="win32"': ['colorama'],
+        'export:python_version in "3.0,3.1,3.2"': ['jinja2>=2.6,<2.7'],
+        'export:python_version not in "3.0,3.1,3.2"': ['jinja2>=2.7,<2.8'],
     },
     entry_points={
         'console_scripts': [

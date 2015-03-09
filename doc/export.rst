@@ -1,92 +1,84 @@
 Exporting
 =========
 
-Honcho allows you to export your Procfile configuration into other formats::
+Honcho allows you to export your Procfile configuration into other formats.
+Basic usage::
 
-  $ honcho export OPTIONS FORMAT LOCATION
+  $ honcho export FORMAT LOCATION
 
-Currently only ``upstart`` and ``supervisord`` formats are supported.
-
-Options
--------
-
-::
-
-    -s SHELL, --shell SHELL
-        Specify the shell that should run the application.
-        Only used for upstart.
-
-    -u USER, --user USER
-        Specify the user the application should be run as.
-
-    -a APP, --app APP
-        Specify the name of the application you are going to export.
-
-    -c process=num,process=num, --concurrency process=num,process=num
-        Specify the number of each process type to run.
-
-    -p N, --port N
-        Specify which port to use as the base for this application.
-        Should be a multiple of 1000.
-
-    -l DIR, --log DIR
-        Specify the directory to place process logs in.
+Exporters for ``upstart`` and ``supervisord`` formats are shipped with Honcho.
 
 
 Examples
 --------
 
-Before exporting, you need to make sure that your user has an access to
-:file:`/var/log/{APP}` folder.
+The following command will create a :file:`myapp.conf` file in the
+:file:`/etc/supervisor/conf.d` directory::
 
-The following command will create a :file:`honcho.conf` file in the :file:`/etc/supervisor/conf.d/` directory.
+    $ honcho export -a myapp supervisord /etc/supervisor/conf.d
 
-::
+Or, for the upstart exporter::
 
-    $ honcho export -c web=1,worker=2,worker_low=1 -a honcho supervisord /etc/supervisor/conf.d/ 
+    $ honcho export -a myapp upstart /etc/init
 
-When exporting to upstart, each process gets its own .conf file.
-
-::
-
-    $ honcho export -c web=1,worker=2,worker_low=1 -a honcho upstart /etc/init
+By default, one of each process type will be started. You can change this by
+specifying the ``--concurrency`` option to ``honcho export``.
 
 
-Adding New Export Format Support
---------------------------------
+Adding support for new export formats
+-------------------------------------
 
-You can support new export formats by writing plugins. Honcho discovers
-export plugins with the `entry points mechanism`_ of setuptools.
+You can add support for new export formats by writing plugins. Honcho discovers
+export plugins with the `entry points mechanism`_ of setuptools. Export plugins
+take the form of a class with ``render`` and ``get_template_loader`` methods
+that inherits from :class:`honcho.export.base.BaseExport`. Inside the
+:meth:`~honcho.export.base.BaseExport.render` method, you can fetch templates
+using the `~honcho.export.base.BaseExport.get_template` method.
 
-First, you need to write a class inherited from :class:`honcho.export.base.BaseExport`
-and override the :meth:`~honcho.export.base.BaseExport.render` method. Inside
-the :meth:`~honcho.export.base.BaseExport.render` method, you could locate your
-Jinja2 template file using something like:
+For example, here is a hypothetical exporter that writes out simple shell
+scripts for each process:
 
 .. code-block:: python
 
-    self.get_template('foo.html', __package__, 'data/templates')
+    import jinja2
 
-There are some existing export classes which could be consulted -- e.g.:
+    from honcho.export.base import BaseExport
 
-* :class:`honcho.export.supervisord.Export`
-* :class:`honcho.export.upstart.Export`
+    class SimpleExport(BaseExport):
+        def get_template_loader(self):
+            return jinja2.PackageLoader(package_name=__package__,
+                                        package_path='templates')
 
-Next, you can create a :file:`setup.py` file for building a package, and specify
-the new export classes in the ``entry_points`` section. For
-example:
+        def render(self, processes, context):
+            tpl = get_template('run.sh')
+
+            for p in processes:
+                filename = 'run-{0}.sh'.format(p.name)
+                ctx = context.copy()
+                ctx['process'] = p
+                script = tpl.render(ctx)
+
+By writing an exporter in this way (specifically, by inheriting
+:class:`~honcho.export.base.BaseExport`), you make it possible for users of your
+exporter to override the exporter's default templates using the
+``--template-dir`` option to ``honcho export``.
+
+In order for your export plugin to be detected by Honcho, you will need to
+register your exporter class under the ``honcho_exporters`` entrypoint. If we
+were shipping our hypothetical ``SimpleExport`` class in a package called
+``honcho_export_simple``, our ``setup.py`` might look something like the
+following:
 
 .. code-block:: python
 
     from setuptools import setup
 
     setup(
-        name='honcho-foo',
+        name='honcho_export_simple',
         ...
         entry_points={
             'honcho_exporters': [
-                'honcho_foo.export.foo:FooExport',
-                'honcho_foo.export.foobar:FooBarExport',
+                'simple=honcho_export_simple:SimpleExport',
             ],
         },
     )

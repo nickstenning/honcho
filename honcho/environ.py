@@ -5,6 +5,7 @@ import errno
 import shlex
 import os
 import re
+import signal
 
 from . import compat
 
@@ -21,17 +22,28 @@ class Env(object):
         return datetime.datetime.now()
 
     if compat.ON_WINDOWS:
-        # Shamelessly cribbed from
-        # https://docs.python.org/2/faq/windows.html#how-do-i-emulate-os-kill-in-windows
-        def killpg(self, pid, signum=None):
-            """kill function for Win32"""
-            kernel32 = ctypes.windll.kernel32
-            handle = kernel32.OpenProcess(1, 0, pid)
-            return (0 != kernel32.TerminateProcess(handle, 0))
+        def terminate(self, pid):
+            # The first argument to OpenProcess represents the desired access
+            # to the process. 1 represents the PROCESS_TERMINATE access right.
+            handle = ctypes.windll.kernel32.OpenProcess(1, False, pid)
+            ctypes.windll.kernel32.TerminateProcess(handle, -1)
+            ctypes.windll.kernel32.CloseHandle(handle)
     else:
-        def killpg(self, pid, signum=None):
+        def terminate(self, pid):
             try:
-                os.killpg(pid, signum)
+                os.killpg(pid, signal.SIGTERM)
+            except OSError as e:
+                if e.errno not in [errno.EPERM, errno.ESRCH]:
+                    raise
+
+    if compat.ON_WINDOWS:
+        def kill(self, pid):
+            # There's no SIGKILL on Win32...
+            self.terminate(pid)
+    else:
+        def kill(self, pid):
+            try:
+                os.killpg(pid, signal.SIGKILL)
             except OSError as e:
                 if e.errno not in [errno.EPERM, errno.ESRCH]:
                     raise
@@ -66,13 +78,15 @@ def parse(content):
     values = {}
     for line in content.splitlines():
         lexer = shlex.shlex(line, posix=True)
-        lexer.wordchars += '/.+-():'
         tokens = list(lexer)
 
         # parses the assignment statement
-        if len(tokens) != 3:
+        if len(tokens) < 3:
             continue
-        name, op, value = tokens
+
+        name, op = tokens[:2]
+        value = ''.join(tokens[2:])
+
         if op != '=':
             continue
         if not re.match(r'[A-Za-z_][A-Za-z_0-9]*', name):
@@ -99,9 +113,6 @@ def expand_processes(processes, concurrency=None, env=None, quiet=None, port=Non
     """
     if env is not None and env.get("PORT") is not None:
         port = int(env.get("PORT"))
-
-    if port is not None:
-        assert port % 1000 == 0, "port must be multiple of 1000"
 
     if quiet is None:
         quiet = []

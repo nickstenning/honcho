@@ -1,3 +1,5 @@
+# coding=utf-8
+
 import textwrap
 from ..helpers import TestCase
 
@@ -72,6 +74,41 @@ ENVFILE_FIXTURES = [
         """,
         {'MYVAR': 'test\nmultiline'}
     ],
+    [
+        # At-sign in value
+        r"""
+        MYVAR=user@domain.com
+        """,
+        {'MYVAR': 'user@domain.com'}
+    ],
+    [
+        # Much punctuation in value
+        r"""
+        MYVAR=~pun|u@|0n$=
+        """,
+        {'MYVAR': '~pun|u@|0n$='}
+    ],
+    [
+        # Unicode values
+        r"""
+        MYVAR=⋃ñᴉ—☪ó∂ǝ
+        """,
+        {'MYVAR': '⋃ñᴉ—☪ó∂ǝ'}
+    ],
+    [
+        # Unicode keys
+        r"""
+        ṀẎṾẠṚ=value
+        """,
+        {}
+    ],
+    [
+        # Quoted space in value
+        r"""
+        MYVAR='sp ace'
+        """,
+        {'MYVAR': 'sp ace'}
+    ]
 ]
 
 PROCFILE_FIXTURES = [
@@ -211,9 +248,6 @@ class TestExpandProcesses(TestCase):
     def test_port(self):
         p = ep(("foo", "some command"), port=8000)
         self.assertEqual({"PORT": "8000"}, p[0].env)
-
-    def test_port_invalid(self):
-        self.assertRaises(AssertionError, ep, ("foo", "test"), port=5123)
 
     def test_port_multiple(self):
         p = ep(("foo", "some command"),

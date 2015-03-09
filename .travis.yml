@@ -1,3 +1,4 @@
+sudo: false
 language: python
 python:
   - 2.6
@@ -7,9 +8,9 @@ python:
   - 3.4
   - pypy
 install:
-  - pip install -r requirements_dev.txt
-  - pip install coverage flake8 nose pep8-naming
-  - pip install coveralls
+  - pip install coverage coveralls flake8 nose pep8-naming wheel
+  - pip wheel .
+  - pip install --find-links=$PWD/wheelhouse honcho[export]
 script:
   - nosetests --with-coverage --cover-branches --cover-package honcho honcho/test/unit
   - nosetests honcho/test/integration
