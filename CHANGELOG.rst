@@ -9,6 +9,9 @@ project endeavours to adhere to `Semantic Versioning`_.
 Unreleased
 ----------
 
+0.6.5 -- 2015-03-09
+-------------------
+
 * ADDED: Exporter templates can now be overridden by the ``--template-dir``
   option to ``honcho export``.
 * CHANGED: Colour output is now supported by default on Windows.
