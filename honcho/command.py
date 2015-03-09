@@ -1,9 +1,9 @@
 import argparse
-import codecs
 import logging
 import os
 import sys
 import signal
+import warnings
 from collections import defaultdict
 from pkg_resources import iter_entry_points
 
@@ -23,13 +23,14 @@ BASENAME = os.path.basename(os.getcwd())
 export_choices = dict((_export.name, _export)
                       for _export in iter_entry_points('honcho_exporters'))
 
-try:
-    # Python 3
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.buffer)
-    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.buffer)
-except AttributeError:
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout)
-    sys.stderr = codecs.getwriter("utf-8")(sys.stderr)
+if not sys.stdout.encoding or sys.stdout.encoding not in ('utf-8', 'utf8'):
+    msg = (
+        'It is recommended to use a terminal with UTF-8.\n'
+        'sys.stdout.encoding = %r\n'
+        'Try setting LANG=en_US.UTF-8 (or similar for your locale and '
+        'language) or PYTHONIOENCODING=utf-8'
+        % sys.stdout.encoding)
+    warnings.warn(msg)
 
 
 class CommandError(Exception):

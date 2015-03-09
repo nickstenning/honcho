@@ -22,7 +22,7 @@ class TestRun(TestCase):
 
         self.assertEqual(ret, 0)
         self.assertEqual(out, 'elephant\n')
-        self.assertEqual(err, 'error output\n')
+        self.assertTrue('error output\n' in err)
 
     def test_run_env(self):
         with TestEnv({'.env': 'ANIMAL=giraffe', 'test.py': script}) as env:
