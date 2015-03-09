@@ -69,6 +69,12 @@ ENVFILE_FIXTURES = [
         {'MYVAR': '"escaped"'}
     ],
     [
+        """
+        MYVAR="test\\nmultiline"
+        """,
+        {'MYVAR': 'test\nmultiline'}
+    ],
+    [
         # At-sign in value
         r"""
         MYVAR=user@domain.com
