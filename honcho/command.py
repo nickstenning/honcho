@@ -4,7 +4,6 @@ import logging
 import os
 import sys
 import signal
-import warnings
 from collections import defaultdict
 from pkg_resources import iter_entry_points
 
