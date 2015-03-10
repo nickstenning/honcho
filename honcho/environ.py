@@ -91,6 +91,8 @@ def parse(content):
             continue
         if not re.match(r'[A-Za-z_][A-Za-z_0-9]*', name):
             continue
+
+        value = value.decode('string_escape')
         values[name] = value
 
     return values

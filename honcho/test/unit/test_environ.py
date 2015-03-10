@@ -102,7 +102,20 @@ ENVFILE_FIXTURES = [
         MYVAR='sp ace'
         """,
         {'MYVAR': 'sp ace'}
-    ]
+    ],
+    [
+        # Escaped characters in value
+        r"""
+        TABS='foo\tbar'
+        NEWLINES='foo\nbar'
+        VTAB='foo\vbar'
+        DOLLAR='foo\$bar'
+        """,
+        {'TABS': 'foo\tbar',
+         'NEWLINES': 'foo\nbar',
+         'VTAB': 'foo\vbar',
+         'DOLLAR': 'foo\\$bar'}
+    ],
 ]
 
 PROCFILE_FIXTURES = [
