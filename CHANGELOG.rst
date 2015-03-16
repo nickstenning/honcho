@@ -9,6 +9,13 @@ project endeavours to adhere to `Semantic Versioning`_.
 Unreleased
 ----------
 
+0.6.6 -- 2015-03-16
+-------------------
+
+* FIXED: Environment variables in ``.env`` files can, once again, contain
+  backslash escapes.
+
+
 0.6.5 -- 2015-03-09
 -------------------
 
