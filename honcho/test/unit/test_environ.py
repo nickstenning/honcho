@@ -108,12 +108,10 @@ ENVFILE_FIXTURES = [
         r"""
         TABS='foo\tbar'
         NEWLINES='foo\nbar'
-        VTAB='foo\vbar'
         DOLLAR='foo\$bar'
         """,
         {'TABS': 'foo\tbar',
          'NEWLINES': 'foo\nbar',
-         'VTAB': 'foo\vbar',
          'DOLLAR': 'foo\\$bar'}
     ],
 ]
