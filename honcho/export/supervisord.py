@@ -1,6 +1,7 @@
 import jinja2
 
 from honcho.export.base import BaseExport
+from honcho.export.base import File
 
 
 class Export(BaseExport):
@@ -11,4 +12,4 @@ class Export(BaseExport):
         context['processes'] = processes
         filename = "{0}.conf".format(context['app'])
         template = self.get_template('supervisord.conf')
-        return [(filename, template.render(context))]
+        return [File(filename, template.render(context))]

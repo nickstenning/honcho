@@ -94,10 +94,12 @@ def command_export(args):
 
     _mkdir(args.location)
 
-    for filename, contents in export.render(processes, context):
-        path = os.path.join(args.location, filename)
+    for f in export.render(processes, context):
+        path = os.path.join(args.location, f.name)
         log.info("Writing '%s'", path)
-        _write_file(path, contents)
+        _write_file(path, f.content)
+        if f.executable:
+            os.chmod(path, 0o755)
 
 parser_export = subparsers.add_parser(
     'export',
@@ -345,6 +347,7 @@ def _mkdir(path):
 
 
 def _write_file(path, content):
+    _mkdir(os.path.dirname(path))
     try:
         with open(path, 'w') as fp:
             fp.write(content)

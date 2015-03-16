@@ -47,6 +47,13 @@ class BaseExport(object):
         raise NotImplementedError("You must implement a render method.")
 
 
+class File(object):
+    def __init__(self, name, content, executable=False):
+        self.name = name
+        self.content = content
+        self.executable = executable
+
+
 def dashrepl(value):
     """
     Replace any non-word characters with a dash.

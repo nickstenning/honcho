@@ -25,4 +25,4 @@ class TestExportSupervisord(TestCase):
 
         results = self.export.render([], {'app': 'elephant'})
 
-        self.assertEqual('elephant.conf', results[0][0])
+        self.assertEqual('elephant.conf', results[0].name)
