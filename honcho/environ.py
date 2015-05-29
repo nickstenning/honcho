@@ -94,7 +94,7 @@ def parse(content):
 
         value = value.replace(r'\n', '\n')
         value = value.replace(r'\t', '\t')
-        values[name] = value
+        values[name] = os.path.expandvars(os.path.expanduser(value))
 
     return values
 
