@@ -52,8 +52,9 @@ setup(
             'honcho=honcho.command:main'
         ],
         'honcho_exporters': [
-            'upstart=honcho.export.upstart:Export',
+            'runit=honcho.export.runit:Export',
             'supervisord=honcho.export.supervisord:Export',
+            'upstart=honcho.export.upstart:Export',
         ],
     }
 )
