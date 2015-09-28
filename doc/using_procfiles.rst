@@ -5,7 +5,7 @@ Using Procfiles
 
 As described in :ref:`what_are_procfiles`, Procfiles are simple text files that
 describe the components required to run an applications. This document describes
-some of the more advances features of Honcho and the Procfile ecosystem.
+some of the more advanced features of Honcho and the Procfile ecosystem.
 
 Syntax
 ------
