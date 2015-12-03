@@ -8,7 +8,7 @@ python:
   - 3.4
   - pypy
 install:
-  - pip install coverage coveralls flake8 nose pep8-naming wheel
+  - pip install coverage==3.7.1 coveralls flake8 nose pep8-naming wheel
   - pip wheel .
   - pip install --find-links=$PWD/wheelhouse honcho[export]
 script:
