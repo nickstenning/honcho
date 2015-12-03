@@ -240,9 +240,10 @@ class TestManager(TestCase):
     def test_printer_receives_messages_in_correct_order(self):
         self.run_history('one')
         self.p.fetch_lines()
-        self.assertEqual('foo started (pid=123)\n', self.p.lines_local[0].data)
-        self.assertEqual(b'hello, world!\n', self.p.lines_local[1].data)
-        self.assertEqual('foo stopped (rc=0)\n', self.p.lines_local[2].data)
+        self.assertEqual('Press Ctrl-C to stop.', self.p.lines_local[0].data)
+        self.assertEqual('foo started (pid=123)\n', self.p.lines_local[1].data)
+        self.assertEqual(b'hello, world!\n', self.p.lines_local[2].data)
+        self.assertEqual('foo stopped (rc=0)\n', self.p.lines_local[3].data)
 
     def test_printer_receives_lines_multi_process(self):
         self.run_history('two')
