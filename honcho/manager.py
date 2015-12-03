@@ -90,6 +90,7 @@ class Manager(object):
         signal.signal(signal.SIGTERM, _terminate)
         signal.signal(signal.SIGINT, _terminate)
 
+        self._system_print("Press Ctrl-C to stop.")
         self._start()
 
         exit = False
