@@ -14,6 +14,13 @@ script = textwrap.dedent("""
     print("error output", file=sys.stderr)
 """)
 
+script2 = textwrap.dedent("""
+    from __future__ import print_function
+    import os
+    import sys
+    print(os.environ.get("ANIMAL", "mongoose"))
+""")
+
 
 class TestStart(TestCase):
     def test_start(self):
@@ -40,6 +47,20 @@ class TestStart(TestCase):
             ret, out, err = env.run_honcho(['start'])
 
         self.assertIn('giraffe', out)
+
+    def test_start_env_procfile(self):
+        files = {
+            '.env': 'PROCFILE=Procfile.dev',
+            'Procfile': 'foo: {0} test.py'.format(python_bin),
+            'Procfile.dev': 'bar: {0} testdev.py'.format(python_bin),
+            'test.py': script,
+            'testdev.py': script2,
+        }
+
+        with TestEnv(files) as env:
+            ret, out, err = env.run_honcho(['start'])
+
+        self.assertIn('mongoose', out)
 
     def test_start_returncode(self):
         files = {

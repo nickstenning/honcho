@@ -246,10 +246,6 @@ class TestExpandProcesses(TestCase):
         p = ep(("foo", "some command"))
         self.assertEqual("some command", p[0].cmd)
 
-    def test_procfile_from_env_overrides(self):
-        p = ep(("foo", "some command"), env={"PROCFILE": "Procfile.dev"}, port=8000)
-        self.assertEqual({"PROCFILE": "Procfile.dev"}, p[0].env)
-
     def test_port_not_defaulted(self):
         p = ep(("foo", "some command"))
         self.assertEqual({}, p[0].env)
