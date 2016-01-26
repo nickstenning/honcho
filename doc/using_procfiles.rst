@@ -36,7 +36,12 @@ Honcho::
     $ cat >.env <<EOF
     RACK_ENV=production
     ASSET_ROOT=https://myapp.s3.amazonaws.com/assets
+    PROCFILE=Procfile
     EOF
+
+As shown, you may choose to specify your Procfile in the ``.env`` file.  This
+takes priority over the default Procfile, but you can still use ``-f`` to replace
+which Procfile to use.
 
 Typically, you should not commit your ``.env`` file to your version control
 repository, but you might wish to create a ``.env.example`` so that others
