@@ -38,6 +38,22 @@ def test_start_env(testenv):
 
 
 @pytest.mark.parametrize('testenv', [{
+    '.env': 'PROCFILE=Procfile.dev',
+    'Procfile': 'foo: {0} test.py'.format(python_bin),
+    'Procfile.dev': 'bar: {0} test_dev.py'.format(python_bin),
+    'test.py': script,
+    'test_dev.py': textwrap.dedent("""
+        from __future__ import print_function
+        print("mongoose")
+        """)
+}], indirect=True)
+def test_start_env_procfile(testenv):
+    ret, out, err = testenv.run_honcho(['start'])
+
+    assert 'mongoose' in out
+
+
+@pytest.mark.parametrize('testenv', [{
     'Procfile': 'foo: {0} test.py'.format(python_bin),
     'test.py': 'import sys; sys.exit(42)',
 }], indirect=True)
