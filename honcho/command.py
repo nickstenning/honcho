@@ -358,6 +358,9 @@ def _check_output_encoding():
     no_encoding = sys.stdout.encoding is None
     utf8 = codecs.lookup('utf8')
 
+    if not sys.stdout.isatty():
+        return
+
     if no_encoding or codecs.lookup(sys.stdout.encoding) != utf8:
         log.warn('Your terminal is not configured to receive UTF-8 encoded '
                  'text. Please adjust your locale settings or force UTF-8 '
