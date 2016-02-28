@@ -1,19 +1,32 @@
 sudo: false
 language: python
-python:
-  - 2.6
-  - 2.7
-  - 3.2
-  - 3.3
-  - 3.4
-  - pypy
+matrix:
+  include:
+    - python: "2.6"
+      env: TOXENV=py26
+    - python: "2.7"
+      env: TOXENV=py27
+    - python: "3.0"
+      env: TOXENV=py30
+    - python: "3.1"
+      env: TOXENV=py31
+    - python: "3.2"
+      env: TOXENV=py32
+    - python: "3.3"
+      env: TOXENV=py33
+    - python: "3.4"
+      env: TOXENV=py34
+    - python: "3.5"
+      env: TOXENV=py35
+    - python: "pypy"
+      env: TOXENV=pypy
+    - python: "3.5"
+      env: TOXENV=lint
+    - python: "3.5"
+      env: TOXENV=docs
 install:
-  - pip install coverage coveralls flake8 nose pep8-naming wheel
-  - pip wheel .
-  - pip install --find-links=$PWD/wheelhouse honcho[export]
+  - pip install tox
 script:
-  - nosetests --with-coverage --cover-branches --cover-package honcho honcho/test/unit
-  - nosetests honcho/test/integration
-  - flake8 honcho
+  - tox
 after_success:
-  - coveralls
+  - tox -e coverage
