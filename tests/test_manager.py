@@ -1,7 +1,8 @@
 import datetime
 import multiprocessing
 
-from ..helpers import TestCase
+import pytest
+
 from honcho.compat import Empty
 from honcho.printer import Message
 from honcho.manager import Manager
@@ -184,9 +185,9 @@ class FakePrinter(object):
                 return line
 
 
-class TestManager(TestCase):
-
-    def setUp(self):  # noqa
+class TestManager(object):
+    @pytest.fixture(autouse=True)
+    def printer(self):  # noqa
         self.p = FakePrinter()
         self.m = Manager(printer=self.p)
         self.m._env = FakeEnv()
@@ -196,36 +197,37 @@ class TestManager(TestCase):
         self.h.run(wait=wait)
 
     def test_init_sets_default_printer_width(self):
-        self.assertEqual(len(SYSTEM_PRINTER_NAME), self.p.width)
+        assert self.p.width == len(SYSTEM_PRINTER_NAME)
 
     def test_add_process_updates_printer_width(self):
         self.m.add_process('interesting', 'ruby server.rb')
-        self.assertEqual(len('interesting'), self.p.width)
+        assert self.p.width == len('interesting')
 
     def test_add_process_sets_name(self):
         proc = self.m.add_process('foo', 'ruby server.rb')
-        self.assertEqual('foo', proc.name)
+        assert proc.name == 'foo'
 
     def test_add_process_sets_cmd(self):
         proc = self.m.add_process('foo', 'ruby server.rb')
-        self.assertEqual('ruby server.rb', proc.cmd)
+        assert proc.cmd == 'ruby server.rb'
 
     def test_add_process_sets_colour(self):
         proc = self.m.add_process('foo', 'ruby server.rb')
-        self.assertTrue(proc.colour is not None)
+        assert proc.colour is not None
 
     def test_add_process_sets_unique_colours(self):
         p1 = self.m.add_process('foo', 'ruby server.rb')
         p2 = self.m.add_process('bar', 'python server.py')
-        self.assertNotEqual(p1.colour, p2.colour)
+        assert p1.colour != p2.colour
 
     def test_add_process_sets_quiet(self):
         proc = self.m.add_process('foo', 'ruby server.rb', quiet=True)
-        self.assertTrue(proc.quiet)
+        assert proc.quiet
 
     def test_add_process_name_must_be_unique(self):
         self.m.add_process('foo', 'ruby server.rb')
-        self.assertRaises(AssertionError, self.m.add_process, 'foo', 'another command')
+        with pytest.raises(AssertionError):
+            self.m.add_process('foo', 'another command')
 
     def test_loop_with_empty_manager_returns_immediately(self):
         self.m.loop()
@@ -233,29 +235,29 @@ class TestManager(TestCase):
     def test_loop_calls_process_run(self):
         self.run_history('one')
         evts = self.h.find_events(type='run')
-        self.assertEqual(1, len(evts))
-        self.assertEqual('foo', evts[0]['name'])
-        self.assertTrue(evts[0]['events_passed'])
+        assert len(evts) == 1
+        assert evts[0]['name'] == 'foo'
+        assert evts[0]['events_passed']
 
     def test_printer_receives_messages_in_correct_order(self):
         self.run_history('one')
         self.p.fetch_lines()
-        self.assertEqual('foo started (pid=123)\n', self.p.lines_local[0].data)
-        self.assertEqual(b'hello, world!\n', self.p.lines_local[1].data)
-        self.assertEqual('foo stopped (rc=0)\n', self.p.lines_local[2].data)
+        assert self.p.lines_local[0].data == 'foo started (pid=123)\n'
+        assert self.p.lines_local[1].data == b'hello, world!\n'
+        assert self.p.lines_local[2].data == 'foo stopped (rc=0)\n'
 
     def test_printer_receives_lines_multi_process(self):
         self.run_history('two')
         l1 = self.p.find_line(b'process one\n')
         l2 = self.p.find_line(b'process two\n')
-        self.assertEqual('foo', l1.name)
-        self.assertEqual('bar', l2.name)
+        assert l1.name == 'foo'
+        assert l2.name == 'bar'
 
     def test_returncode_set_by_first_exiting_process(self):
         self.run_history('returncode')
-        self.assertEqual(456, self.h.manager_returncode)
+        assert self.h.manager_returncode == 456
 
     def test_printer_receives_lines_after_stop(self):
         self.run_history('output_after_stop')
-        self.assertTrue(self.p.got_line(b'fishmongers\n'))
-        self.assertTrue(self.p.got_line(b'butchers\n'))
+        assert self.p.got_line(b'fishmongers\n')
+        assert self.p.got_line(b'butchers\n')

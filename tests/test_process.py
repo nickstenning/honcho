@@ -1,6 +1,6 @@
 import datetime
+import pytest
 
-from ..helpers import TestCase
 from honcho.process import Process
 
 
@@ -79,41 +79,42 @@ class FakeOutput(object):
         pass
 
 
-class TestProcess(TestCase):
+class TestProcess(object):
 
-    def setUp(self):  # noqa
+    @pytest.fixture(autouse=True)
+    def queue(self):  # noqa
         self.q = FakeQueue()
 
     def test_ctor_cmd(self):
         proc = Process('echo 123')
-        self.assertEqual('echo 123', proc.cmd)
+        assert proc.cmd == 'echo 123'
 
     def test_ctor_name(self):
         proc = Process('echo 123', name='foo')
-        self.assertEqual('foo', proc.name)
+        assert proc.name == 'foo'
 
     def test_ctor_colour(self):
         proc = Process('echo 123', colour='red')
-        self.assertEqual('red', proc.colour)
+        assert proc.colour == 'red'
 
     def test_ctor_quiet(self):
         proc = Process('echo 123', quiet=True)
-        self.assertTrue(proc.quiet)
+        assert proc.quiet
 
     def test_output_receives_start_with_pid(self):
         proc = Process('echo 123')
         proc._child_ctor = FakePopen
         proc.run(self.q)
         msg = self.q.messages[0]
-        self.assertEqual('start', msg.type)
-        self.assertEqual({'pid': 66}, msg.data)
+        assert msg.type == 'start'
+        assert msg.data == {'pid': 66}
 
     def test_message_contains_name(self):
         proc = Process('echo 123', name="barry")
         proc._child_ctor = FakePopen
         proc.run(self.q)
         msg = self.q.messages[0]
-        self.assertEqual("barry", msg.name)
+        assert msg.name == "barry"
 
     def test_message_contains_time(self):
         proc = Process('echo 123')
@@ -121,14 +122,14 @@ class TestProcess(TestCase):
         proc._child_ctor = FakePopen
         proc.run(self.q)
         msg = self.q.messages[0]
-        self.assertEqual(datetime.datetime(2012, 8, 11, 12, 42), msg.time)
+        assert msg.time == datetime.datetime(2012, 8, 11, 12, 42)
 
     def test_message_contains_colour(self):
         proc = Process('echo 123', colour="red")
         proc._child_ctor = FakePopen
         proc.run(self.q)
         msg = self.q.messages[0]
-        self.assertEqual("red", msg.colour)
+        assert msg.colour == "red"
 
     def test_output_receives_lines(self):
         def _ctor(*args, **kwargs):
@@ -139,8 +140,8 @@ class TestProcess(TestCase):
         proc = Process('echo 123')
         proc._child_ctor = _ctor
         proc.run(self.q)
-        self.assertTrue(self.q.got_message(b"hello\n"))
-        self.assertTrue(self.q.got_message(b"world\n"))
+        assert self.q.got_message(b"hello\n")
+        assert self.q.got_message(b"world\n")
 
     def test_output_receives_lines_invalid_utf8(self):
         def _ctor(*args, **kwargs):
@@ -151,7 +152,7 @@ class TestProcess(TestCase):
         proc = Process('echo 123')
         proc._child_ctor = _ctor
         proc.run(self.q)
-        self.assertTrue(self.q.got_message(b"\xfe\xff\n"))
+        assert self.q.got_message(b"\xfe\xff\n")
 
     def test_output_does_not_receive_lines_when_quiet(self):
         def _ctor(*args, **kwargs):
@@ -162,15 +163,15 @@ class TestProcess(TestCase):
         proc = Process('echo 123', quiet=True)
         proc._child_ctor = _ctor
         proc.run(self.q)
-        self.assertFalse(self.q.got_message(b"hello\n"))
-        self.assertFalse(self.q.got_message(b"world\n"))
+        assert not self.q.got_message(b"hello\n")
+        assert not self.q.got_message(b"world\n")
 
     def test_output_receives_stop(self):
         proc = Process('echo 123')
         proc._child_ctor = FakePopen
         proc.run(self.q)
         msg = self.q.messages[-1]
-        self.assertEqual('stop', msg.type)
+        assert msg.type == 'stop'
 
     def test_output_receives_stop_with_returncode(self):
         def _ctor(*args, **kwargs):
@@ -182,4 +183,4 @@ class TestProcess(TestCase):
         proc._child_ctor = _ctor
         proc.run(self.q)
         msg = self.q.find_message({'returncode': 42})
-        self.assertEqual('stop', msg.type)
+        assert msg.type == 'stop'

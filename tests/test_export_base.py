@@ -4,8 +4,7 @@ from __future__ import unicode_literals
 
 from mock import Mock
 from mock import patch
-
-from honcho.test.helpers import TestCase
+import pytest
 
 from honcho.export.base import BaseExport
 from honcho.export.base import dashrepl
@@ -16,7 +15,7 @@ class GiraffeExport(BaseExport):
         return 'longneck'
 
 
-class TestBaseExport(TestCase):
+class TestBaseExport():
     @patch('jinja2.Environment')
     def test_env_default(self, env_mock):
         GiraffeExport()
@@ -36,11 +35,13 @@ class TestBaseExport(TestCase):
         fake_env.get_template.assert_called_with('foo/bar.tpl')
 
 
-class TestDashrepl(TestCase):
-    def test_dashrepl(self):
-        self.assertEqual('foo', dashrepl('foo'))
-        self.assertEqual('foo-1', dashrepl('foo.1'))
-        self.assertEqual('foo-bar-baz', dashrepl('foo.bar.baz'))
-        self.assertEqual('foo_bar_baz', dashrepl('foo_bar_baz'))
-        self.assertEqual('foo-bar-baz', dashrepl('foo!bar:baz'))
-        self.assertEqual('καλημέρα-κόσμε', dashrepl('καλημέρα.κόσμε'))
+@pytest.mark.parametrize('name_in,name_out', (
+    ('foo', 'foo'),
+    ('foo.1', 'foo-1'),
+    ('foo.bar.baz', 'foo-bar-baz'),
+    ('foo_bar_baz', 'foo_bar_baz'),
+    ('foo!bar:baz', 'foo-bar-baz'),
+    ('καλημέρα.κόσμε', 'καλημέρα-κόσμε'),
+))
+def test_dashrepl(name_in, name_out):
+    assert dashrepl(name_in) == name_out
