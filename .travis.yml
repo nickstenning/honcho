@@ -24,3 +24,4 @@ script:
   - tox
 after_success:
   - tox -e coverage
+  - tox -e codecov
