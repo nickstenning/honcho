@@ -48,3 +48,15 @@ def test_run_args_before_command(testenv):
 
     assert ret == 0
     assert out == 'giraffe\n'
+
+
+@pytest.mark.parametrize('testenv', [{
+    'test.py': script
+}], indirect=True)
+def test_run_options_positionals_separator(testenv):
+    # Regression test for #159 -- ensure that honcho handles the '--'
+    # options/positionals separator correctly.
+    ret, out, err = testenv.run_honcho(['run', '--', python_bin, 'test.py'])
+
+    assert ret == 0
+    assert out == 'elephant\n'

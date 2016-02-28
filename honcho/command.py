@@ -157,12 +157,18 @@ parser_help.add_argument('task', help='task to show help for', nargs='?')
 def command_run(args):
     os.environ.update(_read_env(args.app_root, args.env))
 
+    argv = args.argv
+
+    # If the first of the remaining args is '--', skip it.
+    if argv and argv[0] == '--':
+        argv = argv[1:]
+
     if compat.ON_WINDOWS:
         # do not quote on Windows, subprocess will handle it for us
         # using the MSFT quoting rules
-        cmd = args.argv
+        cmd = argv
     else:
-        cmd = ' '.join(compat.shellquote(arg) for arg in args.argv)
+        cmd = ' '.join(compat.shellquote(arg) for arg in argv)
 
     p = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr,
               start_new_session=False)
