@@ -23,11 +23,11 @@ Honcho is a Python port of Foreman_, a tool for managing Procfile-based applicat
 .. |Build Status| image:: https://secure.travis-ci.org/nickstenning/honcho.svg?branch=master
    :target: http://travis-ci.org/nickstenning/honcho
    :alt: Build Status
-   
+
 .. |Code Health| image:: https://landscape.io/github/nickstenning/honcho/master/landscape.svg?style=flat
    :target: https://landscape.io/github/nickstenning/honcho/master
    :alt: Code Health
-   
+
 .. |PyPI| image:: https://pypip.in/version/honcho/badge.svg?style=flat
    :target: https://pypi.python.org/pypi/honcho/
    :alt: Latest Version on PyPI
@@ -38,12 +38,6 @@ Installing Honcho
 ::
 
     pip install honcho
-
-If you're one of those sick people who's into this kind of thing, you
-can probably also ``easy_install honcho``. But please, don't: `get with
-the program`_.
-
-.. _get with the program: http://www.pip-installer.org/en/latest/index.html
 
 How to use Honcho
 -----------------
