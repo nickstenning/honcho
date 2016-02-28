@@ -297,7 +297,7 @@ def _read_env(app_root, env):
             with open(os.path.join(app_root, envfile)) as f:
                 content.append(f.read())
         except IOError:
-            log.warn('Could not read environment file %s', envfile)
+            pass
 
     return environ.parse('\n'.join(content))
 
