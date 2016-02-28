@@ -51,7 +51,7 @@ def _ansi(code):
 
 
 def _colour_string(colour, s):
-    return '{0}{1}{2}'.format(_ansi(colour), s, _ansi(0))
+    return '{0}{1}{2}{3}'.format(_ansi(0), _ansi(colour), s, _ansi(0))
 
 
 if ON_WINDOWS:

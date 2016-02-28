@@ -84,4 +84,4 @@ class TestPrinter(object):
         out = FakeOutput()
         p = Printer(output=out)
         p.write(fake_message("conflate\n", name="foo", colour="31"))
-        assert out.string() == "\033[31m12:42:00 foo | \033[0mconflate\n"
+        assert out.string() == "\033[0m\033[31m12:42:00 foo | \033[0mconflate\n"
