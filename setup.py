@@ -24,9 +24,6 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 2.6',
     'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.0',
-    'Programming Language :: Python :: 3.1',
-    'Programming Language :: Python :: 3.2',
     'Programming Language :: Python :: 3.3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
@@ -35,8 +32,7 @@ INSTALL_REQUIRES = []
 EXTRAS_REQUIRE = {
     ':python_version=="2.6"': ['argparse', 'ordereddict'],
     ':sys_platform=="win32"': ['colorama'],
-    'export:python_version in "3.0,3.1,3.2"': ['jinja2>=2.6,<2.7'],
-    'export:python_version not in "3.0,3.1,3.2"': ['jinja2>=2.7,<2.8'],
+    'export': ['jinja2>=2.7,<2.8'],
 }
 ENTRY_POINTS = {
     'console_scripts': [
