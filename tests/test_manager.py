@@ -59,12 +59,13 @@ class FakeEnv(object):
 
 class FakeProcess(object):
 
-    def __init__(self, cmd, name=None, colour=None, quiet=None, env=None):
+    def __init__(self, cmd, name=None, colour=None, quiet=None, env=None, cwd=None):
         self.cmd = cmd
         self.name = name
         self.colour = colour
         self.quiet = quiet
         self.env = env
+        self.cwd = cwd
 
         self._events = None
         self._options = {}
@@ -228,6 +229,10 @@ class TestManager(object):
         self.m.add_process('foo', 'ruby server.rb')
         with pytest.raises(AssertionError):
             self.m.add_process('foo', 'another command')
+
+    def test_add_process_sets_cwd(self):
+        proc = self.m.add_process('foo', 'ruby server.rb', cwd='foo-dir')
+        assert proc.cwd == 'foo-dir'
 
     def test_loop_with_empty_manager_returns_immediately(self):
         self.m.loop()

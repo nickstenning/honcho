@@ -184,3 +184,9 @@ class TestProcess(object):
         proc.run(self.q)
         msg = self.q.find_message({'returncode': 42})
         assert msg.type == 'stop'
+
+    def test_cwd_passed_along(self):
+        proc = Process('echo 123', cwd='fake-dir')
+        proc._child_ctor = FakePopen
+        proc.run(self.q)
+        assert proc._child.kwargs['cwd'] == 'fake-dir'
