@@ -35,13 +35,7 @@ lint:
 	tox -e lint
 
 test:
-	nosetests
-
-test-all:
 	tox
-
-coverage:
-	tox -e coverage
 
 docs:
 	$(MAKE) -C doc html

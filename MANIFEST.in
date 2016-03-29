@@ -1,5 +1,7 @@
-recursive-include honcho *conf
-include AUTHORS.rst
-include CONTRIBUTING.rst
-include LICENSE
-include README.rst
+include Makefile LICENSE
+include *.rst
+graft doc
+prune doc/_build
+graft honcho/export/templates
+global-exclude __pycache__
+global-exclude *.py[co]

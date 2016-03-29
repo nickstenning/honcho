@@ -39,7 +39,6 @@ def _add_common_args(parser, with_defaults=False):
                         help='procfile directory (default: .)')
     parser.add_argument('-f', '--procfile',
                         metavar='FILE',
-                        default=(suppress or 'Procfile'),
                         help='procfile path (default: Procfile)')
     parser.add_argument('-v', '--version',
                         action='version',
@@ -56,7 +55,7 @@ subparsers.required = True
 
 
 def command_check(args):
-    procfile = _procfile(_procfile_path(args.app_root, args.procfile))
+    procfile = _procfile(_procfile_path(args.app_root, _choose_procfile(args)))
 
     log.info('Valid procfile detected ({0})'.format(', '.join(procfile.processes)))
 
@@ -70,9 +69,9 @@ def command_export(args):
     if args.log == "/var/log/APP":
         args.log = args.log.replace('APP', args.app)
 
-    procfile_path = _procfile_path(args.app_root, args.procfile)
+    procfile_path = _procfile_path(args.app_root, _choose_procfile(args))
     procfile = _procfile(procfile_path)
-    env = _read_env(procfile_path, args.env)
+    env = _read_env(args.app_root, args.env)
     concurrency = _parse_concurrency(args.concurrency)
     port = _choose_port(args, env)
 
@@ -94,10 +93,12 @@ def command_export(args):
 
     _mkdir(args.location)
 
-    for filename, contents in export.render(processes, context):
-        path = os.path.join(args.location, filename)
+    for f in export.render(processes, context):
+        path = os.path.join(args.location, f.name)
         log.info("Writing '%s'", path)
-        _write_file(path, contents)
+        _write_file(path, f.content)
+        if f.executable:
+            os.chmod(path, 0o755)
 
 parser_export = subparsers.add_parser(
     'export',
@@ -154,15 +155,20 @@ parser_help.add_argument('task', help='task to show help for', nargs='?')
 
 
 def command_run(args):
-    procfile_path = _procfile_path(args.app_root, args.procfile)
-    os.environ.update(_read_env(procfile_path, args.env))
+    os.environ.update(_read_env(args.app_root, args.env))
+
+    argv = args.argv
+
+    # If the first of the remaining args is '--', skip it.
+    if argv and argv[0] == '--':
+        argv = argv[1:]
 
     if compat.ON_WINDOWS:
         # do not quote on Windows, subprocess will handle it for us
         # using the MSFT quoting rules
-        cmd = args.argv
+        cmd = argv
     else:
-        cmd = ' '.join(compat.shellquote(arg) for arg in args.argv)
+        cmd = ' '.join(compat.shellquote(arg) for arg in argv)
 
     p = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr,
               start_new_session=False)
@@ -181,11 +187,11 @@ parser_run.add_argument(
 
 
 def command_start(args):
-    procfile_path = _procfile_path(args.app_root, args.procfile)
+    procfile_path = _procfile_path(args.app_root, _choose_procfile(args))
     procfile = _procfile(procfile_path)
 
     concurrency = _parse_concurrency(args.concurrency)
-    env = _read_env(procfile_path, args.env)
+    env = _read_env(args.app_root, args.env)
     quiet = _parse_quiet(args.quiet)
     port = _choose_port(args, env)
 
@@ -288,8 +294,7 @@ def _procfile(filename):
     return procfile
 
 
-def _read_env(procfile_path, env):
-    app_root = os.path.dirname(procfile_path)
+def _read_env(app_root, env):
     files = [e.strip() for e in env.split(',')]
     content = []
     for envfile in files:
@@ -320,6 +325,18 @@ def _parse_quiet(desc):
     return result
 
 
+def _choose_procfile(args):
+    env = _read_env(args.app_root, args.env)
+    env_procfile = env.pop('PROCFILE', None)
+
+    if hasattr(args, 'procfile') and args.procfile is not None:
+        return args.procfile
+    elif env_procfile is not None:
+        return env_procfile
+    else:
+        return "Procfile"
+
+
 def _choose_port(args, env):
     env_port = env.pop('PORT', None)
     os_env_port = os.environ.pop('PORT', None)
@@ -345,6 +362,7 @@ def _mkdir(path):
 
 
 def _write_file(path, content):
+    _mkdir(os.path.dirname(path))
     try:
         with open(path, 'w') as fp:
             fp.write(content)
@@ -356,6 +374,9 @@ def _write_file(path, content):
 def _check_output_encoding():
     no_encoding = sys.stdout.encoding is None
     utf8 = codecs.lookup('utf8')
+
+    if not sys.stdout.isatty():
+        return
 
     if no_encoding or codecs.lookup(sys.stdout.encoding) != utf8:
         log.warn('Your terminal is not configured to receive UTF-8 encoded '

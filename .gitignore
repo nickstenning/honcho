@@ -1,10 +1,9 @@
-*.pyc
 *.egg-info
+*.pyc
+*.pyo
+/.cache
+/.coverage
 /.env
 /.tox
 /build
 /dist
-/.project
-/.pydevproject
-/.coverage
-/cover

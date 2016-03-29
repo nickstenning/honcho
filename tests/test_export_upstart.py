@@ -3,8 +3,7 @@ import collections
 from mock import MagicMock
 from mock import call
 from mock import patch
-
-from honcho.test.helpers import TestCase
+import pytest
 
 from honcho.export.upstart import Export
 
@@ -16,8 +15,9 @@ FIX_NPROC = [FakeProcess('web.1'),
              FakeProcess('worker.2')]
 
 
-class TestExportUpstart(TestCase):
-    def setUp(self):  # noqa
+class TestExportUpstart(object):
+    @pytest.fixture(autouse=True)
+    def exporter(self, request):  # noqa
         self.export = Export()
 
         self.master = MagicMock()
@@ -34,38 +34,42 @@ class TestExportUpstart(TestCase):
             else:
                 raise RuntimeError("tests don't know about that template")
 
-        self.get_template_patcher = patch.object(Export, 'get_template')
-        self.get_template = self.get_template_patcher.start()
+        get_template_patcher = patch.object(Export, 'get_template')
+        self.get_template = get_template_patcher.start()
         self.get_template.side_effect = _get_template
+        request.addfinalizer(get_template_patcher.stop)
 
-    def tearDown(self):  # noqa
-        self.get_template_patcher.stop()
+    @pytest.fixture(autouse=True)
+    def file(self, request):
+        file_patcher = patch('honcho.export.upstart.File')
+        self.File = file_patcher.start()
+        request.addfinalizer(file_patcher.stop)
 
     def test_render_master(self):
-        out = self.export.render(FIX_1PROC, {'app': 'elephant'})
+        out = list(self.export.render(FIX_1PROC, {'app': 'elephant'}))
 
-        self.assertIn(('elephant.conf', self.master.render.return_value),
-                      out)
+        master = self.File('elephant.conf', self.master.render.return_value)
+        assert master in out
 
         self.master.render.assert_called_once_with({'app': 'elephant'})
 
     def test_render_process_master(self):
-        out = self.export.render(FIX_1PROC, {'app': 'elephant'})
+        out = list(self.export.render(FIX_1PROC, {'app': 'elephant'}))
 
-        self.assertIn(('elephant-web.conf',
-                       self.process_master.render.return_value),
-                      out)
+        process_master = self.File('elephant-web.conf',
+                                   self.process_master.render.return_value)
+        assert process_master in out
 
         expected = {'app': 'elephant',
                     'group_name': 'elephant-web'}
         self.process_master.render.assert_called_once_with(expected)
 
     def test_render_process(self):
-        out = self.export.render(FIX_1PROC, {'app': 'elephant'})
+        out = list(self.export.render(FIX_1PROC, {'app': 'elephant'}))
 
-        self.assertIn(('elephant-web-1.conf',
-                       self.process.render.return_value),
-                      out)
+        process = self.File('elephant-web-1.conf',
+                            self.process.render.return_value)
+        assert process in out
 
         expected = {'app': 'elephant',
                     'group_name': 'elephant-web',
@@ -73,33 +77,28 @@ class TestExportUpstart(TestCase):
         self.process.render.assert_called_once_with(expected)
 
     def test_render_multiple_process_groups(self):
-        out = self.export.render(FIX_NPROC, {'app': 'elephant'})
+        out = list(self.export.render(FIX_NPROC, {'app': 'elephant'}))
 
-        self.assertIn(('elephant-web.conf',
-                       self.process_master.render.return_value),
-                      out)
-        self.assertIn(('elephant-worker.conf',
-                       self.process_master.render.return_value),
-                      out)
+        assert self.File('elephant-web.conf',
+                         self.process_master.render.return_value) in out
+        assert self.File('elephant-worker.conf',
+                         self.process_master.render.return_value) in out
 
         expected = [call({'app': 'elephant',
                           'group_name': 'elephant-web'}),
                     call({'app': 'elephant',
                           'group_name': 'elephant-worker'})]
-        self.assertEqual(expected, self.process_master.render.call_args_list)
+        assert self.process_master.render.call_args_list == expected
 
     def test_render_multiple_processes(self):
-        out = self.export.render(FIX_NPROC, {'app': 'elephant'})
+        out = list(self.export.render(FIX_NPROC, {'app': 'elephant'}))
 
-        self.assertIn(('elephant-web-1.conf',
-                       self.process.render.return_value),
-                      out)
-        self.assertIn(('elephant-worker-1.conf',
-                       self.process.render.return_value),
-                      out)
-        self.assertIn(('elephant-worker-2.conf',
-                       self.process.render.return_value),
-                      out)
+        assert self.File('elephant-web-1.conf',
+                         self.process.render.return_value) in out
+        assert self.File('elephant-worker-1.conf',
+                         self.process.render.return_value) in out
+        assert self.File('elephant-worker-2.conf',
+                         self.process.render.return_value) in out
 
         expected = [call({'app': 'elephant',
                           'group_name': 'elephant-web',
@@ -110,4 +109,4 @@ class TestExportUpstart(TestCase):
                     call({'app': 'elephant',
                           'group_name': 'elephant-worker',
                           'process': FIX_NPROC[2]})]
-        self.assertEqual(expected, self.process.render.call_args_list)
+        assert self.process.render.call_args_list == expected

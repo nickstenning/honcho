@@ -4,8 +4,8 @@ Using Procfiles
 ===============
 
 As described in :ref:`what_are_procfiles`, Procfiles are simple text files that
-describe the components required to run an applications. This document describes
-some of the more advances features of Honcho and the Procfile ecosystem.
+describe the components required to run an application. This document describes
+some of the more advanced features of Honcho and the Procfile ecosystem.
 
 Syntax
 ------
@@ -36,7 +36,12 @@ Honcho::
     $ cat >.env <<EOF
     RACK_ENV=production
     ASSET_ROOT=https://myapp.s3.amazonaws.com/assets
+    PROCFILE=Procfile
     EOF
+
+As shown, you may choose to specify your Procfile in the ``.env`` file.  This
+takes priority over the default Procfile, but you can still use ``-f`` to replace
+which Procfile to use.
 
 Typically, you should not commit your ``.env`` file to your version control
 repository, but you might wish to create a ``.env.example`` so that others

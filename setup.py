@@ -1,59 +1,78 @@
+import codecs
 import os
-from setuptools import setup, find_packages
+import re
+from setuptools import find_packages
+from setuptools import setup
 
-from honcho import __version__
+###############################################################################
+
+NAME = 'honcho'
+AUTHOR = 'Nick Stenning'
+AUTHOR_EMAIL = 'nick@whiteink.com'
+DESCRIPTION = 'Honcho: a Python clone of Foreman. For managing Procfile-based applications.'
+LICENSE = 'MIT'
+KEYWORDS = 'sysadmin process procfile'
+URL = 'https://github.com/nickstenning/honcho'
+CLASSIFIERS = [
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: System Administrators',
+    'License :: OSI Approved :: MIT License',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.3',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
+]
+INSTALL_REQUIRES = []
+EXTRAS_REQUIRE = {
+    ':python_version=="2.6"': ['argparse', 'ordereddict'],
+    ':sys_platform=="win32"': ['colorama'],
+    'export': ['jinja2>=2.7,<2.8'],
+}
+ENTRY_POINTS = {
+    'console_scripts': [
+        'honcho=honcho.command:main'
+    ],
+    'honcho_exporters': [
+        'runit=honcho.export.runit:Export',
+        'supervisord=honcho.export.supervisord:Export',
+        'upstart=honcho.export.upstart:Export',
+    ],
+}
+
+
+###############################################################################
 
 HERE = os.path.dirname(__file__)
-try:
-    long_description = open(os.path.join(HERE, 'README.rst')).read()
-except:
-    long_description = None
 
-setup(
-    name='honcho',
-    version=__version__,
-    packages=find_packages(exclude=['honcho.test*']),
-    include_package_data=True,
 
-    # metadata for upload to PyPI
-    author='Nick Stenning',
-    author_email='nick@whiteink.com',
-    url='https://github.com/nickstenning/honcho',
-    description='Honcho: a python clone of Foreman. For managing Procfile-based applications.',
-    long_description=long_description,
-    license='MIT',
-    keywords='sysadmin process procfile',
-    classifiers=[
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'Intended Audience :: System Administrators',
-        'License :: OSI Approved :: MIT License',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.0',
-        'Programming Language :: Python :: 3.1',
-        'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-    ],
-    install_requires=[],
-    extras_require={
-        ':python_version=="2.6"': ['argparse', 'ordereddict'],
-        ':sys_platform=="win32"': ['colorama'],
-        'export:python_version in "3.0,3.1,3.2"': ['jinja2>=2.6,<2.7'],
-        'export:python_version not in "3.0,3.1,3.2"': ['jinja2>=2.7,<2.8'],
-    },
-    entry_points={
-        'console_scripts': [
-            'honcho=honcho.command:main'
-        ],
-        'honcho_exporters': [
-            'upstart=honcho.export.upstart:Export',
-            'supervisord=honcho.export.supervisord:Export',
-        ],
-    }
-)
+def read(*path):
+    with codecs.open(os.path.join(HERE, *path), encoding='utf-8') as fp:
+        return fp.read()
+
+LONG_DESCRIPTION = read('README.rst')
+VERSION = re.search(
+    r'^__version__ = [\'"]([^\'"]*)[\'"]',
+    read('honcho/__init__.py')
+).group(1)
+
+if __name__ == "__main__":
+    setup(name=NAME,
+          version=VERSION,
+          packages=find_packages(),
+          author=AUTHOR,
+          description=DESCRIPTION,
+          long_description=LONG_DESCRIPTION,
+          license=LICENSE,
+          keywords=KEYWORDS,
+          url=URL,
+          classifiers=CLASSIFIERS,
+          install_requires=INSTALL_REQUIRES,
+          extras_require=EXTRAS_REQUIRE,
+          entry_points=ENTRY_POINTS,
+          include_package_data=True)

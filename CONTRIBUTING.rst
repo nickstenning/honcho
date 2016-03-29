@@ -113,9 +113,11 @@ To list all available tox environments run::
 
     tox -l
 
-Honcho tox setup uses nose to run the test suite. You can pass positional arguments to a ``nosetests`` command
-within tox. E.g. if youd'd like to use nose ``-x`` flag (stop after first error) with a PyPy interpreter you could do this::
+Honcho's tox setup uses `pytest`_ to run the test suite. You can pass positional
+arguments to a pytest command within tox. For example, if you'd like to use
+pytest's ``-x`` flag (stop after first error) with a PyPy interpreter you could
+do this::
 
     tox -e pypy -- -x
 
-
+.. _pytest: https://pytest.org/

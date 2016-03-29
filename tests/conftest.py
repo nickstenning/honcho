@@ -1,18 +1,9 @@
 import os
 import shutil
 import tempfile
-import unittest
 from subprocess import Popen, PIPE
 
-
-class TestCase(unittest.TestCase):
-    if not hasattr(unittest.TestCase, 'assertIn'):
-        def assertIn(self, member, container, msg=None):  # noqa
-                """Just like self.assertTrue(a in b), but with a nicer default message."""
-                if member not in container:
-                    standardMsg = '%s not found in %s' % (repr(member),  # noqa
-                                                          repr(container))
-                    self.fail(self._formatMessage(msg, standardMsg))
+import pytest
 
 
 class TestEnv(object):
@@ -46,7 +37,6 @@ class TestEnv(object):
 
         # The below is mostly copy-pasted from subprocess.py's check_output (to
         # support python 2.6)
-
         process = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
         output, error = process.communicate()
         retcode = process.returncode
@@ -55,12 +45,10 @@ class TestEnv(object):
 
         return retcode, output, error
 
-    def __enter__(self):
-        self.setup()
-        return self
 
-    def __exit__(self, *args):
-        self.cleanup()
-
-    def __del__(self):
-        self.cleanup()
+@pytest.fixture
+def testenv(request):
+    env = TestEnv(request.param)
+    env.setup()
+    request.addfinalizer(env.cleanup)
+    return env
