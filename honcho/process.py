@@ -21,12 +21,14 @@ class Process(object):
                  name=None,
                  colour=None,
                  quiet=False,
-                 env=None):
+                 env=None,
+                 cwd=None):
         self.cmd = cmd
         self.colour = colour
         self.quiet = quiet
         self.name = name
         self.env = os.environ.copy() if env is None else env
+        self.cwd = cwd
 
         # This is a honcho.environ.Env object, to allow for stubbing of
         # external calls, not the operating system environment.
@@ -36,7 +38,7 @@ class Process(object):
 
     def run(self, events=None, ignore_signals=False):
         self._events = events
-        self._child = self._child_ctor(self.cmd, env=self.env)
+        self._child = self._child_ctor(self.cmd, env=self.env, cwd=self.cwd)
         self._send_message({'pid': self._child.pid}, type='start')
 
         # Don't pay attention to SIGINT/SIGTERM. The process itself is

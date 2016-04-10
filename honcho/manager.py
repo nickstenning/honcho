@@ -53,7 +53,7 @@ class Manager(object):
 
         self._terminating = False
 
-    def add_process(self, name, cmd, quiet=False, env=None):
+    def add_process(self, name, cmd, quiet=False, env=None, cwd=None):
         """
         Add a process to this manager instance. The process will not be started
         until #loop() is called.
@@ -63,7 +63,8 @@ class Manager(object):
                                   name=name,
                                   quiet=quiet,
                                   colour=next(self._colours),
-                                  env=env)
+                                  env=env,
+                                  cwd=cwd)
         self._processes[name] = {}
         self._processes[name]['obj'] = proc
 
