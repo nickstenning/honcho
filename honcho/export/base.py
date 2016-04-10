@@ -62,8 +62,16 @@ def dashrepl(value):
     return re.sub(patt, '-', value)
 
 
+def percentescape(value):
+    """
+    Double any % signs.
+    """
+    return value.replace('%', '%%')
+
+
 def _default_template_env(loader):
     env = jinja2.Environment(loader=loader)
     env.filters['shellquote'] = shellquote
     env.filters['dashrepl'] = dashrepl
+    env.filters['percentescape'] = percentescape
     return env

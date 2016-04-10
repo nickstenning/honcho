@@ -8,6 +8,7 @@ import pytest
 
 from honcho.export.base import BaseExport
 from honcho.export.base import dashrepl
+from honcho.export.base import percentescape
 
 
 class GiraffeExport(BaseExport):
@@ -45,3 +46,13 @@ class TestBaseExport():
 ))
 def test_dashrepl(name_in, name_out):
     assert dashrepl(name_in) == name_out
+
+
+@pytest.mark.parametrize('val_in,val_out', (
+    ('foo', 'foo'),
+    ('foo name.%h', 'foo name.%%h'),
+    ('%one two% %three', '%%one two%% %%three'),
+    ('foo%%bar', 'foo%%%%bar'),
+))
+def test_percentescape(val_in, val_out):
+    assert percentescape(val_in) == val_out
