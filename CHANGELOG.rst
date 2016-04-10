@@ -6,8 +6,25 @@ project endeavours to adhere to `Semantic Versioning`_.
 
 .. _Semantic Versioning: http://semver.org/
 
-Unreleased
-----------
+0.7.0 -- 2016-04-10
+-------------------
+
+* ADDED: Honcho can now export to a `runit <http://smarden.org/runit/>`_ service
+  directory.
+* ADDED: You can now specify the location of the Procfile with a ``PROCFILE``
+  environment variable.
+* ADDED: Python 3.5 is now a supported environment.
+* CHANGED: Python 3.0, 3.1, and 3.2 are no longer supported environments.
+* FIXED: The ``run`` command now correctly parses commands which include the
+  ``--`` "end of arguments" separator.
+* FIXED: Honcho no longer fails to load ``.env`` files if the Procfile is not in
+  the application directory.
+* FIXED: ANSI colour codes from running programs can no longer interfere with
+  Honcho's output.
+* FIXED: Export of environment variables containing special characters no longer
+  breaks the Upstart exporter.
+* FIXED: The supervisord exporter now correctly escapes the % symbol in commands
+  and environment variable values.
 
 0.6.6 -- 2015-03-16
 -------------------
