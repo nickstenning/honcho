@@ -68,7 +68,7 @@ The 30-second version:
 For more detail and an explanation of the circumstances in which Honcho might
 be useful, consult the `Honcho documentation`_.
 
-.. _Honcho documentation: //honcho.readthedocs.org/
+.. _Honcho documentation: https://honcho.readthedocs.org/
 
 License
 -------

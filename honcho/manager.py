@@ -30,13 +30,22 @@ class Manager(object):
     managing the events that result (starting, stopping, printing). By default
     it relays printed lines to a printer that prints to STDOUT.
 
-    Example:
+    Example::
+
+        import sys
+        from honcho.manager import Manager
 
         m = Manager()
         m.add_process('server', 'ruby server.rb')
         m.add_process('worker', 'python worker.py')
         m.loop()
+
+        sys.exit(m.returncode)
     """
+
+    #: After :func:`~honcho.manager.Manager.loop` finishes,
+    #: this will contain a return code that can be used with `sys.exit`.
+    returncode = None
 
     def __init__(self, printer=None):
         self.events = multiprocessing.Queue()
@@ -56,7 +65,7 @@ class Manager(object):
     def add_process(self, name, cmd, quiet=False, env=None, cwd=None):
         """
         Add a process to this manager instance. The process will not be started
-        until #loop() is called.
+        until :func:`~honcho.manager.Manager.loop` is called.
         """
         assert name not in self._processes, "process names must be unique"
         proc = self._process_ctor(cmd,
@@ -79,7 +88,7 @@ class Manager(object):
         printer (which by default will print to STDOUT).
 
         If one process terminates, all the others will be terminated by
-        Honcho, and #loop() will return.
+        Honcho, and :func:`~honcho.manager.Manager.loop` will return.
 
         This method will block until all the processes have terminated.
         """

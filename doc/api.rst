@@ -11,6 +11,11 @@ API Documentation
     :undoc-members:
     :show-inheritance:
 
+.. automodule:: honcho.manager
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 .. automodule:: honcho.export.base
     :members:
     :undoc-members:
