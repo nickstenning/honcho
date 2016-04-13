@@ -39,6 +39,7 @@ def _add_common_args(parser, with_defaults=False):
                         help='procfile directory (default: .)')
     parser.add_argument('-f', '--procfile',
                         metavar='FILE',
+                        default=suppress,
                         help='procfile path (default: Procfile)')
     parser.add_argument('-v', '--version',
                         action='version',
