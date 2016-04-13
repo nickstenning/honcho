@@ -6,6 +6,13 @@ project endeavours to adhere to `Semantic Versioning`_.
 
 .. _Semantic Versioning: http://semver.org/
 
+0.7.1 -- 2016-04-13
+-------------------
+
+- FIXED: Honcho now correctly pays attention to the ``-f`` argument when
+  provided before a command, fixing a regression introduced in the previous
+  version. Thanks to Marc Krull for reporting and fixing.
+
 0.7.0 -- 2016-04-10
 -------------------
 
