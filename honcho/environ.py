@@ -129,7 +129,7 @@ def expand_processes(processes, concurrency=None, env=None, quiet=None, port=Non
             n = "{0}.{1}".format(name, i + 1)
             c = cmd
             q = name in quiet
-            e = {}
+            e = {'HONCHO_PROCESS_NAME': n}
             if env is not None:
                 e.update(env)
             if port is not None:
