@@ -30,6 +30,12 @@ class FakeOutput(object):
         return "".join(self.out)
 
 
+class FakeTTY(FakeOutput):
+
+    def isatty(self):
+        return True
+
+
 class TestPrinter(object):
     def test_write(self):
         out = FakeOutput()
@@ -80,8 +86,14 @@ class TestPrinter(object):
         p.write(fake_message("narcissist\n", name="oop"))
         assert out.string() == "12:42:00 oop    | narcissist\n"
 
-    def test_write_with_colour(self):
-        out = FakeOutput()
+    def test_write_with_colour_tty(self):
+        out = FakeTTY()
         p = Printer(output=out)
         p.write(fake_message("conflate\n", name="foo", colour="31"))
         assert out.string() == "\033[0m\033[31m12:42:00 foo | \033[0mconflate\n"
+
+    def test_write_with_colour_non_tty(self):
+        out = FakeOutput()
+        p = Printer(output=out)
+        p.write(fake_message("conflate\n", name="foo", colour="31"))
+        assert out.string() == "12:42:00 foo | conflate\n"
