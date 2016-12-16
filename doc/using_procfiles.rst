@@ -39,6 +39,12 @@ Honcho::
     PROCFILE=Procfile
     EOF
 
+In addition to the variables specified in your ``.env`` file, the subprocess
+environment will also contain a ``HONCHO_PROCESS_NAME`` variable that will be
+set to a unique string composed of the process name as defined in the Procfile
+and an integer counter that is incremented for each concurrent process of the
+same type, for example: ``web.1``, ``web.2``, ``queue.1``, etc.
+
 As shown, you may choose to specify your Procfile in the ``.env`` file.  This
 takes priority over the default Procfile, but you can still use ``-f`` to replace
 which Procfile to use.

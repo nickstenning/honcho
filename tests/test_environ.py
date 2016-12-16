@@ -246,38 +246,38 @@ def test_expand_processes_command():
 
 def test_expand_processes_port_not_defaulted():
     p = ep(("foo", "some command"))
-    assert p[0].env == {}
+    assert "PORT" not in p[0].env
 
 
 def test_expand_processes_port():
     p = ep(("foo", "some command"), port=8000)
-    assert p[0].env == {"PORT": "8000"}
+    assert p[0].env["PORT"] == "8000"
 
 
 def test_expand_processes_port_multiple():
     p = ep(("foo", "some command"),
            ("bar", "another command"),
            port=8000)
-    assert p[0].env == {"PORT": "8000"}
-    assert p[1].env == {"PORT": "8100"}
+    assert p[0].env["PORT"] == "8000"
+    assert p[1].env["PORT"] == "8100"
 
 
 def test_expand_processes_port_from_env():
     p = ep(("foo", "some command"),
            ("bar", "another command"),
            env={"PORT": 8000})
-    assert p[0].env == {"PORT": "8000"}
-    assert p[1].env == {"PORT": "8100"}
+    assert p[0].env["PORT"] == "8000"
+    assert p[1].env["PORT"] == "8100"
 
 
 def test_expand_processes_port_from_env_coerced_to_number():
     p = ep(("foo", "some command"), env={"PORT": "5000"})
-    assert p[0].env == {"PORT": "5000"}
+    assert p[0].env["PORT"] == "5000"
 
 
 def test_expand_processes_port_from_env_overrides():
     p = ep(("foo", "some command"), env={"PORT": 5000}, port=8000)
-    assert p[0].env == {"PORT": "5000"}
+    assert p[0].env["PORT"] == "5000"
 
 
 def test_expand_processes_port_concurrency():
@@ -285,11 +285,11 @@ def test_expand_processes_port_concurrency():
            ("bar", "another command"),
            concurrency={"foo": 3, "bar": 2},
            port=4000)
-    assert p[0].env == {"PORT": "4000"}
-    assert p[1].env == {"PORT": "4001"}
-    assert p[2].env == {"PORT": "4002"}
-    assert p[3].env == {"PORT": "4100"}
-    assert p[4].env == {"PORT": "4101"}
+    assert p[0].env["PORT"] == "4000"
+    assert p[1].env["PORT"] == "4001"
+    assert p[2].env["PORT"] == "4002"
+    assert p[3].env["PORT"] == "4100"
+    assert p[4].env["PORT"] == "4101"
 
 
 def test_expand_processes_quiet():
@@ -320,3 +320,14 @@ def test_expand_processes_env_multiple():
     assert p[0].env["DEBUG"] == "false"
     assert p[1].env["ANIMAL"] == "giraffe"
     assert p[1].env["DEBUG"] == "false"
+
+
+def test_set_env_process_name():
+    p = ep(("foo", "some command"),
+           ("bar", "another command"),
+           concurrency={"foo": 3, "bar": 2})
+    assert p[0].env["HONCHO_PROCESS_NAME"] == "foo.1"
+    assert p[1].env["HONCHO_PROCESS_NAME"] == "foo.2"
+    assert p[2].env["HONCHO_PROCESS_NAME"] == "foo.3"
+    assert p[3].env["HONCHO_PROCESS_NAME"] == "bar.1"
+    assert p[4].env["HONCHO_PROCESS_NAME"] == "bar.2"
