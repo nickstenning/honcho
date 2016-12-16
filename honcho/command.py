@@ -60,6 +60,7 @@ def command_check(args):
 
     log.info('Valid procfile detected ({0})'.format(', '.join(procfile.processes)))
 
+
 parser_check = subparsers.add_parser(
     'check',
     help="validate a Procfile")
@@ -100,6 +101,7 @@ def command_export(args):
         _write_file(path, f.content)
         if f.executable:
             os.chmod(path, 0o755)
+
 
 parser_export = subparsers.add_parser(
     'export',
@@ -149,6 +151,7 @@ def command_help(args):
         argv.append(args.task)
     return parser.parse_args(argv[::-1])
 
+
 parser_help = subparsers.add_parser(
     'help',
     help="describe available tasks or one specific task")
@@ -176,6 +179,7 @@ def command_run(args):
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     p.wait()
     sys.exit(p.returncode)
+
 
 parser_run = subparsers.add_parser(
     'run',
@@ -219,6 +223,7 @@ def command_start(args):
 
     manager.loop()
     sys.exit(manager.returncode)
+
 
 parser_start = subparsers.add_parser(
     'start',
