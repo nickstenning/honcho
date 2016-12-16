@@ -21,6 +21,15 @@ class Printer(object):
         self.time_format = time_format
         self.width = width
 
+        try:
+            # We only want to print coloured messages if the given output supports
+            # ANSI escape sequences. Usually, testing if it is a TTY is safe enough.
+            self._colours_supported = self.output.isatty()
+        except AttributeError:
+            # If the given output does not implement isatty(), we assume that it
+            # is not able to handle ANSI escape sequences.
+            self._colours_supported = False
+
     def write(self, message):
         if message.type != 'line':
             raise RuntimeError('Printer can only process messages of type "line"')
@@ -41,7 +50,7 @@ class Printer(object):
         for line in string.splitlines():
             time_formatted = message.time.strftime(self.time_format)
             prefix = '{time} {name}| '.format(time=time_formatted, name=name)
-            if message.colour:
+            if self._colours_supported and message.colour:
                 prefix = _colour_string(message.colour, prefix)
             self.output.write(prefix + line + "\n")
 
