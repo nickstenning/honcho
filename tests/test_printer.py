@@ -97,3 +97,27 @@ class TestPrinter(object):
         p = Printer(output=out)
         p.write(fake_message("conflate\n", name="foo", colour="31"))
         assert out.string() == "12:42:00 foo | conflate\n"
+
+    def test_write_without_prefix_tty(self):
+        out = FakeTTY()
+        p = Printer(output=out, prefix=False, colour=True)
+        p.write(fake_message("paranoid android\n", name="foo", colour="31"))
+        assert out.string() == "paranoid android\n"
+
+    def test_write_without_prefix_and_colour_tty(self):
+        out = FakeTTY()
+        p = Printer(output=out, prefix=False, colour=False)
+        p.write(fake_message("paranoid android\n", name="foo", colour="31"))
+        assert out.string() == "paranoid android\n"
+
+    def test_write_without_colour_tty(self):
+        out = FakeTTY()
+        p = Printer(output=out, prefix=True, colour=False)
+        p.write(fake_message("paranoid android\n", name="foo", colour="31"))
+        assert out.string() == "12:42:00 foo | paranoid android\n"
+
+    def test_write_without_prefix_non_tty(self):
+        out = FakeOutput()
+        p = Printer(output=out, prefix=False)
+        p.write(fake_message("paranoid android\n", name="foo", colour="31"))
+        assert out.string() == "paranoid android\n"

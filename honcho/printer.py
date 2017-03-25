@@ -56,8 +56,8 @@ class Printer(object):
             if self.prefix:
                 time_formatted = message.time.strftime(self.time_format)
                 prefix = '{time} {name}| '.format(time=time_formatted, name=name)
-            if self.colour and self._colours_supported and message.colour:
-                prefix = _colour_string(message.colour, prefix)
+                if self.colour and self._colours_supported and message.colour:
+                    prefix = _colour_string(message.colour, prefix)
             self.output.write(prefix + line + "\n")
 
 
