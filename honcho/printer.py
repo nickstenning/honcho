@@ -16,10 +16,14 @@ class Printer(object):
     def __init__(self,
                  output=sys.stdout,
                  time_format="%H:%M:%S",
-                 width=0):
+                 width=0,
+                 colour=True,
+                 prefix=True):
         self.output = output
         self.time_format = time_format
         self.width = width
+        self.colour = colour
+        self.prefix = prefix
 
         try:
             # We only want to print coloured messages if the given output supports
@@ -48,9 +52,11 @@ class Printer(object):
             string = message.data
 
         for line in string.splitlines():
-            time_formatted = message.time.strftime(self.time_format)
-            prefix = '{time} {name}| '.format(time=time_formatted, name=name)
-            if self._colours_supported and message.colour:
+            prefix = ''
+            if self.prefix:
+                time_formatted = message.time.strftime(self.time_format)
+                prefix = '{time} {name}| '.format(time=time_formatted, name=name)
+            if self.colour and self._colours_supported and message.colour:
                 prefix = _colour_string(message.colour, prefix)
             self.output.write(prefix + line + "\n")
 

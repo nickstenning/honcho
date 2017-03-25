@@ -10,6 +10,7 @@ from pkg_resources import iter_entry_points
 from honcho import __version__
 from honcho.process import Popen
 from honcho.manager import Manager
+from honcho.printer import Printer
 from honcho import compat, environ
 
 logging.basicConfig(format='%(asctime)s [%(process)d] [%(levelname)s] '
@@ -37,6 +38,12 @@ def _add_common_args(parser, with_defaults=False):
                         metavar='DIR',
                         default=(suppress or '.'),
                         help='procfile directory (default: .)')
+    parser.add_argument('--no-colour',
+                        action='store_true',
+                        help='Disables colours on output')
+    parser.add_argument('--no-prefix',
+                        action='store_true',
+                        help='Disables logging prefix completely')
     parser.add_argument('-f', '--procfile',
                         metavar='FILE',
                         default=suppress,
@@ -210,7 +217,9 @@ def command_start(args):
     else:
         processes = procfile.processes
 
-    manager = Manager()
+    manager = Manager(Printer(sys.stdout,
+                              colour=(not args.no_colour),
+                              prefix=(not args.no_prefix)))
 
     for p in environ.expand_processes(processes,
                                       concurrency=concurrency,
