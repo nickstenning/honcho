@@ -67,30 +67,31 @@ To see the command line arguments accepted by Honcho, run it with the ``--help``
 option::
 
     $ honcho --help
-    usage: honcho [-h] [-v] [-e ENV] [-d APP_ROOT] [-f PROCFILE]
-                  {check,export,help,run,start} ...
+    usage: honcho [-h] [-e ENV] [-d DIR] [--no-colour] [--no-prefix] [-f FILE]
+                  [-v]
+                  {check,export,help,run,start,version} ...
 
     Manage Procfile-based applications
 
     optional arguments:
       -h, --help            show this help message and exit
+      -e ENV, --env ENV     environment file[,file] (default: .env)
+      -d DIR, --app-root DIR
+                            procfile directory (default: .)
+      --no-colour           Disables colours on output
+      --no-prefix           Disables logging prefix completely
+      -f FILE, --procfile FILE
+                            procfile path (default: Procfile)
       -v, --version         show program's version number and exit
 
-    common arguments:
-      -e ENV, --env ENV     Environment file[,file] (default: .env)
-      -d APP_ROOT, --app-root APP_ROOT
-                            Procfile directory (default: .)
-      -f PROCFILE, --procfile PROCFILE
-                            Procfile path (default: Procfile)
-
     tasks:
-      {check,export,help,run,start}
-        check               Validate your application's Procfile
-        export              Export the application to another process management
-                            format
-        help                Describe available tasks or one specific task
-        run                 Run a command using your application's environment
-        start               Start the application (or a specific PROCESS)
+      {check,export,help,run,start,version}
+        check               validate a Procfile
+        export              export a Procfile to another format
+        help                describe available tasks or one specific task
+        run                 run a command using your application's environment
+        start               start the application (or a specific PROCESS)
+        version             display honcho version
 
 
 You will notice that by default, Honcho will read a Procfile called
