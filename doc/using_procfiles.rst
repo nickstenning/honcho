@@ -78,8 +78,8 @@ option::
       -e ENV, --env ENV     environment file[,file] (default: .env)
       -d DIR, --app-root DIR
                             procfile directory (default: .)
-      --no-colour           Disables colours on output
-      --no-prefix           Disables logging prefix completely
+      --no-colour           disable coloured output
+      --no-prefix           disable logging prefix
       -f FILE, --procfile FILE
                             procfile path (default: Procfile)
       -v, --version         show program's version number and exit

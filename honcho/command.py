@@ -40,10 +40,10 @@ def _add_common_args(parser, with_defaults=False):
                         help='procfile directory (default: .)')
     parser.add_argument('--no-colour',
                         action='store_true',
-                        help='Disables colours on output')
+                        help='disable coloured output')
     parser.add_argument('--no-prefix',
                         action='store_true',
-                        help='Disables logging prefix completely')
+                        help='disable logging prefix')
     parser.add_argument('-f', '--procfile',
                         metavar='FILE',
                         default=suppress,
