@@ -28,7 +28,7 @@ Honcho is a Python port of Foreman_, a tool for managing Procfile-based applicat
    :target: https://landscape.io/github/nickstenning/honcho/master
    :alt: Code Health
 
-.. |PyPI| image:: https://pypip.in/version/honcho/badge.svg?style=flat
+.. |PyPI| image:: https://img.shields.io/pypi/v/honcho.svg
    :target: https://pypi.python.org/pypi/honcho/
    :alt: Latest Version on PyPI
 
