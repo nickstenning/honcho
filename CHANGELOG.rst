@@ -6,6 +6,13 @@ project endeavours to adhere to `Semantic Versioning`_.
 
 .. _Semantic Versioning: http://semver.org/
 
+1.0.1 -- 2017-04-01
+-------------------
+
+* FIXED: This release is identical to 1.0.0, but will be GPG-signed and uploaded
+  with `twine <https://pypi.python.org/pypi/twine>` to ensure it has correct
+  PyPI metadata.
+
 1.0.0 -- 2017-04-01
 -------------------
 
