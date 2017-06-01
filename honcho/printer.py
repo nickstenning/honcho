@@ -59,6 +59,8 @@ class Printer(object):
                 if self.colour and self._colours_supported and message.colour:
                     prefix = _colour_string(message.colour, prefix)
             self.output.write(prefix + line + "\n")
+            if hasattr(self.output, 'flush'):
+                self.output.flush()
 
 
 def _ansi(code):
