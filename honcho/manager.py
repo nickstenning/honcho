@@ -62,7 +62,7 @@ class Manager(object):
 
         self._terminating = False
 
-    def add_process(self, name, cmd, quiet=False, env=None, cwd=None):
+    def add_process(self, name, cmd, quiet=False, env=None, cwd=None, respawn=False):
         """
         Add a process to this manager instance. The process will not be started
         until :func:`~honcho.manager.Manager.loop` is called.
@@ -76,6 +76,7 @@ class Manager(object):
                                   cwd=cwd)
         self._processes[name] = {}
         self._processes[name]['obj'] = proc
+        self._processes[name]['respawn'] = respawn
 
         # Update printer width to accommodate this process name
         self._printer.width = max(self._printer.width, len(name))
@@ -100,7 +101,7 @@ class Manager(object):
         signal.signal(signal.SIGTERM, _terminate)
         signal.signal(signal.SIGINT, _terminate)
 
-        self._start()
+        self._startall()
 
         exit = False
         exit_start = None
@@ -119,11 +120,16 @@ class Manager(object):
                     self._system_print("%s started (pid=%s)\n"
                                        % (msg.name, msg.data['pid']))
                 elif msg.type == 'stop':
-                    self._processes[msg.name]['returncode'] = msg.data['returncode']
-                    self._system_print("%s stopped (rc=%s)\n"
-                                       % (msg.name, msg.data['returncode']))
-                    if self.returncode is None:
-                        self.returncode = msg.data['returncode']
+                    if not self._terminating and self._processes[msg.name]['respawn']:
+                        self._system_print("%s stopped (rc=%s) and respawning\n"
+                                           % (msg.name, msg.data['returncode']))
+                        self._start(msg.name)
+                    else:
+                        self._processes[msg.name]['returncode'] = msg.data['returncode']
+                        self._system_print("%s stopped (rc=%s)\n"
+                                           % (msg.name, msg.data['returncode']))
+                        if self.returncode is None:
+                            self.returncode = msg.data['returncode']
 
             if self._all_started() and self._all_stopped():
                 exit = True
@@ -172,12 +178,16 @@ class Manager(object):
             else:
                 self._env.terminate(p['pid'])
 
-    def _start(self):
+    def _start(self, name):
+        p = self._processes[name]
+        p['process'] = multiprocessing.Process(name=name,
+                                               target=p['obj'].run,
+                                               args=(self.events, True))
+        p['process'].start()
+
+    def _startall(self):
         for name, p in self._processes.items():
-            p['process'] = multiprocessing.Process(name=name,
-                                                   target=p['obj'].run,
-                                                   args=(self.events, True))
-            p['process'].start()
+            self._start(name)
 
     def _all_started(self):
         return all(p.get('pid') is not None for _, p in iteritems(self._processes))

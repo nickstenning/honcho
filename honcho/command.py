@@ -228,7 +228,7 @@ def command_start(args):
                                       port=port):
         e = os.environ.copy()
         e.update(p.env)
-        manager.add_process(p.name, p.cmd, quiet=p.quiet, env=e)
+        manager.add_process(p.name, p.cmd, quiet=p.quiet, env=e, respawn=args.respawn)
 
     manager.loop()
     sys.exit(manager.returncode)
@@ -246,6 +246,10 @@ parser_start.add_argument(
     '-c', '--concurrency',
     help='the number of each process type to run.',
     type=str, metavar='process=num,process=num')
+parser_start.add_argument(
+    '-r', '--respawn',
+    help='flag to enable process respawning.',
+    action='store_true')
 parser_start.add_argument(
     '-q', '--quiet',
     help='process names for which to suppress output',
