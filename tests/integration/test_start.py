@@ -27,6 +27,18 @@ def test_start(testenv):
 
 
 @pytest.mark.parametrize('testenv', [{
+    'Procfile': 'foo: {0} test.py'.format(python_bin),
+    'test.py': script,
+}], indirect=True)
+def test_start_respawn(testenv):
+    ret, out, err = testenv.run_honcho(['start'], respawn=True)
+
+    assert ret != 0
+    assert 'elephant' in out
+    assert 'error output' in out
+
+
+@pytest.mark.parametrize('testenv', [{
     '.env': 'ANIMAL=giraffe',
     'Procfile': 'foo: {0} test.py'.format(python_bin),
     'test.py': script,
