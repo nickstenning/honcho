@@ -31,3 +31,4 @@ Contributors
 * Miguel Grinberg
 * Pepijn de Vos
 * Philippe Ombredanne
+* Matthieu Melquiond
