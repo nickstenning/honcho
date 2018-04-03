@@ -31,13 +31,13 @@ class Export(BaseExport):
         master_wants = [".".join([group[0], "target"]) for group in process_groups]
         context['master_wants'] = " ".join(master_wants)
         context['process_groups'] = process_groups
-        yield File("{}.target".format(app_name), master_tpl.render(context))
+        yield File("{0}.target".format(app_name), master_tpl.render(context))
 
         for process_master_name, proc_groups in process_groups:
             process_master_wants = [".".join([p[0], "service"]) for p in proc_groups]
             context['process_master_wants'] = " ".join(process_master_wants)
-            yield File("{}.target".format(process_master_name), process_master_tpl.render(context))
+            yield File("{0}.target".format(process_master_name), process_master_tpl.render(context))
 
             for process_name, process in proc_groups:
                 context['process'] = process
-                yield File("{}.service".format(process_name), process_tpl.render(context))
+                yield File("{0}.service".format(process_name), process_tpl.render(context))
