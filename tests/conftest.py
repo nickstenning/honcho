@@ -1,9 +1,13 @@
 import os
 import shutil
+import sys
 import tempfile
 from subprocess import Popen, PIPE
 
 import pytest
+
+RUN_AS_PYTHON_PACKAGE = 'package'
+RUN_AS_PYTHON_ENTRYPOINT = 'entrypoint'
 
 
 class TestEnv(object):
@@ -28,11 +32,18 @@ class TestEnv(object):
     def path(self, *args):
         return os.path.join(self.root, *args)
 
-    def run_honcho(self, args):
+    def run_honcho(self, args, runner=RUN_AS_PYTHON_ENTRYPOINT):
+        if runner == RUN_AS_PYTHON_ENTRYPOINT:
+            return self._run_honcho(args, cmd=['honcho'])
+        elif runner == RUN_AS_PYTHON_PACKAGE:
+            return self._run_honcho(args, cmd=[sys.executable, '-m', 'honcho'])
+
+        raise NotImplementedError('Cannot run honcho as %r.' % (runner, ))
+
+    def _run_honcho(self, args, cmd):
         cwd = os.getcwd()
         os.chdir(self.root)
 
-        cmd = ['honcho']
         cmd.extend(args)
 
         # The below is mostly copy-pasted from subprocess.py's check_output (to
