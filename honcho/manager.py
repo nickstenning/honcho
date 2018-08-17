@@ -9,6 +9,7 @@ from .compat import iteritems
 from .environ import Env
 from .process import Process
 from .printer import Printer, Message
+from ._util import _listify, _get_if_empty
 
 KILL_WAIT = 5
 SIGNALS = {
@@ -54,8 +55,9 @@ class Manager(object):
         self._colours = get_colours()
         self._env = Env()
 
-        self._printer = printer if printer is not None else Printer(sys.stdout)
-        self._printer.width = len(SYSTEM_PRINTER_NAME)
+        self._printers = _listify(_get_if_empty(printer, Printer()))
+        for i, _printer in enumerate(self._printers):
+            self._printers[i].width = len(SYSTEM_PRINTER_NAME)
 
         self._process_ctor = Process
         self._processes = {}
@@ -78,7 +80,8 @@ class Manager(object):
         self._processes[name]['obj'] = proc
 
         # Update printer width to accommodate this process name
-        self._printer.width = max(self._printer.width, len(name))
+        for i, _printer in enumerate(self._printers):
+            self._printers[i].width = max(self._printers[i].width, len(name))
 
         return proc
 
@@ -113,7 +116,8 @@ class Manager(object):
                     break
             else:
                 if msg.type == 'line':
-                    self._printer.write(msg)
+                    for _printer in self._printers:
+                        _printer.write(msg)
                 elif msg.type == 'start':
                     self._processes[msg.name]['pid'] = msg.data['pid']
                     self._system_print("%s started (pid=%s)\n"
@@ -189,7 +193,8 @@ class Manager(object):
         return any(p.get('returncode') is not None for _, p in iteritems(self._processes))
 
     def _system_print(self, data):
-        self._printer.write(Message(type='line',
+        for _printer in self._printers:
+            _printer.write(Message(type='line',
                                     data=data,
                                     time=self._env.now(),
                                     name=SYSTEM_PRINTER_NAME,
