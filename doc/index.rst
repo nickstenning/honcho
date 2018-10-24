@@ -56,11 +56,15 @@ established that you need to run your application under a proper web server like
 
     web: gunicorn -b "0.0.0.0:$PORT" -w 4 myapp:app
     worker: python worker.py --priority high,med,low
-    worker_low: python worker.py --priority med,low 
+    worker_low: python worker.py --priority med,low
 
 Again, you can start all three processes with a single command::
 
     $ honcho start
+
+Honcho also supports `runpy`_ invocation::
+
+    $ python -m honcho start
 
 As you add features to your application, you shouldn't be forced to bundle
 everything up into a single process just to make the application easier to run.
@@ -73,6 +77,7 @@ it's made up of multiple independent components. Honcho (and `Foreman`_, and
 .. _Foreman: http://ddollar.github.com/foreman
 .. _Heroku: https://heroku.com/
 .. _gunicorn: http://gunicorn.org/
+.. _runpy: https://docs.python.org/3/library/runpy.html
 
 Why did you port Foreman?
 -------------------------
