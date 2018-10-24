@@ -2,20 +2,17 @@ import os
 
 import pytest
 
-all_honcho_runners = pytest.mark.parametrize('runner', ['entrypoint', 'package'])
 
-
-@all_honcho_runners
 @pytest.mark.parametrize('testenv', [{
     'Procfile': "web: python web.py"
 }], indirect=True)
-def test_export_supervisord(testenv, runner):
+def test_export_supervisord(testenv):
     ret, out, err = testenv.run_honcho([
         'export',
         'supervisord',
         testenv.path('giraffe'),
         '-a', 'neck',
-    ], runner=runner)
+    ])
 
     expected = testenv.path('giraffe', 'neck.conf')
 
@@ -23,17 +20,16 @@ def test_export_supervisord(testenv, runner):
     assert os.path.exists(expected)
 
 
-@all_honcho_runners
 @pytest.mark.parametrize('testenv', [{
     'Procfile': "web: python web.py"
 }], indirect=True)
-def test_export_upstart(testenv, runner):
+def test_export_upstart(testenv):
     ret, out, err = testenv.run_honcho([
         'export',
         'upstart',
         testenv.path('elephant'),
         '-a', 'trunk',
-    ], runner=runner)
+    ])
 
     assert ret == 0
     for filename in ('trunk.conf',
@@ -43,7 +39,6 @@ def test_export_upstart(testenv, runner):
         assert os.path.exists(expected)
 
 
-@all_honcho_runners
 @pytest.mark.parametrize('testenv', [{
     'Procfile': "web: python web.py",
     '.env': """
@@ -57,13 +52,13 @@ SQ_DOLLAR='costs $UNINTERPOLATED amount'
 DQ_DOLLAR="costs $UNINTERPOLATED amount"
 """
 }], indirect=True)
-def test_export_upstart_environment(testenv, runner):
+def test_export_upstart_environment(testenv):
     ret, out, err = testenv.run_honcho([
         'export',
         'upstart',
         testenv.path('test'),
         '-a', 'envvars',
-    ], runner=runner)
+    ])
 
     assert ret == 0
 
