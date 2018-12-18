@@ -1,7 +1,6 @@
 import datetime
 import multiprocessing
 import signal
-import sys
 
 from .colour import get_colours
 from .compat import Empty
@@ -108,7 +107,7 @@ class Manager(object):
         exit = False
         exit_start = None
 
-        while 1:
+        while True:
             try:
                 msg = self.events.get(timeout=0.1)
             except Empty:
@@ -196,7 +195,7 @@ class Manager(object):
         for _printer in self._printers:
             now = self._env.now()
             _printer.write(Message(type='line',
-                                    data=data,
-                                    time=now,
-                                    name=SYSTEM_PRINTER_NAME,
-                                    colour=None))
+                                   data=data,
+                                   time=now,
+                                   name=SYSTEM_PRINTER_NAME,
+                                   colour=None))
