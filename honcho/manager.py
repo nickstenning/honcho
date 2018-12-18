@@ -9,7 +9,7 @@ from .compat import iteritems
 from .environ import Env
 from .process import Process
 from .printer import Printer, Message
-from ._util import _listify, _get_if_empty
+from .util.type import sequencify
 
 KILL_WAIT = 5
 SIGNALS = {
@@ -29,7 +29,7 @@ class Manager(object):
     """
     Manager is responsible for running multiple external processes in parallel
     managing the events that result (starting, stopping, printing). By default
-    it relays printed lines to a printer that prints to STDOUT.
+    it relays printed lines to a printers that prints to STDOUT.
 
     Example::
 
@@ -55,7 +55,7 @@ class Manager(object):
         self._colours = get_colours()
         self._env = Env()
 
-        self._printers = _listify(_get_if_empty(printer, Printer()))
+        self._printers = sequencify(printer or Printer())
         for i, _printer in enumerate(self._printers):
             self._printers[i].width = len(SYSTEM_PRINTER_NAME)
 
@@ -194,8 +194,9 @@ class Manager(object):
 
     def _system_print(self, data):
         for _printer in self._printers:
+            now = self._env.now()
             _printer.write(Message(type='line',
                                     data=data,
-                                    time=self._env.now(),
+                                    time=now,
                                     name=SYSTEM_PRINTER_NAME,
                                     colour=None))
