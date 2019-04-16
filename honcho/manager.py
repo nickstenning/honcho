@@ -47,9 +47,10 @@ class Manager(object):
     #: this will contain a return code that can be used with `sys.exit`.
     returncode = None
 
-    def __init__(self, printer=None):
+    def __init__(self, printer=None, process_kwargs=None):
         self.events = multiprocessing.Queue()
         self.returncode = None
+        self._process_kwargs = process_kwargs
 
         self._colours = get_colours()
         self._env = Env()
@@ -176,7 +177,8 @@ class Manager(object):
         for name, p in self._processes.items():
             p['process'] = multiprocessing.Process(name=name,
                                                    target=p['obj'].run,
-                                                   args=(self.events, True))
+                                                   args=(self.events, True,
+                                                         self._process_kwargs))
             p['process'].start()
 
     def _all_started(self):

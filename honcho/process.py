@@ -36,9 +36,16 @@ class Process(object):
         self._child = None
         self._child_ctor = Popen
 
-    def run(self, events=None, ignore_signals=False):
+    def run(self, events=None, ignore_signals=False, process_kwargs=None):
         self._events = events
-        self._child = self._child_ctor(self.cmd, env=self.env, cwd=self.cwd)
+        process_kwargs = process_kwargs or {}
+        kwargs = dict(
+            dict(
+                env=self.env,
+                cwd=self.cwd,
+            ),
+            **process_kwargs)
+        self._child = self._child_ctor(self.cmd, **kwargs)
         self._send_message({'pid': self._child.pid}, type='start')
 
         # Don't pay attention to SIGINT/SIGTERM. The process itself is
