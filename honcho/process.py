@@ -39,9 +39,10 @@ class Process(object):
     def run(self, events=None, ignore_signals=False, process_kwargs=None):
         self._events = events
         process_kwargs = process_kwargs or {}
+        custom_env = process_kwargs.pop('env', {})
         kwargs = dict(
             dict(
-                env=self.env,
+                env=dict(self.env, **custom_env),
                 cwd=self.cwd,
             ),
             **process_kwargs)
