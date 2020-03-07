@@ -18,10 +18,10 @@ source tree that contains zero or more lines of the form::
 
     <process type>: <command>
 
-The ``process type`` is a string which may contain alphanumerics and underscores
-(``[A-Za-z0-9_]+``), and uniquely identifies one type of process which can be
-run to form your application. For example: ``web``, ``worker``, or
-``my_process_123``.
+The ``process type`` is a string which may contain alphanumerics as well as
+underscores and dashes (``[A-Za-z0-9_-]+``), and uniquely identifies one type
+of process which can be run to form your application. For example: ``web``,
+``worker``, or ``my_process_123``.
 
 ``command`` is a shell commandline which will be executed to spawn a process of
 the specified type.
