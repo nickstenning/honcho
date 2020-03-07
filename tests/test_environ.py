@@ -155,9 +155,16 @@ def test_environ_parse(content, commands):
     [
         # Invalid characters
         """
-        -foo: command
+        +foo: command
         """,
         {}
+    ],
+    [
+        # Valid -/_ characters
+        """
+        -foo_bar: command
+        """,
+        {'-foo_bar': 'command'}
     ],
     [
         # Shell metacharacters

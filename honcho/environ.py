@@ -13,7 +13,7 @@ if compat.ON_WINDOWS:
     import ctypes
 
 
-PROCFILE_LINE = re.compile(r'^([A-Za-z0-9_]+):\s*(.+)$')
+PROCFILE_LINE = re.compile(r'^([A-Za-z0-9_-]+):\s*(.+)$')
 
 
 class Env(object):
