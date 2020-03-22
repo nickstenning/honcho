@@ -96,9 +96,9 @@ Before you submit a pull request, check that it meets these guidelines:
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function or class with a docstring.
-3. The pull request should work for Python 2.6, 2.7, 3.2 and 3.3 and for PyPy. Check
-   https://travis-ci.org/nickstenning/honcho/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+3. The pull request should work for all supported Python versions. Check
+   https://travis-ci.org/nickstenning/honcho/pull_requests and make sure that
+   all the tests pass.
 
 Tips
 ----
