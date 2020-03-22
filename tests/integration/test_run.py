@@ -6,7 +6,6 @@ import pytest
 python_bin = sys.executable
 
 script = textwrap.dedent("""
-    from __future__ import print_function
     import os
     import sys
     print(os.environ.get("ANIMAL", "elephant"))

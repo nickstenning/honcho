@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import os
 import signal
 import subprocess
@@ -73,7 +71,6 @@ class Popen(subprocess.Popen):
             'stdout': subprocess.PIPE,
             'stderr': subprocess.STDOUT,
             'shell': True,
-            'bufsize': 1,
             'close_fds': not ON_WINDOWS,
         }
         options.update(**kwargs)

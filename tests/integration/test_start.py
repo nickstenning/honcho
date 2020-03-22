@@ -6,7 +6,6 @@ import pytest
 python_bin = sys.executable
 
 script = textwrap.dedent("""
-    from __future__ import print_function
     import os
     import sys
     print(os.environ.get("ANIMAL", "elephant"))
@@ -43,7 +42,6 @@ def test_start_env(testenv):
     'Procfile.dev': 'bar: {0} test_dev.py'.format(python_bin),
     'test.py': script,
     'test_dev.py': textwrap.dedent("""
-        from __future__ import print_function
         print("mongoose")
         """)
 }], indirect=True)
@@ -58,7 +56,6 @@ def test_start_env_procfile(testenv):
     'Procfile.dev': 'bar: {0} test_dev.py'.format(python_bin),
     'test.py': script,
     'test_dev.py': textwrap.dedent("""
-        from __future__ import print_function
         print("mongoose")
         """)
 }], indirect=True)
@@ -75,7 +72,6 @@ def test_start_procfile_after_command(testenv):
     'Procfile.dev': 'bar: {0} test_dev.py'.format(python_bin),
     'test.py': script,
     'test_dev.py': textwrap.dedent("""
-        from __future__ import print_function
         print("mongoose")
         """)
 }], indirect=True)

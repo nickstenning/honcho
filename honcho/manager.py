@@ -1,11 +1,10 @@
 import datetime
+import queue
 import multiprocessing
 import signal
 import sys
 
 from .colour import get_colours
-from .compat import Empty
-from .compat import iteritems
 from .environ import Env
 from .process import Process
 from .printer import Printer, Message
@@ -108,7 +107,7 @@ class Manager(object):
         while 1:
             try:
                 msg = self.events.get(timeout=0.1)
-            except Empty:
+            except queue.Empty:
                 if exit:
                     break
             else:
@@ -158,7 +157,7 @@ class Manager(object):
         """Kill all remaining processes, forcefully if requested."""
         for_termination = []
 
-        for n, p in iteritems(self._processes):
+        for n, p in self._processes.items():
             if 'returncode' not in p:
                 for_termination.append(n)
 
@@ -180,13 +179,13 @@ class Manager(object):
             p['process'].start()
 
     def _all_started(self):
-        return all(p.get('pid') is not None for _, p in iteritems(self._processes))
+        return all(p.get('pid') is not None for _, p in self._processes.items())
 
     def _all_stopped(self):
-        return all(p.get('returncode') is not None for _, p in iteritems(self._processes))
+        return all(p.get('returncode') is not None for _, p in self._processes.items())
 
     def _any_stopped(self):
-        return any(p.get('returncode') is not None for _, p in iteritems(self._processes))
+        return any(p.get('returncode') is not None for _, p in self._processes.items())
 
     def _system_print(self, data):
         self._printer.write(Message(type='line',

@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from collections import defaultdict
 from collections import namedtuple
 import datetime
@@ -53,7 +54,7 @@ class Procfile(object):
     """A data structure representing a Procfile"""
 
     def __init__(self):
-        self.processes = compat.OrderedDict()
+        self.processes = OrderedDict()
 
     def add_process(self, name, command):
         assert name not in self.processes, \
@@ -124,7 +125,7 @@ def expand_processes(processes, concurrency=None, env=None, quiet=None, port=Non
 
     out = []
 
-    for name, cmd in compat.iteritems(processes):
+    for name, cmd in processes.items():
         for i in range(con[name]):
             n = "{0}.{1}".format(name, i + 1)
             c = cmd

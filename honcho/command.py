@@ -2,8 +2,10 @@ import argparse
 import codecs
 import logging
 import os
+import shlex
 import sys
 import signal
+from collections import OrderedDict
 from collections import defaultdict
 from pkg_resources import iter_entry_points
 
@@ -179,7 +181,7 @@ def command_run(args):
         # using the MSFT quoting rules
         cmd = argv
     else:
-        cmd = ' '.join(compat.shellquote(arg) for arg in argv)
+        cmd = ' '.join(shlex.quote(arg) for arg in argv)
 
     p = Popen(cmd, stdout=sys.stdout, stderr=sys.stderr,
               start_new_session=False)
@@ -208,7 +210,7 @@ def command_start(args):
     port = _choose_port(args, env)
 
     if args.processes:
-        processes = compat.OrderedDict()
+        processes = OrderedDict()
         for name in args.processes:
             try:
                 processes[name] = procfile.processes[name]

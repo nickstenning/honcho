@@ -1,9 +1,9 @@
 import datetime
+import queue
 import multiprocessing
 
 import pytest
 
-from honcho.compat import Empty
 from honcho.printer import Message
 from honcho.manager import Manager
 from honcho.manager import SYSTEM_PRINTER_NAME
@@ -131,7 +131,7 @@ class Harness(object):
         while 1:
             try:
                 self.events_local.append(self._q.get(False))
-            except Empty:
+            except queue.Empty:
                 break
 
     def find_events(self, name=None, type=None):
@@ -173,7 +173,7 @@ class FakePrinter(object):
         while 1:
             try:
                 self.lines_local.append(self._q.get(False))
-            except Empty:
+            except queue.Empty:
                 break
 
     def got_line(self, data):

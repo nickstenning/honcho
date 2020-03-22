@@ -1,9 +1,6 @@
-from __future__ import print_function
-
 import re
+import shlex
 import sys
-
-from honcho.compat import shellquote
 
 try:
     import jinja2
@@ -71,7 +68,7 @@ def percentescape(value):
 
 def _default_template_env(loader):
     env = jinja2.Environment(loader=loader)
-    env.filters['shellquote'] = shellquote
+    env.filters['shellquote'] = shlex.quote
     env.filters['dashrepl'] = dashrepl
     env.filters['percentescape'] = percentescape
     return env

@@ -1,4 +1,4 @@
-from honcho import colour, compat
+from honcho import colour
 
 
 def test_colours():
@@ -13,6 +13,6 @@ def test_get_colours():
 
     expect = ['cyan', 'yellow', 'green', 'magenta', 'red', 'blue']
     expect = [getattr(colour, x) for x in expect]
-    actual = [next(gen) for _ in compat.xrange(6)]
+    actual = [next(gen) for _ in range(6)]
 
     assert expect == actual

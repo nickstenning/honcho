@@ -1,11 +1,11 @@
 # coding=utf-8
 
+import collections
 import textwrap
 
 import pytest
 
 from honcho import environ
-from honcho import compat
 
 
 @pytest.mark.parametrize('content,commands', [
@@ -211,7 +211,7 @@ class TestProcfile(object):
 
 
 def ep(*args, **kwargs):
-    return environ.expand_processes(compat.OrderedDict(args), **kwargs)
+    return environ.expand_processes(collections.OrderedDict(args), **kwargs)
 
 
 def test_expand_processes_name():
