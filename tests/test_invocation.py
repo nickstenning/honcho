@@ -5,7 +5,6 @@ import re
 import pytest
 
 
-@pytest.mark.skipif(sys.version_info < (2, 7), reason="check_output not available")
 def test_runpy_invoke():
     """
     Ensure honcho can also be invoked using runpy (python -m)
