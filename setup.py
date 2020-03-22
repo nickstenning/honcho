@@ -20,18 +20,15 @@ CLASSIFIERS = [
     'License :: OSI Approved :: MIT License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.6',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.3',
     'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
 ]
 INSTALL_REQUIRES = []
 EXTRAS_REQUIRE = {
-    ':python_version=="2.6"': ['argparse', 'ordereddict'],
     ':sys_platform=="win32"': ['colorama'],
     'export': ['jinja2>=2.7,<2.8'],
 }
