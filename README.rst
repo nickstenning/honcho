@@ -12,7 +12,7 @@
         /:/  /       \::/  /        /:/  /       \:\__\         /:/  /       \::/  /
         \/__/         \/__/         \/__/         \/__/         \/__/         \/__/
 
-|PyPI| |Build Status| |Code Health|
+|PyPI| |Build Status|
 
 Honcho is a Python port of Foreman_, a tool for managing Procfile-based applications.
 
