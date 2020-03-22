@@ -122,6 +122,7 @@ class TestPrinter(object):
         out = FakeOutput()
         p = Printer(output=out, prefix=False)
         p.write(fake_message("paranoid android\n", name="foo", colour="31"))
+        assert out.string() == "paranoid android\n"
 
     def test_write_flushes_output(self):
         out = FakeOutput()
