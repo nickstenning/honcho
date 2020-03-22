@@ -1,7 +1,6 @@
 import os
 import signal
 import subprocess
-import sys
 
 from .compat import ON_WINDOWS
 from .environ import Env
