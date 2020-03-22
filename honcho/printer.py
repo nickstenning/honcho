@@ -58,7 +58,7 @@ class Printer(object):
                 prefix = '{time} {name}| '.format(time=time_formatted, name=name)
                 if self.colour and self._colours_supported and message.colour:
                     prefix = _colour_string(message.colour, prefix)
-            self.output.write(prefix + line + "\n")
+            print(prefix + line, file=self.output, flush=True)
 
 
 def _ansi(code):

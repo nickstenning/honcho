@@ -20,6 +20,10 @@ class FakeOutput(object):
 
     def __init__(self):
         self.out = []
+        self.flushcount = 0
+
+    def flush(self):
+        self.flushcount += 1
 
     def write(self, data):
         self.out.append(data)
@@ -118,4 +122,9 @@ class TestPrinter(object):
         out = FakeOutput()
         p = Printer(output=out, prefix=False)
         p.write(fake_message("paranoid android\n", name="foo", colour="31"))
-        assert out.string() == "paranoid android\n"
+
+    def test_write_flushes_output(self):
+        out = FakeOutput()
+        p = Printer(output=out, prefix=False)
+        p.write(fake_message("paranoid android\n"))
+        assert out.flushcount == 1
