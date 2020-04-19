@@ -46,6 +46,9 @@ def _add_common_args(parser, with_defaults=False):
     parser.add_argument('--no-prefix',
                         action='store_true',
                         help='disable logging prefix')
+    parser.add_argument('--no-prefix-time',
+                        action='store_true',
+                        help='disable time in logging prefix')
     parser.add_argument('-f', '--procfile',
                         metavar='FILE',
                         default=suppress,
@@ -221,7 +224,8 @@ def command_start(args):
 
     manager = Manager(Printer(sys.stdout,
                               colour=(not args.no_colour),
-                              prefix=(not args.no_prefix)))
+                              prefix=(not args.no_prefix),
+                              prefix_time=(not args.no_prefix_time)))
 
     for p in environ.expand_processes(processes,
                                       concurrency=concurrency,
