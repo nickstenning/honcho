@@ -18,10 +18,10 @@ Honcho is a Python port of Foreman_, a tool for managing Procfile-based applicat
 
 `Why a port? <//honcho.readthedocs.io/en/latest/#why-did-you-port-foreman>`_
 
-.. _Foreman: http://ddollar.github.com/foreman
+.. _Foreman: https://ddollar.github.io/foreman/
 
 .. |Build Status| image:: https://secure.travis-ci.org/nickstenning/honcho.svg?branch=master
-   :target: http://travis-ci.org/nickstenning/honcho
+   :target: https://travis-ci.org/nickstenning/honcho
    :alt: Build Status
 
 .. |PyPI| image:: https://img.shields.io/pypi/v/honcho.svg
@@ -59,7 +59,7 @@ The 30-second version:
     $ honcho start
 
 .. _a Procfile: https://devcenter.heroku.com/articles/procfile
-.. _to configure your app: http://www.12factor.net/config
+.. _to configure your app: https://www.12factor.net/config
 
 For more detail and an explanation of the circumstances in which Honcho might
 be useful, consult the `Honcho documentation`_.
