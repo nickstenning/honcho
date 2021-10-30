@@ -189,8 +189,9 @@ class FakePrinter(object):
 class TestManager(object):
     @pytest.fixture(autouse=True)
     def printer(self):  # noqa
-        self.p = FakePrinter()
-        self.m = Manager(printer=self.p)
+        self.p1 = FakePrinter()
+        self.p2 = FakePrinter()
+        self.m = Manager(printer=[self.p1,self.p2])
         self.m._env = FakeEnv()
 
     def run_history(self, name, wait=True):
@@ -198,11 +199,13 @@ class TestManager(object):
         self.h.run(wait=wait)
 
     def test_init_sets_default_printer_width(self):
-        assert self.p.width == len(SYSTEM_PRINTER_NAME)
+        assert self.p1.width == len(SYSTEM_PRINTER_NAME)
+        assert self.p2.width == len(SYSTEM_PRINTER_NAME)
 
     def test_add_process_updates_printer_width(self):
         self.m.add_process('interesting', 'ruby server.rb')
-        assert self.p.width == len('interesting')
+        assert self.p1.width == len('interesting')
+        assert self.p2.width == len('interesting')
 
     def test_add_process_sets_name(self):
         proc = self.m.add_process('foo', 'ruby server.rb')
@@ -246,15 +249,26 @@ class TestManager(object):
 
     def test_printer_receives_messages_in_correct_order(self):
         self.run_history('one')
-        self.p.fetch_lines()
-        assert self.p.lines_local[0].data == 'foo started (pid=123)\n'
-        assert self.p.lines_local[1].data == b'hello, world!\n'
-        assert self.p.lines_local[2].data == 'foo stopped (rc=0)\n'
+        self.p1.fetch_lines()
+        self.p2.fetch_lines()
+        
+        assert self.p1.lines_local[0].data == 'foo started (pid=123)\n'
+        assert self.p1.lines_local[1].data == b'hello, world!\n'
+        assert self.p1.lines_local[2].data == 'foo stopped (rc=0)\n'
+
+        assert self.p2.lines_local[0].data == 'foo started (pid=123)\n'
+        assert self.p2.lines_local[1].data == b'hello, world!\n'
+        assert self.p2.lines_local[2].data == 'foo stopped (rc=0)\n'
 
     def test_printer_receives_lines_multi_process(self):
         self.run_history('two')
-        l1 = self.p.find_line(b'process one\n')
-        l2 = self.p.find_line(b'process two\n')
+        l1 = self.p1.find_line(b'process one\n')
+        l2 = self.p1.find_line(b'process two\n')
+        assert l1.name == 'foo'
+        assert l2.name == 'bar'
+
+        l1 = self.p2.find_line(b'process one\n')
+        l2 = self.p2.find_line(b'process two\n')
         assert l1.name == 'foo'
         assert l2.name == 'bar'
 
@@ -264,5 +278,8 @@ class TestManager(object):
 
     def test_printer_receives_lines_after_stop(self):
         self.run_history('output_after_stop')
-        assert self.p.got_line(b'fishmongers\n')
-        assert self.p.got_line(b'butchers\n')
+        assert self.p1.got_line(b'fishmongers\n')
+        assert self.p1.got_line(b'butchers\n')
+
+        assert self.p2.got_line(b'fishmongers\n')
+        assert self.p2.got_line(b'butchers\n')
