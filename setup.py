@@ -67,6 +67,7 @@ if __name__ == "__main__":
           author=AUTHOR,
           description=DESCRIPTION,
           long_description=LONG_DESCRIPTION,
+          long_description_content_type='text/x-rst',
           license=LICENSE,
           keywords=KEYWORDS,
           url=URL,
