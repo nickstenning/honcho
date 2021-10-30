@@ -127,7 +127,7 @@ parser_export.add_argument(
     default="/var/log/APP", type=str, metavar='DIR')
 parser_export.add_argument(
     '-p', '--port',
-    help="starting port number (default: 5000)",
+    help="starting port number (default: 5050)",
     default=argparse.SUPPRESS, type=int, metavar='N')
 parser_export.add_argument(
     '-c', '--concurrency',
@@ -244,7 +244,7 @@ parser_start = subparsers.add_parser(
 _add_common_args(parser_start)
 parser_start.add_argument(
     '-p', '--port',
-    help="starting port number (default: 5000)",
+    help="starting port number (default: 5050)",
     type=int, default=argparse.SUPPRESS, metavar='N')
 parser_start.add_argument(
     '-c', '--concurrency',
@@ -367,7 +367,7 @@ def _choose_port(args, env):
     elif os_env_port is not None:
         return int(os_env_port)
     else:
-        return 5000
+        return 5050
 
 
 def _mkdir(path):
