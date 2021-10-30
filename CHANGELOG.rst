@@ -6,6 +6,24 @@ project endeavours to adhere to `Semantic Versioning`_.
 
 .. _Semantic Versioning: http://semver.org/
 
+1.1.0 -- 2021-10-30
+-------------------
+
+* ADDED: Honcho can now export to a set of `systemd
+  <https://www.freedesktop.org/wiki/Software/systemd/>`_ unit files. Thanks to
+  Matt Melquiond for contributing the systemd exporter.
+* ADDED: ``python -m honcho`` now works identically to ``honcho``.
+* CHANGED: Dash (``-``) is now an allowed character in process types (thanks to
+  Ben Spaulding).
+* CHANGED: Honcho no longer opens a new console for every process on Windows.
+  Thank you to Benedikt Arnold for contributing the fix.
+* CHANGED: Python versions 3.6 through 3.10 are now supported environments.
+* CHANGED: Python 3.4 and 3.5 are no longer supported environments.
+* FIXED: ``--no-colour`` and ``--no-prefix`` now work whether specified before
+  or after the command.
+* FIXED: Honcho on Python 3.8 will no longer issue a ``RuntimeWarning`` about
+  line buffering not being supported in binary mode.
+
 1.0.1 -- 2017-04-01
 -------------------
 
