@@ -39,6 +39,7 @@ ENTRY_POINTS = {
     'honcho_exporters': [
         'runit=honcho.export.runit:Export',
         'supervisord=honcho.export.supervisord:Export',
+        'systemd=honcho.export.systemd:Export',
         'upstart=honcho.export.upstart:Export',
     ],
 }
