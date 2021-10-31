@@ -30,16 +30,22 @@ jobs:
           python -VV
           python -m site
           python -m pip install --upgrade pip
-          pip install tox tox-gh-actions
+          pip install coverage tox tox-gh-actions
 
       - name: "Run tox targets for ${{ matrix.python-version }}"
         run: "tox"
 
-      - name: "Combine coverage"
+      - name: "Coverage report"
+        if: "${{ matrix.python-version == '3.8' }}"
         run: |
-          tox -e coverage
+          coverage report
+          coverage xml
 
-      # TODO: get codecov working
+      - name: "Upload coverage to Codecov"
+        if: "${{ matrix.python-version == '3.8' }}"
+        uses: "codecov/codecov-action@v2"
+        with:
+          fail_ci_if_error: true
 
   package:
     name: "Build & verify package"
