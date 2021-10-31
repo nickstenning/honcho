@@ -82,12 +82,12 @@ it's made up of multiple independent components. Honcho (and `Foreman`_, and
 Why did you port Foreman?
 -------------------------
 
-`Foreman`_ is a great tool, and the fact I chose to port it to Python shouldn't
-be interpreted as saying anything negative about Foreman. But I've worked in
-Python-only development environments, where installing Ruby just so I can run
-Procfile applications seemed a bit crazy. Python, on the other hand, is part of
-the `Linux Standard Base`_, and so even in "Ruby-only" environments, Python will
-still be around.
+`Foreman`_ is a great tool! The fact I chose to port it to Python shouldn't be
+interpreted as saying anything negative about Foreman. But I have often worked
+in Python-only development environments where I didn't want to install Ruby just
+so I could run Procfile applications. Python, on the other hand, is part of the
+`Linux Standard Base`_, so even in "Ruby-only" environments it will typically
+still be installed.
 
 (Oh, and I also I wanted to learn about `asynchronous I/O`_ `in Python`_.)
 
