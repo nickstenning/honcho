@@ -28,10 +28,7 @@ DEFAULTS = {
     'port': '5000',
     'procfile': 'Procfile',
 }
-OS_ENV_ARGS = {
-    'port': 'PORT',
-}
-APP_ENV_ARGS = {
+ENV_ARGS = {
     'port': 'PORT',
     'procfile': 'PROCFILE',
 }
@@ -301,8 +298,8 @@ COMMANDS = {
 def map_from(args):
     env = _read_env(args.app_root, args.env)
 
-    from_os_env = _compact({k: os.environ.get(v) for k, v in OS_ENV_ARGS.items()})
-    from_env = _compact({k: env.get(v) for k, v in APP_ENV_ARGS.items()})
+    from_os_env = _compact({k: os.environ.get(v) for k, v in ENV_ARGS.items()})
+    from_env = _compact({k: env.get(v) for k, v in ENV_ARGS.items()})
     from_cli = _compact(vars(args))
 
     return ChainMap(from_cli, from_env, from_os_env, DEFAULTS)

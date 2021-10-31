@@ -6,6 +6,12 @@ project endeavours to adhere to `Semantic Versioning`_.
 
 .. _Semantic Versioning: http://semver.org/
 
+Recent changes
+--------------
+
+* CHANGED: You can use the ``PROCFILE`` OS environment variable to configure the
+  name of the Procfile.
+
 1.1.0 -- 2021-10-30
 -------------------
 

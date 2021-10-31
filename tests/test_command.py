@@ -70,6 +70,11 @@ def test_procfile_precedence(monkeypatch):
     result = command.map_from(args)['procfile']
     assert result == 'Procfile'
 
+    # OS environment override
+    monkeypatch.setenv('PROCFILE', 'Procfile.osenv')
+    result = command.map_from(args)['procfile']
+    assert result == 'Procfile.osenv'
+
     # App environment override
     # FIXME: find a better test seam for this
     def _read_env(app_root, env):
