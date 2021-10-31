@@ -1,5 +1,6 @@
 import os
 import shutil
+import subprocess
 import tempfile
 from subprocess import Popen, PIPE
 
@@ -44,6 +45,17 @@ class TestEnv(object):
         os.chdir(cwd)
 
         return retcode, output, error
+
+    def run(self, *args, **kwargs):
+        options = {
+            'cwd': self.root,
+            'stdout': PIPE,
+            'stderr': PIPE,
+            'universal_newlines': True,
+        }
+        options.update(kwargs)
+
+        return subprocess.run(*args, **options)
 
 
 @pytest.fixture
