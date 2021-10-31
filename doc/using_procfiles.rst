@@ -116,12 +116,12 @@ If you supply multiple comma-separated arguments to the ``-e`` option, Honcho wi
 Differences to Foreman
 ----------------------
 
-One of the curses of maintaining a "clone" of someone else's program is that
-you are forever asked to reimplement whatever questionable features upstream has
-introduced. So, while Honcho is based heavily on the Foreman_ project, there
-are some important differences between the two tools, some of which are simply
-the result of differences between Ruby and Python, and others are matters of
-software design. The following is a non-exhaustive list of these differences:
+While Honcho is based heavily on the Foreman_ project, it is not necessarily our
+intent to make Honcho feature-for-feature compatible with Foreman.
+
+There are some important differences between the two tools, some of which are
+simply the result of differences between Ruby and Python, and others are design
+choices. The following is a non-exhaustive list of these differences:
 
 .. _Foreman: https://github.com/ddollar/foreman
 
