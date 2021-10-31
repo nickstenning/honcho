@@ -2,7 +2,7 @@ import os
 import shutil
 import subprocess
 import tempfile
-from subprocess import Popen, PIPE
+from subprocess import PIPE
 
 import pytest
 
@@ -30,21 +30,14 @@ class TestEnv(object):
         return os.path.join(self.root, *args)
 
     def run_honcho(self, args):
-        cwd = os.getcwd()
-        os.chdir(self.root)
+        result = subprocess.run(
+            ['honcho'] + args,
+            cwd=self.root,
+            stdout=PIPE,
+            stderr=PIPE,
+            universal_newlines=True)
 
-        cmd = ['honcho']
-        cmd.extend(args)
-
-        # The below is mostly copy-pasted from subprocess.py's check_output (to
-        # support python 2.6)
-        process = Popen(cmd, stdout=PIPE, stderr=PIPE, universal_newlines=True)
-        output, error = process.communicate()
-        retcode = process.returncode
-
-        os.chdir(cwd)
-
-        return retcode, output, error
+        return result.returncode, result.stdout, result.stderr
 
     def run(self, *args, **kwargs):
         options = {
