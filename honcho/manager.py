@@ -6,7 +6,6 @@ import sys
 
 from .colour import get_colours
 from .compat import ProcessManager
-from .environ import Env
 from .process import Process
 from .printer import Printer, Message
 
@@ -52,7 +51,7 @@ class Manager(object):
         self.returncode = None
 
         self._colours = get_colours()
-        self._env = Env()
+        self._clock = datetime.datetime
         self._procmgr = ProcessManager()
 
         self._printer = printer if printer is not None else Printer(sys.stdout)
@@ -130,13 +129,13 @@ class Manager(object):
                 exit = True
 
             if exit_start is None and self._all_started() and self._any_stopped():
-                exit_start = self._env.now()
+                exit_start = self._clock.now()
                 self.terminate()
 
             if exit_start is not None:
                 # If we've been in this loop for more than KILL_WAIT seconds,
                 # it's time to kill all remaining children.
-                waiting = self._env.now() - exit_start
+                waiting = self._clock.now() - exit_start
                 if waiting > datetime.timedelta(seconds=KILL_WAIT):
                     self.kill()
 
@@ -192,6 +191,6 @@ class Manager(object):
     def _system_print(self, data):
         self._printer.write(Message(type='line',
                                     data=data,
-                                    time=self._env.now(),
+                                    time=self._clock.now(),
                                     name=SYSTEM_PRINTER_NAME,
                                     colour=None))

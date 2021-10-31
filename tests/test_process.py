@@ -4,7 +4,7 @@ import pytest
 from honcho.process import Process
 
 
-class FakeEnv(object):
+class FakeClock(object):
 
     def now(self):
         return datetime.datetime(2012, 8, 11, 12, 42)
@@ -118,7 +118,7 @@ class TestProcess(object):
 
     def test_message_contains_time(self):
         proc = Process('echo 123')
-        proc._env = FakeEnv()
+        proc._clock = FakeClock()
         proc._child_ctor = FakePopen
         proc.run(self.q)
         msg = self.q.messages[0]

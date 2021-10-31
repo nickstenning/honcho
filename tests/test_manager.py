@@ -45,7 +45,7 @@ HISTORIES = {
 }
 
 
-class FakeEnv(object):
+class FakeClock(object):
 
     def now(self):
         return datetime.datetime(2012, 8, 11, 12, 42)
@@ -194,7 +194,7 @@ class TestManager(object):
     def printer(self):  # noqa
         self.p = FakePrinter()
         self.m = Manager(printer=self.p)
-        self.m._env = FakeEnv()
+        self.m._clock = FakeClock()
         self.m._procmgr = FakeProcessManager()
 
     def run_history(self, name, wait=True):

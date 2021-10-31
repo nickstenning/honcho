@@ -1,9 +1,9 @@
+import datetime
 import os
 import signal
 import subprocess
 
 from .compat import ON_WINDOWS
-from .environ import Env
 from .printer import Message
 
 
@@ -27,9 +27,7 @@ class Process(object):
         self.env = os.environ.copy() if env is None else env
         self.cwd = cwd
 
-        # This is a honcho.environ.Env object, to allow for stubbing of
-        # external calls, not the operating system environment.
-        self._env = Env()
+        self._clock = datetime.datetime
         self._child = None
         self._child_ctor = Popen
 
@@ -57,7 +55,7 @@ class Process(object):
         if self._events is not None:
             self._events.put(Message(type=type,
                                      data=data,
-                                     time=self._env.now(),
+                                     time=self._clock.now(),
                                      name=self.name,
                                      colour=self.colour))
 
