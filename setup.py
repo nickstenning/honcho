@@ -31,6 +31,7 @@ INSTALL_REQUIRES = []
 EXTRAS_REQUIRE = {
     ':sys_platform=="win32"': ['colorama'],
     'export': ['jinja2>=2.7,<3'],
+    'docs': ['sphinx'],
 }
 ENTRY_POINTS = {
     'console_scripts': [
