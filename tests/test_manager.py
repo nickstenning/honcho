@@ -50,6 +50,9 @@ class FakeEnv(object):
     def now(self):
         return datetime.datetime(2012, 8, 11, 12, 42)
 
+
+class FakeProcessManager(object):
+
     def terminate(self, pid):
         pass
 
@@ -192,6 +195,7 @@ class TestManager(object):
         self.p = FakePrinter()
         self.m = Manager(printer=self.p)
         self.m._env = FakeEnv()
+        self.m._procmgr = FakeProcessManager()
 
     def run_history(self, name, wait=True):
         self.h = Harness(HISTORIES[name], self.m)

@@ -5,6 +5,7 @@ import signal
 import sys
 
 from .colour import get_colours
+from .compat import ProcessManager
 from .environ import Env
 from .process import Process
 from .printer import Printer, Message
@@ -52,6 +53,7 @@ class Manager(object):
 
         self._colours = get_colours()
         self._env = Env()
+        self._procmgr = ProcessManager()
 
         self._printer = printer if printer is not None else Printer(sys.stdout)
         self._printer.width = len(SYSTEM_PRINTER_NAME)
@@ -167,9 +169,9 @@ class Manager(object):
             self._system_print("sending %s to %s (pid %s)\n" %
                                (signame, n, p['pid']))
             if force:
-                self._env.kill(p['pid'])
+                self._procmgr.kill(p['pid'])
             else:
-                self._env.terminate(p['pid'])
+                self._procmgr.terminate(p['pid'])
 
     def _start(self):
         for name, p in self._processes.items():

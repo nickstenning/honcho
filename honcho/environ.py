@@ -1,17 +1,9 @@
 from collections import OrderedDict
 from collections import defaultdict
 from collections import namedtuple
-import datetime
-import errno
 import shlex
 import os
 import re
-import signal
-
-from . import compat
-
-if compat.ON_WINDOWS:
-    import ctypes
 
 
 PROCFILE_LINE = re.compile(r'^([A-Za-z0-9_-]+):\s*(.+)$')
@@ -21,33 +13,6 @@ class Env(object):
 
     def now(self):
         return datetime.datetime.now()
-
-    if compat.ON_WINDOWS:
-        def terminate(self, pid):
-            # The first argument to OpenProcess represents the desired access
-            # to the process. 1 represents the PROCESS_TERMINATE access right.
-            handle = ctypes.windll.kernel32.OpenProcess(1, False, pid)
-            ctypes.windll.kernel32.TerminateProcess(handle, -1)
-            ctypes.windll.kernel32.CloseHandle(handle)
-    else:
-        def terminate(self, pid):
-            try:
-                os.killpg(pid, signal.SIGTERM)
-            except OSError as e:
-                if e.errno not in [errno.EPERM, errno.ESRCH]:
-                    raise
-
-    if compat.ON_WINDOWS:
-        def kill(self, pid):
-            # There's no SIGKILL on Win32...
-            self.terminate(pid)
-    else:
-        def kill(self, pid):
-            try:
-                os.killpg(pid, signal.SIGKILL)
-            except OSError as e:
-                if e.errno not in [errno.EPERM, errno.ESRCH]:
-                    raise
 
 
 class Procfile(object):
