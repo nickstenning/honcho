@@ -36,3 +36,50 @@ def test_command_equivalence(commands):
     for args in commands:
         result = command.parser.parse_args(args)
         assert result == reference_result
+
+
+def test_port_precedence(monkeypatch):
+    # Nothing specified -- should return default
+    args = command.parser.parse_args(['start'])
+    result = command.map_from(args)['port']
+    assert result == '5000'
+
+    # OS environment override
+    monkeypatch.setenv('PORT', '4200')
+    result = command.map_from(args)['port']
+    assert result == '4200'
+
+    # App environment override
+    # FIXME: find a better test seam for this
+    def _read_env(app_root, env):
+        return {'PORT': '4300'}
+    monkeypatch.setattr(command, '_read_env', _read_env)
+    args = command.parser.parse_args(['start'])
+    result = command.map_from(args)['port']
+    assert result == '4300'
+
+    # CLI override
+    args = command.parser.parse_args(['start', '-p', '4400'])
+    result = command.map_from(args)['port']
+    assert result == '4400'
+
+
+def test_procfile_precedence(monkeypatch):
+    # Nothing specified -- should return default
+    args = command.parser.parse_args(['start'])
+    result = command.map_from(args)['procfile']
+    assert result == 'Procfile'
+
+    # App environment override
+    # FIXME: find a better test seam for this
+    def _read_env(app_root, env):
+        return {'PROCFILE': 'Procfile.appenv'}
+    monkeypatch.setattr(command, '_read_env', _read_env)
+    args = command.parser.parse_args(['start'])
+    result = command.map_from(args)['procfile']
+    assert result == 'Procfile.appenv'
+
+    # CLI override
+    args = command.parser.parse_args(['start', '-f', 'Procfile.cli'])
+    result = command.map_from(args)['procfile']
+    assert result == 'Procfile.cli'

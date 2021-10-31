@@ -5,11 +5,13 @@ import os
 import shlex
 import sys
 import signal
+from collections import ChainMap
 from collections import OrderedDict
 from collections import defaultdict
 from pkg_resources import iter_entry_points
 
 from honcho import __version__
+from honcho.environ import Env
 from honcho.process import Popen
 from honcho.manager import Manager
 from honcho.printer import Printer
@@ -22,6 +24,17 @@ logging.basicConfig(format='%(asctime)s [%(process)d] [%(levelname)s] '
 log = logging.getLogger(__name__)
 
 BASENAME = os.path.basename(os.getcwd())
+DEFAULTS = {
+    'port': '5000',
+    'procfile': 'Procfile',
+}
+OS_ENV_ARGS = {
+    'port': 'PORT',
+}
+APP_ENV_ARGS = {
+    'port': 'PORT',
+    'procfile': 'PROCFILE',
+}
 
 export_choices = dict((_export.name, _export)
                       for _export in iter_entry_points('honcho_exporters'))
@@ -51,7 +64,7 @@ def _add_common_args(parser, with_defaults=False):
     parser.add_argument('-f', '--procfile',
                         metavar='FILE',
                         default=suppress,
-                        help='procfile path (default: Procfile)')
+                        help=f'procfile path (default: {DEFAULTS["procfile"]})')
     parser.add_argument('-v', '--version',
                         action='version',
                         version='%(prog)s ' + __version__)
@@ -67,8 +80,10 @@ subparsers.required = True
 
 
 def command_check(args):
-    procfile = _procfile(_procfile_path(args.app_root, _choose_procfile(args)))
+    config = map_from(args)
+    env = Env(config)
 
+    procfile = _procfile(env)
     log.info('Valid procfile detected ({0})'.format(', '.join(procfile.processes)))
 
 
@@ -82,15 +97,17 @@ def command_export(args):
     if args.log == "/var/log/APP":
         args.log = args.log.replace('APP', args.app)
 
-    procfile_path = _procfile_path(args.app_root, _choose_procfile(args))
-    procfile = _procfile(procfile_path)
-    env = _read_env(args.app_root, args.env)
+    config = map_from(args)
+    env = Env(config)
+
+    procfile = _procfile(env)
+    app_env = _read_env(args.app_root, args.env)
     concurrency = _parse_concurrency(args.concurrency)
-    port = _choose_port(args, env)
+    port = _port(env)
 
     processes = environ.expand_processes(procfile.processes,
                                          concurrency=concurrency,
-                                         env=env,
+                                         env=app_env,
                                          port=port)
 
     export_ctor = export_choices[args.format].load()
@@ -127,8 +144,8 @@ parser_export.add_argument(
     default="/var/log/APP", type=str, metavar='DIR')
 parser_export.add_argument(
     '-p', '--port',
-    help="starting port number (default: 5000)",
-    default=argparse.SUPPRESS, type=int, metavar='N')
+    help=f"starting port number (default: {DEFAULTS['port']})",
+    default=argparse.SUPPRESS, metavar='N')
 parser_export.add_argument(
     '-c', '--concurrency',
     help='number of each process type to run.',
@@ -203,13 +220,14 @@ parser_run.add_argument(
 
 
 def command_start(args):
-    procfile_path = _procfile_path(args.app_root, _choose_procfile(args))
-    procfile = _procfile(procfile_path)
+    config = map_from(args)
+    env = Env(config)
 
+    procfile = _procfile(env)
     concurrency = _parse_concurrency(args.concurrency)
-    env = _read_env(args.app_root, args.env)
+    app_env = _read_env(args.app_root, args.env)
     quiet = _parse_quiet(args.quiet)
-    port = _choose_port(args, env)
+    port = _port(env)
 
     if args.processes:
         processes = OrderedDict()
@@ -227,7 +245,7 @@ def command_start(args):
 
     for p in environ.expand_processes(processes,
                                       concurrency=concurrency,
-                                      env=env,
+                                      env=app_env,
                                       quiet=quiet,
                                       port=port):
         e = os.environ.copy()
@@ -244,8 +262,8 @@ parser_start = subparsers.add_parser(
 _add_common_args(parser_start)
 parser_start.add_argument(
     '-p', '--port',
-    help="starting port number (default: 5000)",
-    type=int, default=argparse.SUPPRESS, metavar='N')
+    help=f"starting port number (default: {DEFAULTS['port']})",
+    default=argparse.SUPPRESS, metavar='N')
 parser_start.add_argument(
     '-c', '--concurrency',
     help='the number of each process type to run.',
@@ -280,6 +298,16 @@ COMMANDS = {
 }
 
 
+def map_from(args):
+    env = _read_env(args.app_root, args.env)
+
+    from_os_env = _compact({k: os.environ.get(v) for k, v in OS_ENV_ARGS.items()})
+    from_env = _compact({k: env.get(v) for k, v in APP_ENV_ARGS.items()})
+    from_cli = _compact(vars(args))
+
+    return ChainMap(from_cli, from_env, from_os_env, DEFAULTS)
+
+
 def main(argv=None):
     if argv is not None:
         args = parser.parse_args(argv)
@@ -294,23 +322,25 @@ def main(argv=None):
         sys.exit(1)
 
 
-def _procfile_path(app_root, procfile):
-    return os.path.join(app_root, procfile)
+def _compact(mapping):
+    return {k: v for k, v in mapping.items() if v is not None}
 
 
-def _procfile(filename):
+def _procfile(env):
     try:
-        with open(filename) as f:
-            content = f.read()
+        procfile = env.load_procfile()
     except IOError:
         raise CommandError('Procfile does not exist or is not a file')
-
-    try:
-        procfile = environ.parse_procfile(content)
     except AssertionError as e:
         raise CommandError(str(e))
-
     return procfile
+
+
+def _port(env):
+    try:
+        return env.port
+    except ValueError as e:
+        raise CommandError(str(e))
 
 
 def _read_env(app_root, env):
@@ -342,32 +372,6 @@ def _parse_quiet(desc):
         return result
     result = desc.split(',')
     return result
-
-
-def _choose_procfile(args):
-    env = _read_env(args.app_root, args.env)
-    env_procfile = env.pop('PROCFILE', None)
-
-    if hasattr(args, 'procfile') and args.procfile is not None:
-        return args.procfile
-    elif env_procfile is not None:
-        return env_procfile
-    else:
-        return "Procfile"
-
-
-def _choose_port(args, env):
-    env_port = env.pop('PORT', None)
-    os_env_port = os.environ.pop('PORT', None)
-
-    if hasattr(args, 'port'):
-        return args.port
-    elif env_port is not None:
-        return int(env_port)
-    elif os_env_port is not None:
-        return int(os_env_port)
-    else:
-        return 5000
 
 
 def _mkdir(path):

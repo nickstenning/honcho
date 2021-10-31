@@ -11,8 +11,25 @@ PROCFILE_LINE = re.compile(r'^([A-Za-z0-9_-]+):\s*(.+)$')
 
 class Env(object):
 
-    def now(self):
-        return datetime.datetime.now()
+    def __init__(self, config):
+        self._c = config
+
+    @property
+    def port(self):
+        try:
+            return int(self._c['port'])
+        except ValueError:
+            raise ValueError(f"invalid value for port: '{self._c['port']}'")
+
+    @property
+    def procfile(self):
+        return os.path.join(self._c['app_root'], self._c['procfile'])
+
+    def load_procfile(self):
+        with open(self.procfile) as f:
+            content = f.read()
+
+        return parse_procfile(content)
 
 
 class Procfile(object):
