@@ -1,11 +1,12 @@
 import datetime
 import queue
 import multiprocessing
+import os
 import signal
 import sys
 
 from .colour import get_colours
-from .compat import ProcessManager
+from .compat import ON_WINDOWS, ProcessManager
 from .process import Process
 from .printer import Printer, Message
 
@@ -139,6 +140,8 @@ class Manager(object):
                 if waiting > datetime.timedelta(seconds=KILL_WAIT):
                     self.kill()
 
+            self._reap_zombies()
+
     def terminate(self):
         """
         Terminate all processes managed by this ProcessManager.
@@ -187,6 +190,26 @@ class Manager(object):
 
     def _any_stopped(self):
         return any(p.get('returncode') is not None for _, p in self._processes.items())
+
+    def _reap_zombies(self):
+        """
+        When honcho is used as Pid 1 (in a container), it need to reap zombie
+        processes.
+        """
+        if ON_WINDOWS:
+            return
+
+        while 1:
+            try:
+                pid, status = os.waitpid(-1, os.WUNTRACED | os.WNOHANG)
+                if pid == 0:
+                    # no more stopped child
+                    break
+                else:
+                    self._system_print("Pid %s got reaped: %s" % (pid, status))
+            except Exception as e:
+                self._system_print("waitpid error: %s: %s" % (
+                    e.__class__.__name__, e))
 
     def _system_print(self, data):
         self._printer.write(Message(type='line',
