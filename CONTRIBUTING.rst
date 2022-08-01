@@ -105,9 +105,9 @@ Tips
 
 If you'd like to run a specific tox environment just use ``-e`` flag e.g.::
 
-    tox -e py27
+    tox -e py39
 
-This will run tests using python2.7 interpreter.
+This will run tests using python3.9 interpreter.
 
 To list all available tox environments run::
 
