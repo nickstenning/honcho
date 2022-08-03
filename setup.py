@@ -30,7 +30,7 @@ CLASSIFIERS = [
 INSTALL_REQUIRES = []
 EXTRAS_REQUIRE = {
     ':sys_platform=="win32"': ['colorama'],
-    'export': ['jinja2>=2.7,<3'],
+    'export': ['jinja2>=3.1.2,<4'],
     'docs': ['sphinx'],
 }
 ENTRY_POINTS = {
