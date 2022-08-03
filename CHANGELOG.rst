@@ -11,6 +11,7 @@ Recent changes
 
 * CHANGED: You can use the ``PROCFILE`` OS environment variable to configure the
   name of the Procfile.
+* CHANGED: Python 3.6 is no longer a supported environment.
 
 1.1.0 -- 2021-10-30
 -------------------
