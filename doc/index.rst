@@ -74,7 +74,7 @@ it's made up of multiple independent components. Honcho (and `Foreman`_, and
 
 .. _Procfile: https://devcenter.heroku.com/articles/procfile
 .. _Procfile-based applications: Procfile_
-.. _Foreman: http://ddollar.github.com/foreman
+.. _Foreman: https://ddollar.github.io/foreman/
 .. _Heroku: https://heroku.com/
 .. _gunicorn: http://gunicorn.org/
 .. _runpy: https://docs.python.org/3/library/runpy.html
