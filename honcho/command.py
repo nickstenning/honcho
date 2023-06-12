@@ -5,6 +5,7 @@ import os
 import shlex
 import sys
 import signal
+import yaml
 from collections import ChainMap
 from collections import OrderedDict
 from collections import defaultdict
@@ -298,11 +299,13 @@ COMMANDS = {
 def map_from(args):
     env = _read_env(args.app_root, args.env)
 
+    from_dotfile = _read_dotfile()
+
     from_os_env = _compact({k: os.environ.get(v) for k, v in ENV_ARGS.items()})
     from_env = _compact({k: env.get(v) for k, v in ENV_ARGS.items()})
     from_cli = _compact(vars(args))
 
-    return ChainMap(from_cli, from_env, from_os_env, DEFAULTS)
+    return ChainMap(from_cli, from_dotfile, from_env, from_os_env, DEFAULTS)
 
 
 def main(argv=None):
@@ -318,6 +321,11 @@ def main(argv=None):
         log.error(str(e))
         sys.exit(1)
 
+def _read_dotfile():
+    if not os.path.isfile(".honcho"):
+        return {}
+    with open('.honcho', 'r') as file:
+        return yaml.load(file, Loader=yaml.Loader) or {}
 
 def _compact(mapping):
     return {k: v for k, v in mapping.items() if v is not None}
