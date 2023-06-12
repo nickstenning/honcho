@@ -26,7 +26,9 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
 ]
-INSTALL_REQUIRES = []
+INSTALL_REQUIRES = [
+    'pyyaml'
+]
 EXTRAS_REQUIRE = {
     ':sys_platform=="win32"': ['colorama'],
     'export': ['jinja2>=3.1.2,<4'],
