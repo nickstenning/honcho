@@ -116,6 +116,13 @@ from honcho import environ
          'NEWLINES': 'foo\nbar',
          'DOLLAR': 'foo\\$bar'}
     ],
+    [
+        # "." in value
+        r"""
+        MYVAR.SUB=value
+        """,
+        {'MYVAR.SUB': 'value'}
+    ]
 ])
 def test_environ_parse(content, commands):
     content = textwrap.dedent(content)
