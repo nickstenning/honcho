@@ -6,7 +6,7 @@ Basic usage::
 
   $ honcho export FORMAT LOCATION
 
-Exporters for ``upstart``,``supervisord``,``runit`` and ``systemd`` formats are shipped with Honcho.
+Exporters for ``upstart``, ``supervisord``, ``runit`` and ``systemd`` formats are shipped with Honcho.
 
 
 Examples
