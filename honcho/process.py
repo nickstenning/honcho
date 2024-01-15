@@ -67,7 +67,7 @@ class Popen(subprocess.Popen):
         options = {
             'stdout': subprocess.PIPE,
             'stderr': subprocess.STDOUT,
-            'shell': True,
+            'shell': not ON_WINDOWS,
             'close_fds': not ON_WINDOWS,
         }
         options.update(**kwargs)

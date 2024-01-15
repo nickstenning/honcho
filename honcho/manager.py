@@ -111,6 +111,8 @@ class Manager(object):
             except queue.Empty:
                 if exit:
                     break
+            except InterruptedError:
+                exit = True
             else:
                 if msg.type == 'line':
                     self._printer.write(msg)
