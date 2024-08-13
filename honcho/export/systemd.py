@@ -36,6 +36,7 @@ class Export(BaseExport):
         for process_master_name, proc_groups in process_groups:
             process_master_wants = [".".join([p[0], "service"]) for p in proc_groups]
             context['process_master_wants'] = " ".join(process_master_wants)
+            context['process_master_name'] = process_master_name
             yield File("{0}.target".format(process_master_name), process_master_tpl.render(context))
 
             for process_name, process in proc_groups:
