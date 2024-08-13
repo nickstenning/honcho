@@ -10,7 +10,7 @@ Environment={{ k }}={{ v | shellquote }}
 ExecStart={{ shell }} -lc '{{ process.cmd }}'
 Restart=always
 StandardInput=null
-StandardOutput=syslog
-StandardError=syslog
+StandardOutput=journal
+StandardError=journal
 SyslogIdentifier=%n
 KillMode=process
