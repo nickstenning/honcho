@@ -1,5 +1,5 @@
 [Unit]
-PartOf={{ app }}-{{ process.name }}.target
+PartOf={{ app }}-{{ process_master_name }}.target
 
 [Service]
 User={{ user }}
