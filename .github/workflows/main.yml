@@ -8,62 +8,67 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
+env:
+  FORCE_COLOR: "1"
+
 jobs:
+  package:
+    name: Build & verify package
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: hynek/build-and-inspect-python-package@v2
+        id: baipp
+
+    outputs:
+      python-versions: ${{ steps.baipp.outputs.supported_python_classifiers_json_array }}
+
   tests:
-    name: "Python ${{ matrix.python-version }}"
-    runs-on: "ubuntu-latest"
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    needs: package
 
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "pypy-3.7", "pypy-3.8"]
+        python-version:
+          - pypy3.9
+          - pypy3.10
+          - ${{ fromJson(needs.package.outputs.python-versions) }}
 
     steps:
-      - uses: "actions/checkout@v2"
-
-      - uses: "actions/setup-python@v2"
+      - name: Download pre-built packages
+        uses: actions/download-artifact@v4
         with:
-          python-version: "${{ matrix.python-version }}"
+          name: Packages
+          path: dist
 
-      - name: "Install dependencies"
+      - run: tar xf dist/*.tar.gz --strip-components=1
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          allow-prereleases: true
+
+      - uses: hynek/setup-cached-uv@v2
+
+      - name: Run tox
+        run: >
+          uvx --with=tox-uv --with=tox-gh-actions
+          tox run --installpkg dist/*.whl
+
+      - name: Coverage report
+        if: ${{ matrix.python-version == '3.12' }}
         run: |
-          set -xe
-          python -VV
-          python -m site
-          python -m pip install --upgrade pip
-          pip install coverage tox tox-gh-actions
+          uvx coverage report
+          uvx coverage xml
 
-      - name: "Run tox targets for ${{ matrix.python-version }}"
-        run: "tox"
-
-      - name: "Coverage report"
-        if: "${{ matrix.python-version == '3.8' }}"
-        run: |
-          coverage report
-          coverage xml
-
-      - name: "Upload coverage to Codecov"
-        if: "${{ matrix.python-version == '3.8' }}"
-        uses: "codecov/codecov-action@v2"
+      - name: Upload coverage to Codecov
+        if: ${{ matrix.python-version == '3.12' }}
+        uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
-
-  package:
-    name: "Build & verify package"
-    runs-on: "ubuntu-latest"
-
-    steps:
-      - uses: "actions/checkout@v2"
-      - uses: "actions/setup-python@v2"
-        with:
-          python-version: "3.10"
-
-      - name: "Install build, check-wheel-contents, and twine"
-        run: "python -m pip install build twine check-wheel-contents"
-      - name: "Build package"
-        run: "python -m build --sdist --wheel ."
-      - name: "List result"
-        run: "ls -l dist"
-      - name: "Check wheel contents"
-        run: "check-wheel-contents dist/*.whl"
-      - name: "Check long_description"
-        run: "python -m twine check dist/*"
