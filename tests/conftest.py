@@ -31,7 +31,7 @@ class TestEnv(object):
 
     def run_honcho(self, args):
         result = subprocess.run(
-            ['honcho'] + args,
+            ['honcho', *args],
             cwd=self.root,
             stdout=PIPE,
             stderr=PIPE,

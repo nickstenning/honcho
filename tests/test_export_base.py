@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 
-from mock import Mock
-from mock import patch
 import pytest
+from mock import Mock, patch
 
-from honcho.export.base import BaseExport
-from honcho.export.base import dashrepl
-from honcho.export.base import percentescape
+from honcho.export.base import BaseExport, dashrepl, percentescape
 
 
 class GiraffeExport(BaseExport):

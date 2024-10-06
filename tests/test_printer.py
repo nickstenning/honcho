@@ -1,7 +1,8 @@
 import datetime
+
 import pytest
 
-from honcho.printer import Printer, Message
+from honcho.printer import Message, Printer
 
 
 def fake_message(data, **kwargs):

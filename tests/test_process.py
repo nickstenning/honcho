@@ -1,4 +1,5 @@
 import datetime
+
 import pytest
 
 from honcho.process import Process
@@ -82,7 +83,7 @@ class FakeOutput(object):
 class TestProcess(object):
 
     @pytest.fixture(autouse=True)
-    def queue(self):  # noqa
+    def queue(self):
         self.q = FakeQueue()
 
     def test_ctor_cmd(self):

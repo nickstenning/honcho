@@ -1,5 +1,5 @@
-from collections import namedtuple
 import sys
+from collections import namedtuple
 
 from .compat import ON_WINDOWS
 
@@ -76,7 +76,7 @@ if ON_WINDOWS:
     try:
         import colorama
     except ImportError:
-        def _colour_string(colour, s):  # noqa
+        def _colour_string(colour, s):
             return s
     else:
         colorama.init()

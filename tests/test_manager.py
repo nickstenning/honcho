@@ -1,12 +1,11 @@
 import datetime
-import queue
 import multiprocessing
+import queue
 
 import pytest
 
+from honcho.manager import SYSTEM_PRINTER_NAME, Manager
 from honcho.printer import Message
-from honcho.manager import Manager
-from honcho.manager import SYSTEM_PRINTER_NAME
 
 HISTORIES = {
     'one': {
@@ -191,7 +190,7 @@ class FakePrinter(object):
 
 class TestManager(object):
     @pytest.fixture(autouse=True)
-    def printer(self):  # noqa
+    def printer(self):
         self.p = FakePrinter()
         self.m = Manager(printer=self.p)
         self.m._clock = FakeClock()

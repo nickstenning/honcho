@@ -1,9 +1,7 @@
 import collections
 
-from mock import MagicMock
-from mock import call
-from mock import patch
 import pytest
+from mock import MagicMock, call, patch
 
 from honcho.export.systemd import Export
 
@@ -17,7 +15,7 @@ FIX_NPROC = [FakeProcess('web.1'),
 
 class TestExportSystemd(object):
     @pytest.fixture(autouse=True)
-    def exporter(self, request):  # noqa
+    def exporter(self, request):
         self.export = Export()
 
         self.master = MagicMock()

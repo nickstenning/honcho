@@ -1,7 +1,7 @@
 import collections
 
-from mock import patch
 import pytest
+from mock import patch
 
 from honcho.export.runit import Export
 
@@ -12,7 +12,7 @@ FIX_1PROC = [FakeProcess('web.1', {'FOO': 'bar'})]
 
 class TestExportRunit(object):
     @pytest.fixture(autouse=True)
-    def exporter(self, request):  # noqa
+    def exporter(self, request):
         self.export = Export()
 
         get_template_patcher = patch.object(Export, 'get_template')
