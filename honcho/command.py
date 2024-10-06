@@ -8,7 +8,7 @@ import signal
 from collections import ChainMap
 from collections import OrderedDict
 from collections import defaultdict
-from pkg_resources import iter_entry_points
+from importlib.metadata import entry_points
 
 from honcho import __version__
 from honcho.environ import Env
@@ -33,8 +33,9 @@ ENV_ARGS = {
     'procfile': 'PROCFILE',
 }
 
-export_choices = dict((_export.name, _export)
-                      for _export in iter_entry_points('honcho_exporters'))
+export_choices = dict(
+    (_export.name, _export) for _export in entry_points(group="honcho_exporters")
+)
 
 
 class CommandError(Exception):
