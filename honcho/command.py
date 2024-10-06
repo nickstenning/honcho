@@ -8,7 +8,6 @@ import signal
 from collections import ChainMap
 from collections import OrderedDict
 from collections import defaultdict
-from importlib.metadata import entry_points
 
 from honcho import __version__
 from honcho.environ import Env
@@ -16,6 +15,11 @@ from honcho.process import Popen
 from honcho.manager import Manager
 from honcho.printer import Printer
 from honcho import compat, environ
+
+if sys.version_info < (3, 10):
+    from backports.entry_points_selectable import entry_points
+else:
+    from importlib.metadata import entry_points
 
 logging.basicConfig(format='%(asctime)s [%(process)d] [%(levelname)s] '
                            '%(message)s',

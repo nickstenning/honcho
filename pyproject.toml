@@ -30,6 +30,7 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
+    'backports.entry-points-selectable; python_version<"3.10"',
     'colorama; sys_platform=="win32"',
 ]
 dynamic = ["version"]
