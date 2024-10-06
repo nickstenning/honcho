@@ -1,10 +1,7 @@
-from collections import OrderedDict
-from collections import defaultdict
-from collections import namedtuple
-import shlex
 import os
 import re
-
+import shlex
+from collections import OrderedDict, defaultdict, namedtuple
 
 PROCFILE_LINE = re.compile(r'^([A-Za-z0-9_-]+):\s*(.+)$')
 

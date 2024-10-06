@@ -88,8 +88,8 @@ from honcho import environ
         # Unicode values
         r"""
         MYVAR=⋃ñᴉ—☪ó∂ǝ
-        """,
-        {'MYVAR': '⋃ñᴉ—☪ó∂ǝ'}
+        """,  # noqa: RUF001
+        {'MYVAR': '⋃ñᴉ—☪ó∂ǝ'}  # noqa: RUF001
     ],
     [
         # Unicode keys

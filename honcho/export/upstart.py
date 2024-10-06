@@ -2,9 +2,7 @@ from itertools import groupby
 
 import jinja2
 
-from honcho.export.base import BaseExport
-from honcho.export.base import File
-from honcho.export.base import dashrepl
+from honcho.export.base import BaseExport, File, dashrepl
 
 
 class Export(BaseExport):

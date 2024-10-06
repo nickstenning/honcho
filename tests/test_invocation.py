@@ -1,8 +1,6 @@
-import sys
-import subprocess
 import re
-
-import pytest
+import subprocess
+import sys
 
 
 def test_runpy_invoke():

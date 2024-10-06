@@ -1,5 +1,4 @@
-from mock import MagicMock
-from mock import patch
+from mock import MagicMock, patch
 
 from honcho.export.supervisord import Export
 

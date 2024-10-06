@@ -1,13 +1,13 @@
 import datetime
-import queue
 import multiprocessing
+import queue
 import signal
 import sys
 
 from .colour import get_colours
 from .compat import ProcessManager
+from .printer import Message, Printer
 from .process import Process
-from .printer import Printer, Message
 
 KILL_WAIT = 5
 SIGNALS = {

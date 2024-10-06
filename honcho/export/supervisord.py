@@ -1,7 +1,6 @@
 import jinja2
 
-from honcho.export.base import BaseExport
-from honcho.export.base import File
+from honcho.export.base import BaseExport, File
 
 
 class Export(BaseExport):
