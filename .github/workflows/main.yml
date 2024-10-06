@@ -57,6 +57,8 @@ jobs:
       - uses: hynek/setup-cached-uv@v2
 
       - name: Run tox
+        env:
+          RUFF_OUTPUT_FORMAT: github
         run: >
           uvx --with=tox-uv --with=tox-gh-actions
           tox run --installpkg dist/*.whl
