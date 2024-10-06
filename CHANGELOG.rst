@@ -6,12 +6,25 @@ project endeavours to adhere to `Semantic Versioning`_.
 
 .. _Semantic Versioning: http://semver.org/
 
-Recent changes
---------------
+2.0.0 -- 2024-10-06
+-------------------
 
 * CHANGED: You can use the ``PROCFILE`` OS environment variable to configure the
   name of the Procfile.
-* CHANGED: Python 3.6 is no longer a supported environment.
+* CHANGED: Python 3.6 and 3.7 are no longer supported environments.
+* CHANGED: Python 3.11, 3.12, 3.13 are now supported environments. Thank you to
+  Jace Browning and Marco Carvalho who each submitted fixes to enable this.
+* CHANGED: PyPy 3.7 and 3.8 are no longer supported environments.
+* CHANGED: PyPy 3.9, 3.10 are now supported environments.
+* FIXED: The systemd exporter now correctly sets ``Wants`` for the process group
+  master targets. Thank you to Dan Berg for the fix.
+* CHANGED: The systemd exporter sets ``WantedBy=multi-user.target`` for
+  individual services so that they start automatically on most systems.
+  Processes also log to the ``journal`` by default. Thank you to Dan Berg for
+  the contributions.
+
+Thank you also to the following for contributions improving Honcho's
+documentation: @timgates42, @rafrafek, @sblondon, and @Bernardoow.
 
 1.1.0 -- 2021-10-30
 -------------------
