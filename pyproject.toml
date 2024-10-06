@@ -9,7 +9,6 @@ readme = "README.rst"
 authors = [
   {name = "Nick Stenning", email = "nick@whiteink.com"}
 ]
-license.file = "LICENSE"
 keywords = ["sysadmin", "process", "procfile"]
 urls."Source" = "https://github.com/nickstenning/honcho"
 classifiers = [
