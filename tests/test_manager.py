@@ -72,8 +72,9 @@ class FakeProcess(object):
         self._events = None
         self._options = {}
 
-    def run(self, events=None, ignore_signals=False):
-        self._report('run', events_passed=events is not None)
+    def run(self, events=None, ignore_signals=False, process_kwargs=None):
+        self._report('run', events_passed=events is not None,
+                     process_kwargs=process_kwargs)
 
     def _report(self, type, **data):
         if self._events is not None:
@@ -246,6 +247,15 @@ class TestManager(object):
         assert len(evts) == 1
         assert evts[0]['name'] == 'foo'
         assert evts[0]['events_passed']
+
+    def test_loop_calls_with_process_kwargs(self):
+        kwargs = {'cwd': '../'}
+        self.m = Manager(printer=self.p, process_kwargs=kwargs)
+        self.m._env = FakeEnv()
+        self.run_history('one')
+        evts = self.h.find_events(type='run')
+        assert len(evts) == 1
+        assert evts[0]['process_kwargs'] == kwargs
 
     def test_printer_receives_messages_in_correct_order(self):
         self.run_history('one')
