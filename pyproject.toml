@@ -48,7 +48,10 @@ systemd = "honcho.export.systemd:Export"
 upstart = "honcho.export.upstart:Export"
 
 [tool.ruff]
-format.exclude = ["honcho/_version.py"]
+format.exclude = [
+    "doc/conf.py",
+    "honcho/_version.py",
+]
 lint.select = ["E4", "E7", "E9", "F", "I", "N", "RUF"]
 
 [tool.setuptools.packages.find]
