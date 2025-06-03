@@ -48,7 +48,7 @@ systemd = "honcho.export.systemd:Export"
 upstart = "honcho.export.upstart:Export"
 
 [tool.ruff]
-format.exclude = [
+extend-exclude = [
     "doc/conf.py",
     "honcho/_version.py",
 ]
