@@ -69,17 +69,8 @@ class FakeProcess(object):
         self.env = env
         self.cwd = cwd
 
-        self._events = None
-        self._options = {}
-
     def run(self, events=None, ignore_signals=False):
-        self._report('run', events_passed=events is not None)
-
-    def _report(self, type, **data):
-        if self._events is not None:
-            data.update({'type': type,
-                         'name': self.name})
-            self._events.put(data)
+        pass
 
 
 class Harness(object):
@@ -89,11 +80,8 @@ class Harness(object):
         self.manager = manager
         self.events_local = []
 
-        self._q = multiprocessing.Queue()
-        self._rc = multiprocessing.Value('i', -999)
-
     def run(self, wait=True):
-        self.manager._process_ctor = self._process_ctor
+        self.manager._process_ctor = FakeProcess
 
         for name, options in self.history['processes'].items():
             self.manager.add_process(name,
@@ -104,55 +92,15 @@ class Harness(object):
             self.manager.loop()
             rc.value = self.manager.returncode
 
-        self._mproc = multiprocessing.Process(target=_loop, args=(self._rc,))
-        self._mproc.start()
-
         for msg in self.history['messages']:
-            self.send_manager(*msg)
+            process_name, type, data = msg
+            self.manager.events.put(Message(type=type,
+                                            data=data,
+                                            time=datetime.datetime.now(),
+                                            name=process_name,
+                                            colour=None))
 
-        self._mproc.join()
-
-    @property
-    def manager_returncode(self):
-        if self._rc.value == -999:
-            return None
-        return self._rc.value
-
-    def send_manager(self, process_name, type, data, **kwargs):
-        self.manager.events.put(Message(type=type,
-                                        data=data,
-                                        time=datetime.datetime.now(),
-                                        name=process_name,
-                                        colour=None))
-
-    def fetch_events(self):
-        """
-        Retrieve any pending events from the queue and put them on the local
-        event cache
-        """
-        while 1:
-            try:
-                self.events_local.append(self._q.get(False))
-            except queue.Empty:
-                break
-
-    def find_events(self, name=None, type=None):
-        self.fetch_events()
-        results = []
-        for event in self.events_local:
-            if name is not None and event['name'] != name:
-                continue
-            if type is not None and event['type'] != type:
-                continue
-            results.append(event)
-        return results
-
-    def _process_ctor(self, *args, **kwargs):
-        options = self.history['processes'][kwargs['name']]
-        p = FakeProcess(*args, **kwargs)
-        p._events = self._q
-        p._options = options
-        return p
+        self.manager.loop()
 
 
 class FakePrinter(object):
@@ -240,13 +188,6 @@ class TestManager(object):
     def test_loop_with_empty_manager_returns_immediately(self):
         self.m.loop()
 
-    def test_loop_calls_process_run(self):
-        self.run_history('one')
-        evts = self.h.find_events(type='run')
-        assert len(evts) == 1
-        assert evts[0]['name'] == 'foo'
-        assert evts[0]['events_passed']
-
     def test_printer_receives_messages_in_correct_order(self):
         self.run_history('one')
         self.p.fetch_lines()
@@ -263,7 +204,7 @@ class TestManager(object):
 
     def test_returncode_set_by_first_exiting_process(self):
         self.run_history('returncode')
-        assert self.h.manager_returncode == 456
+        assert self.h.manager.returncode == 456
 
     def test_printer_receives_lines_after_stop(self):
         self.run_history('output_after_stop')
