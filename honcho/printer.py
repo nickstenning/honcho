@@ -18,12 +18,14 @@ class Printer(object):
                  time_format="%H:%M:%S",
                  width=0,
                  colour=True,
-                 prefix=True):
+                 prefix=True,
+                 prefix_time=True):
         self.output = output
         self.time_format = time_format
         self.width = width
         self.colour = colour
         self.prefix = prefix
+        self.prefix_time = prefix_time
 
         try:
             # We only want to print coloured messages if the given output supports
@@ -54,8 +56,11 @@ class Printer(object):
         for line in string.splitlines():
             prefix = ''
             if self.prefix:
-                time_formatted = message.time.strftime(self.time_format)
-                prefix = '{time} {name}| '.format(time=time_formatted, name=name)
+                if self.prefix_time:
+                    time_formatted = message.time.strftime(self.time_format)
+                    prefix = '{time} {name}| '.format(time=time_formatted, name=name)
+                else:
+                    prefix = '{name}| '.format(name=name)
                 if self.colour and self._colours_supported and message.colour:
                     prefix = _colour_string(message.colour, prefix)
             print(prefix + line, file=self.output, flush=True)
