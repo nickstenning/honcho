@@ -54,8 +54,11 @@ class Printer(object):
         for line in string.splitlines():
             prefix = ''
             if self.prefix:
-                time_formatted = message.time.strftime(self.time_format)
-                prefix = '{time} {name}| '.format(time=time_formatted, name=name)
+                if self.time_format:
+                    time_formatted = message.time.strftime(self.time_format)
+                    prefix = '{time} {name}| '.format(time=time_formatted, name=name)
+                else:
+                    prefix = '{name}| '.format(name=name)
                 if self.colour and self._colours_supported and message.colour:
                     prefix = _colour_string(message.colour, prefix)
             print(prefix + line, file=self.output, flush=True)
