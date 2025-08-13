@@ -57,21 +57,17 @@ def parse(content):
     """
     values = {}
     for line in content.splitlines():
-        lexer = shlex.shlex(line, posix=True)
-        tokens = list(lexer)
-
-        # parses the assignment statement
-        if len(tokens) < 3:
+        try:
+            name, value = line.split('=', 1)
+        except ValueError:
             continue
 
-        name, op = tokens[:2]
-        value = ''.join(tokens[2:])
-
-        if op != '=':
-            continue
-        if not re.match(r'[A-Za-z_][A-Za-z_0-9]*', name):
+        name = name.strip()
+        if not re.match(r'[A-Za-z_][A-Za-z_0-9.]*', name):
             continue
 
+        lexer = shlex.shlex(value, posix=True)
+        value = ''.join(lexer)
         value = value.replace(r'\n', '\n')
         value = value.replace(r'\t', '\t')
         values[name] = value
