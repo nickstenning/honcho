@@ -1,6 +1,7 @@
 import pytest
 
 from honcho import command
+from honcho.manager import KILL_WAIT
 
 
 # All of the following groups of commands should parse to the same result
@@ -88,3 +89,41 @@ def test_procfile_precedence(monkeypatch):
     args = command.parser.parse_args(['start', '-f', 'Procfile.cli'])
     result = command.map_from(args)['procfile']
     assert result == 'Procfile.cli'
+
+
+def test_start_timeout():
+    # Nothing specified -- same as the manager's default
+    args = command.parser.parse_args(['start'])
+    assert args.timeout == KILL_WAIT
+
+    args = command.parser.parse_args(['start', '-t', '30'])
+    assert args.timeout == 30
+
+    args = command.parser.parse_args(['start', '--timeout', '0'])
+    assert args.timeout == 0
+
+
+def test_start_passes_timeout_to_manager(monkeypatch, tmp_path):
+    (tmp_path / 'Procfile').write_text('web: true\n')
+    created = {}
+
+    class FakeManager(object):
+        returncode = 0
+
+        def __init__(self, printer, kill_wait):
+            created['kill_wait'] = kill_wait
+
+        def add_process(self, *args, **kwargs):
+            pass
+
+        def loop(self):
+            pass
+
+    monkeypatch.setattr(command, 'Manager', FakeManager)
+    args = command.parser.parse_args(
+        ['-d', str(tmp_path), 'start', '-t', '30'])
+
+    with pytest.raises(SystemExit):
+        command.command_start(args)
+
+    assert created['kill_wait'] == 30

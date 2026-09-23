@@ -113,6 +113,15 @@ If you supply multiple comma-separated arguments to the ``-e`` option, Honcho wi
     ANIMAL_1=giraffe
     ANIMAL_2=elephant
 
+When one process exits, or when Honcho receives SIGINT or SIGTERM, Honcho sends
+SIGTERM to all the remaining processes. Any process still running 5 seconds
+after the first one exited is sent SIGKILL. Processes that need longer to shut
+down gracefully, such as a job queue worker finishing its current job, can be
+given more time with the ``-t``/``--timeout`` option to ``honcho start``, as
+with Foreman::
+
+    $ honcho start --timeout 30
+
 Differences to Foreman
 ----------------------
 

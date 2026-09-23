@@ -9,7 +9,7 @@ from collections import ChainMap, OrderedDict, defaultdict
 
 from honcho import __version__, compat, environ
 from honcho.environ import Env
-from honcho.manager import Manager
+from honcho.manager import KILL_WAIT, Manager
 from honcho.printer import Printer
 from honcho.process import Popen
 
@@ -240,7 +240,8 @@ def command_start(args):
 
     manager = Manager(Printer(sys.stdout,
                               colour=(not args.no_colour),
-                              prefix=(not args.no_prefix)))
+                              prefix=(not args.no_prefix)),
+                      kill_wait=args.timeout)
 
     for p in environ.expand_processes(processes,
                                       concurrency=concurrency,
@@ -271,6 +272,11 @@ parser_start.add_argument(
     '-q', '--quiet',
     help='process names for which to suppress output',
     type=str, metavar='process1,process2,process3')
+parser_start.add_argument(
+    '-t', '--timeout',
+    help=('seconds processes have to shut down gracefully before they are '
+          f'sent SIGKILL (default: {KILL_WAIT})'),
+    type=int, default=KILL_WAIT, metavar='N')
 parser_start.add_argument(
     'processes', nargs='*',
     help='process(es) to start (default: all processes)')

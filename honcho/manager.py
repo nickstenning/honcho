@@ -46,9 +46,13 @@ class Manager(object):
     #: this will contain a return code that can be used with `sys.exit`.
     returncode = None
 
-    def __init__(self, printer=None):
+    def __init__(self, printer=None, kill_wait=KILL_WAIT):
         self.events = multiprocessing.Queue()
         self.returncode = None
+
+        #: Seconds the remaining processes get to exit after the first one
+        #: stops, before they are sent SIGKILL.
+        self.kill_wait = kill_wait
 
         self._colours = get_colours()
         self._clock = datetime.datetime
@@ -133,10 +137,10 @@ class Manager(object):
                 self.terminate()
 
             if exit_start is not None:
-                # If we've been in this loop for more than KILL_WAIT seconds,
+                # If we've been in this loop for more than kill_wait seconds,
                 # it's time to kill all remaining children.
                 waiting = self._clock.now() - exit_start
-                if waiting > datetime.timedelta(seconds=KILL_WAIT):
+                if waiting > datetime.timedelta(seconds=self.kill_wait):
                     self.kill()
 
     def terminate(self):

@@ -59,3 +59,38 @@ def test_start_returncode(testenv):
     ret, out, err = testenv.run_honcho(['start'])
 
     assert ret == 42
+
+
+draining = textwrap.dedent("""
+    import signal
+    import sys
+    import time
+
+    def drain(signum, frame):
+        time.sleep(1)
+        print("drained", flush=True)
+        sys.exit(0)
+
+    signal.signal(signal.SIGTERM, drain)
+    print("ready", flush=True)
+    time.sleep(30)
+""")
+
+
+@pytest.mark.skipif(sys.platform == 'win32', reason='relies on POSIX signals')
+@pytest.mark.parametrize('testenv', [{
+    'Procfile': '\n'.join([
+        'quick: {0} -c "import time; time.sleep(1)"'.format(python_bin),
+        'slow: {0} draining.py'.format(python_bin),
+    ]),
+    'draining.py': draining,
+}], indirect=True)
+@pytest.mark.parametrize(('args', 'drained'), [
+    (['start'], True),
+    (['start', '--timeout', '0'], False),
+])
+def test_start_timeout(testenv, args, drained):
+    _, out, _ = testenv.run_honcho(args)
+
+    assert 'ready' in out
+    assert ('drained' in out) == drained
