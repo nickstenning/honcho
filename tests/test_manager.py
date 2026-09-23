@@ -4,7 +4,7 @@ import queue
 
 import pytest
 
-from honcho.manager import SYSTEM_PRINTER_NAME, Manager
+from honcho.manager import KILL_WAIT, SYSTEM_PRINTER_NAME, Manager
 from honcho.printer import Message
 
 HISTORIES = {
@@ -22,6 +22,12 @@ HISTORIES = {
                      ('bar', 'line', b'process two\n'),
                      ('foo', 'stop', {'returncode': 0}),
                      ('bar', 'stop', {'returncode': 0})),
+    },
+    'straggler': {
+        'processes': {'bar': {}, 'foo': {}},
+        'messages': (('foo', 'start', {'pid': 123}),
+                     ('bar', 'start', {'pid': 124}),
+                     ('foo', 'stop', {'returncode': 0})),
     },
     'returncode': {
         'processes': {'bar': {}, 'foo': {}},
@@ -57,6 +63,44 @@ class FakeProcessManager(object):
 
     def kill(self, pid):
         pass
+
+
+class TickingClock(object):
+    """A clock that moves forward one second every time it is read."""
+
+    def __init__(self):
+        self.current = datetime.datetime(2012, 8, 11, 12, 42)
+
+    def now(self):
+        self.current += datetime.timedelta(seconds=1)
+        return self.current
+
+
+class RecordingProcessManager(object):
+    """Records when processes are signalled, and stops any process it kills."""
+
+    def __init__(self, manager, clock):
+        self.manager = manager
+        self.clock = clock
+        self.terminated_at = None
+        self.killed_at = None
+        self.killed_pids = []
+
+    def terminate(self, pid):
+        if self.terminated_at is None:
+            self.terminated_at = self.clock.current
+
+    def kill(self, pid):
+        if self.killed_at is None:
+            self.killed_at = self.clock.current
+        self.killed_pids.append(pid)
+        name = next(n for n, p in self.manager._processes.items()
+                    if p.get('pid') == pid)
+        self.manager.events.put(Message(type='stop',
+                                        data={'returncode': -9},
+                                        time=datetime.datetime.now(),
+                                        name=name,
+                                        colour=None))
 
 
 class FakeProcess(object):
@@ -210,3 +254,29 @@ class TestManager(object):
         self.run_history('output_after_stop')
         assert self.p.got_line(b'fishmongers\n')
         assert self.p.got_line(b'butchers\n')
+
+    def run_straggler(self, **kwargs):
+        clock = TickingClock()
+        manager = Manager(printer=self.p, **kwargs)
+        manager._clock = clock
+        manager._procmgr = RecordingProcessManager(manager, clock)
+        Harness(HISTORIES['straggler'], manager).run()
+        return manager._procmgr
+
+    # The clock also moves when the manager stamps its own log lines, so the
+    # kill may land up to two ticks after the wait has run out.
+
+    def test_kill_waits_five_seconds_by_default(self):
+        procmgr = self.run_straggler()
+        waited = procmgr.killed_at - procmgr.terminated_at
+        assert datetime.timedelta(seconds=KILL_WAIT) < waited
+        assert waited <= datetime.timedelta(seconds=KILL_WAIT + 2)
+        assert procmgr.killed_pids == [124]
+
+    @pytest.mark.parametrize('kill_wait', [0, 10])
+    def test_kill_waits_for_kill_wait_seconds(self, kill_wait):
+        procmgr = self.run_straggler(kill_wait=kill_wait)
+        waited = procmgr.killed_at - procmgr.terminated_at
+        assert datetime.timedelta(seconds=kill_wait) < waited
+        assert waited <= datetime.timedelta(seconds=kill_wait + 2)
+        assert procmgr.killed_pids == [124]

@@ -6,6 +6,13 @@ project endeavours to adhere to `Semantic Versioning`_.
 
 .. _Semantic Versioning: http://semver.org/
 
+Unreleased
+----------
+
+* ADDED: ``honcho start --timeout N`` (``-t N``) sets how many seconds
+  processes have to shut down gracefully before Honcho sends them SIGKILL, as
+  with Foreman. The default is still 5 seconds.
+
 2.0.0 -- 2024-10-06
 -------------------
 
