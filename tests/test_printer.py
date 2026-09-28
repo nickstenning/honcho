@@ -130,3 +130,16 @@ class TestPrinter(object):
         p = Printer(output=out, prefix=False)
         p.write(fake_message("paranoid android\n"))
         assert out.flushcount == 1
+
+
+    def test_write_broken_pipe_is_swallowed(self):
+        class BrokenPipeOutput(FakeOutput):
+            def write(self, data):
+                raise BrokenPipeError()
+
+        out = BrokenPipeOutput()
+        p = Printer(output=out, prefix=False)
+        # Must not raise — manager loop relies on write being safe when the
+        # downstream pipe has gone away (#255).
+        p.write(fake_message("still here\n"))
+

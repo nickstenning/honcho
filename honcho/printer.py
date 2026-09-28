@@ -58,7 +58,13 @@ class Printer(object):
                 prefix = '{time} {name}| '.format(time=time_formatted, name=name)
                 if self.colour and self._colours_supported and message.colour:
                     prefix = _colour_string(message.colour, prefix)
-            print(prefix + line, file=self.output, flush=True)
+            try:
+                print(prefix + line, file=self.output, flush=True)
+            except BrokenPipeError:
+                # Consumer of a pipe closed early (e.g. `honcho start | head`).
+                # Swallow so the manager can still terminate child processes
+                # instead of aborting mid-loop (issue #255).
+                return
 
 
 def _ansi(code):
